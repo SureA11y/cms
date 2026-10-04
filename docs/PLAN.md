@@ -80,7 +80,8 @@ Answer the questions the research could not, in a real browser:
 - [ ] Check the front-end view for logged-in users: same engine, published
       page.
 
-**Exit:** real timings, and a decision on checking while typing (live, after
+**Exit:** real timings that set the performance budgets (see "Quality, in
+every phase"), and a decision on checking while typing (live, after
 a pause in typing, or on demand). If a typical post scans in under about
 200 ms, live checking after a pause is the default.
 
@@ -110,8 +111,10 @@ WordPress plugin:
 - [ ] Settings: content area selector, rules on/off, severity.
 - [ ] No front-end changes for visitors. No external requests.
 
-**Exit:** installed on at least three real sites with different themes; no
-editor-visible slowdown; template problems never shown as the author's.
+**Exit:** installed on at least three real sites with different themes;
+within the performance budgets; the panel passes its own accessibility
+checks and a manual screen-reader test; template problems never shown as
+the author's.
 
 ### Phase 2: What sets us apart
 
@@ -132,6 +135,7 @@ answered" on a page, and export the evidence.
 
 ### Phase 3: Public release on WordPress.org
 
+- [ ] Security review and a full pass of the quality gates.
 - [ ] Confirm the `surea11y` slug; submit for review.
 - [ ] Translations through translate.wordpress.org.
 - [ ] Documentation for editors (what each message means, how to fix it) and
@@ -159,6 +163,59 @@ answered" on a page, and export the evidence.
   thinking on cost, privacy and operations. Nothing in Phases 0 to 3 should
   rule it out: keep the result format and the evidence trail independent
   of where a scan ran.
+
+## Quality, in every phase
+
+Performance and quality are part of every change, not a later phase. Every
+phase's exit check includes the gates below, and every pull request says how
+it affects them.
+
+### Performance
+
+- **Nothing for visitors.** Logged-out visitors load no SureA11y scripts,
+  styles or requests.
+- **Scan time budget**, set from the Phase 0 measurements and tracked in CI
+  on fixed test posts (short, typical, long). A regression fails the build.
+- **Editor responsiveness.** No noticeable typing lag; long scans are
+  scheduled after a pause in typing, never on every keystroke.
+- **Size budgets** for the panel's JavaScript and CSS (compressed), checked
+  in CI.
+- **Server cost.** No crawling from PHP; a fixed, small number of database
+  queries per request; results stored compactly (no repeated engine options).
+- **Memory.** No references kept to the page between scans.
+
+### Accessibility of our own interface
+
+- The panel and plugin screens meet WCAG 2.2 AA: full keyboard use, visible
+  focus, screen-reader announcements for new results, sufficient contrast,
+  usable at 400% zoom and with reduced motion.
+- Tested with our own engine in CI, and by hand with at least NVDA and
+  VoiceOver before each release. An accessibility checker that is not
+  accessible has no credibility.
+
+### Security and privacy
+
+- Capability checks and nonces on every action and endpoint; all input
+  sanitised, all output escaped.
+- No `eval` or inline scripts, so sites with strict Content Security
+  Policies work.
+- No external requests and no telemetry.
+- A security review before every public release.
+
+### Reliability and compatibility
+
+- Supported WordPress, PHP and browser versions stated and tested in CI.
+- Tested against Gutenberg's nightly builds, to catch editor changes early.
+- Public editor APIs only; no reliance on the editor's internal markup.
+
+### Code quality and tests
+
+- Linting and formatting enforced in CI, matching SureA11y/core's
+  conventions where they apply.
+- Unit tests for the panel; end-to-end tests in a real browser against a
+  local WordPress (Playwright with wp-env).
+- Every user-facing string translatable, including right-to-left languages.
+- Every change recorded in a changelog, written for the people who use it.
 
 ## Features: free now, paid candidates later
 

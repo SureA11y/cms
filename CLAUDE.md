@@ -51,6 +51,13 @@ planning stage; there is no code yet. Read `README.md`, `docs/ideas.md` and
 - Keep the engine's honesty: show what could not be decided as questions the
   author can answer, not as failures.
 
+## Quality in every change
+
+Performance and quality are checked in every development, not left for
+later. Follow "Quality, in every phase" in `docs/PLAN.md`: performance
+budgets, accessibility of our own interface (WCAG 2.2 AA), security and
+privacy, compatibility, and tests. Every change states how it affects them.
+
 ## Names
 
 | Thing | Name |
