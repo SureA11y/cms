@@ -3,7 +3,7 @@
 Accessibility checking for content management systems (WordPress, Drupal and
 more), built on [`@surea11y/core`](https://github.com/SureA11y/core).
 
-> **Status: research and planning.** There is no code yet. This repository
+> **Status: planning.** There is no code yet. This repository
 > currently holds the ideas, decisions and research that will shape the
 > project.
 
@@ -31,7 +31,7 @@ does not change what visitors see, and does not claim legal compliance.
 | [`docs/decisions.md`](docs/decisions.md) | Decisions made so far, with the reasoning |
 | [`docs/research/`](docs/research/) | Analysis of our engine and of existing CMS accessibility checkers |
 
-A plan (`docs/PLAN.md`) will follow once the research is complete.
+The plan is in [`docs/PLAN.md`](docs/PLAN.md).
 
 ## Related repositories
 
