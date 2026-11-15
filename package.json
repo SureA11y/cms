@@ -1,0 +1,19 @@
+{
+  "name": "surea11y-cms",
+  "private": true,
+  "description": "SureA11y for CMS: the shared panel, the CMS pack and the CMS plugins",
+  "workspaces": [
+    "packages/pack-cms",
+    "packages/panel"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "npm test --workspaces --if-present",
+    "test:e2e": "node --test tests/e2e/"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "jsdom": "^29.1.1",
+    "playwright-core": "^1.56.0"
+  }
+}
