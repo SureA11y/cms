@@ -2,6 +2,32 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Trying it locally with wp-env and a demo site, in this repository
+
+- **wp-env, not a separate repository.** WordPress's own tool runs a
+  WordPress in Docker from `.wp-env.json`, with the plugin folder shared
+  into it. It lives here because it depends on the plugin's build and on
+  the test posts; a separate repository would drift from both. Needs Node.js
+  and Docker, nothing else. `npm run wp:start`, `wp:stop`, `wp:reset`.
+- **A demo site, apart from the test posts.** `dev/demo-content.php`
+  creates a fictional library: six pages and three posts, some clean and
+  some with mistakes the checker finds today (a table without headers, a
+  skipped heading level, "click here", a PDF link, bold lines as headings,
+  an image named by its file, pale text, images marked decorative). Mistakes
+  the engine doesn't find yet (lists typed by hand, web addresses as text)
+  are left out, so the demo shows what the checker does. The test posts
+  stay as they were, now created by `tests/e2e/content.php` with fixed IDs
+  (8, 9, 10), the tests' defaults.
+- **Verified here in part.** This machine's network lets Docker download
+  images but not run wp-env's build step (Alpine packages), so wp-env itself
+  was not started here. Both content scripts were run in a WordPress here:
+  every block valid in the editor, and the checker finds what each page is
+  meant to show; running them again changes nothing.
+- **One login helper, and the login flake's cause.** WordPress's login
+  page focuses and selects the username field 200 ms after it loads; when
+  that came mid-typing, the password landed in the username field. The
+  helper waits for that focus. See `tests/e2e/README.md`.
+
 ## 2026-11-15: The site overview reads a summary per post, never the records
 
 - **Where.** Dashboard → Accessibility, for anyone who sees the checker and

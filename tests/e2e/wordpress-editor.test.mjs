@@ -10,7 +10,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
-import { siteContext } from './site.mjs';
+import { siteContext, logIn } from './site.mjs';
 
 const {
   WP_URL,
@@ -26,13 +26,7 @@ const report = {};
 async function openEditor(browser, postId) {
   const context = await siteContext(browser, { viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
-  await page.goto(`${WP_URL}/wp-login.php`);
-  await page.fill('#user_login', WP_USER);
-  await page.fill('#user_pass', WP_PASS);
-  await Promise.all([
-    page.waitForURL(/wp-admin/, { waitUntil: 'commit' }),
-    page.click('#wp-submit')
-  ]);
+  await logIn(page, WP_USER, WP_PASS);
   await page.goto(`${WP_URL}/wp-admin/post.php?post=${postId}&action=edit`);
   await page.evaluate(() => {
     try {

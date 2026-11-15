@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/wp-env.json",
+  "core": null,
+  "phpVersion": "8.3",
+  "port": 8888,
+  "mappings": {
+    "wp-content/plugins/surea11y": "./plugins/wordpress",
+    "wp-content/surea11y-tests": "./tests/e2e",
+    "wp-content/surea11y-dev": "./dev"
+  },
+  "lifecycleScripts": {
+    "afterStart": "npm run -s wp:content"
+  },
+  "testsEnvironment": false
+}

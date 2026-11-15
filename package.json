@@ -10,13 +10,21 @@
     "build": "node scripts/build.mjs",
     "test": "npm test --workspaces --if-present",
     "test:e2e": "node --test --test-concurrency=1 \"tests/e2e/*.test.mjs\"",
+    "test:e2e:local": "node --env-file=tests/e2e/wp-env.env --test --test-concurrency=1 \"tests/e2e/*.test.mjs\"",
+    "e2e:browser": "playwright-core install chromium",
+    "setup:core": "node scripts/setup-core.mjs",
     "lint": "eslint .",
     "format": "prettier --write \"packages/*/src/**/*.js\" \"packages/*/tests/**/*.js\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\" eslint.config.mjs",
     "format:check": "prettier --check \"packages/*/src/**/*.js\" \"packages/*/tests/**/*.js\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\" eslint.config.mjs",
-    "size": "node scripts/check-size.mjs"
+    "size": "node scripts/check-size.mjs",
+    "wp:start": "npm run build && wp-env start",
+    "wp:stop": "wp-env stop",
+    "wp:reset": "wp-env clean development && npm run -s wp:content",
+    "wp:content": "wp-env run cli wp plugin activate surea11y && wp-env run cli wp eval-file wp-content/surea11y-dev/demo-content.php && wp-env run cli wp eval-file wp-content/surea11y-tests/content.php"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@wordpress/env": "12.0.0",
     "esbuild": "^0.25.0",
     "eslint": "^10.15.0",
     "eslint-config-prettier": "^10.1.8",

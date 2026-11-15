@@ -1,9 +1,18 @@
 # End-to-end tests
 
 The WordPress plugin in Chromium, against a local WordPress with the plugin
-active and the Phase 0 test posts created
-(`prototypes/phase-0/make-content.php`). Every file is skipped when `WP_URL`
-is not set.
+active and the test posts created (`content.php`: short, typical and long,
+IDs 8, 9 and 10 by default). Every file is skipped when `WP_URL` is not set.
+
+With wp-env (see the main README), which creates the posts when it starts:
+
+```sh
+npm run e2e:browser     # once: the Chromium the tests use
+npm run test:e2e:local  # the address and login come from wp-env.env
+```
+
+Against another WordPress, create the posts with
+`wp eval-file tests/e2e/content.php` and give their IDs if they differ:
 
 ```sh
 WP_URL=http://127.0.0.1:8881 WP_USER=admin WP_PASS=... CHROMIUM=/path/to/chrome \
@@ -16,8 +25,8 @@ when it ends, whatever happened.
 
 ## The WordPress to run them against
 
-Any WordPress 6.6 or later, **served by a real web server**: nginx or Apache
-with PHP-FPM, or `wp-env`. A minimal nginx site:
+Any WordPress 6.6 or later, **served by a real web server**: `wp-env` (the
+simplest), or nginx or Apache with PHP-FPM. A minimal nginx site:
 
 ```nginx
 server {
@@ -44,6 +53,17 @@ Its log shows it: requests accepted and answered, never "Closing", each in a
 different worker. With 4 workers about one run in two failed somewhere; with
 16, still most runs. PHP documents the built-in server as a development
 tool.
+
+## Logging in
+
+Every file logs in through `logIn()` (`site.mjs`). WordPress's login page
+moves the focus to the username field and selects it 200 ms after it loads;
+when that came while the password was being typed, the password went into
+the username field and the form was never sent (its password is required).
+That happened a few times in a hundred runs of the suite. `logIn()` waits
+for that focus before typing and checks both fields before logging in; if
+a login still doesn't leave the page, it is tried once more and what the
+page held is logged (`# login attempt`).
 
 ## No requests outside the site
 
