@@ -1,0 +1,8 @@
+{
+  "cmsLinkToDocument_title": "Los enlaces a documentos dicen qué abren",
+  "cmsLinkToDocument_description": "Enumera los enlaces a archivos PDF, de Office y otros documentos, pidiendo que el enlace diga qué tipo de archivo abre y que el documento se revise por separado.",
+  "cmsLinkToDocument_summary_unstated": "Este enlace abre un documento {{format}}, pero nada lo indica.",
+  "cmsLinkToDocument_hint_unstated": "Indica el tipo de archivo junto al texto del enlace, como \"Informe anual (PDF, 2 MB)\", y comprueba que el documento sea accesible por sí mismo.",
+  "cmsLinkToDocument_summary_document": "Este enlace abre un documento {{format}}.",
+  "cmsLinkToDocument_hint_document": "Comprueba que el documento sea accesible por sí mismo, igual que la página."
+}
