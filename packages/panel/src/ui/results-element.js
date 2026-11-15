@@ -1056,10 +1056,19 @@ export class ResultsElement extends HTMLElement {
     return true;
   }
 
-  /** Shows a given place (from a marker beside the content). */
+  /**
+   * Shows a given place (from a marker beside the content, or a link to a
+   * finding). The card must be in sight to be shown: back to the findings
+   * from the headings or images view, the filter cleared if it hides the
+   * card's group, and that group unfolded.
+   */
   showPlace(cardKey, place = 0) {
     const card = (this._cards || []).find((c) => c.key === cardKey);
-    if (card) this._go(card, place, `card:${hash(card.key)}:show`);
+    if (!card) return;
+    this._view = 'findings';
+    if (this._only && this._only !== card.group) this._only = null;
+    this._closed.delete(card.group);
+    this._go(card, place, `card:${hash(card.key)}:show`);
   }
 
   _mark(card, fine) {
