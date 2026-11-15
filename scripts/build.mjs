@@ -20,6 +20,40 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(path.join(root, 'package.json'));
 const out = path.join(root, 'plugins/wordpress/build');
+
+// The engine first, before the old build is removed: with a core older than
+// the pack needs (a rule it names is missing), stop with what to do rather
+// than a stack trace, and keep the last good build.
+const { buildBrowserBundle } = require('@surea11y/core/pack');
+const pack = require(path.join(root, 'packages/pack-cms'));
+const coreVersion = require('@surea11y/core/package.json').version;
+let engine;
+try {
+  engine = buildBrowserBundle({ packs: [pack] });
+} catch (error) {
+  if (
+    error &&
+    error.code === 'INVALID_ENGINE_OPTIONS' &&
+    /unknown (testId|rule)/i.test(error.message)
+  ) {
+    console.error(
+      [
+        '',
+        `The installed @surea11y/core (${coreVersion}) is older than the CMS pack needs:`,
+        `  ${error.message}`,
+        '',
+        'Install core from its main branch, then build again:',
+        '  npm run setup:core',
+        '',
+        '(`npm install` puts the released version back; run setup:core again after it.)',
+        ''
+      ].join('\n')
+    );
+    process.exit(1);
+  }
+  throw error;
+}
+
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 
@@ -54,13 +88,8 @@ for (const locale of ['es', 'de', 'fr', 'ja']) {
   });
 }
 
-const { buildBrowserBundle } = require('@surea11y/core/pack');
-const pack = require(path.join(root, 'packages/pack-cms'));
-fs.writeFileSync(path.join(out, 'engine.js'), buildBrowserBundle({ packs: [pack] }));
-fs.writeFileSync(
-  path.join(out, 'core-version.txt'),
-  require('@surea11y/core/package.json').version
-);
+fs.writeFileSync(path.join(out, 'engine.js'), engine);
+fs.writeFileSync(path.join(out, 'core-version.txt'), coreVersion);
 fs.writeFileSync(
   path.join(out, 'pack-version.txt'),
   require(path.join(root, 'packages/pack-cms/package.json')).version

@@ -67,6 +67,21 @@ The first start downloads WordPress and a database, so it takes a few
 minutes. Then open <http://localhost:8888/wp-admin> and log in as `admin`
 with the password `password`.
 
+If something goes wrong:
+
+- **"The installed @surea11y/core (1.17.0) is older than the CMS pack
+  needs"**: run `npm run setup:core`, then start again. `npm install` puts
+  the released core back, so run it after every `npm install`.
+- **`spawn docker ENOENT`**: wp-env can't find Docker. Install
+  [Docker Desktop](https://www.docker.com/products/docker-desktop/) and open
+  it. If `docker --version` works in a terminal but not from your editor,
+  the editor's PATH lacks Docker's folder (`which docker` shows it, often
+  `/usr/local/bin` or `~/.docker/bin`): add it to the PATH of the editor's
+  run configurations, or turn on "Install system-wide" in Docker Desktop's
+  advanced settings.
+- **Docker errors about the daemon or the socket**: Docker Desktop isn't
+  running. Open it and wait until it says it is.
+
 What to try:
 
 - **Pages → "Events"** or **"Opening hours"**: open one in the editor and
