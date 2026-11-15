@@ -2,6 +2,36 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: The evidence trail: records on save and on page checks, kept with the post
+
+- **When.** A record is made when the post is saved by hand in the editor
+  (not on autosave), checking again first if the content changed since the
+  last check, so the record is of what was saved; and after each check of
+  the page, which includes the theme. A record that would repeat the last
+  one of its kind (the same findings and answers) is not kept, so saving
+  three times without a change makes one record.
+- **What.** Date, who, where (editor or page), the address, the engine and
+  pack versions, the profile, each finding (its identity, rule, reason and
+  group) and the answers as they stood then (answer, who, when, note).
+  Answers are copied, not referred to: a later change to an answer doesn't
+  rewrite the record.
+- **Where.** The post meta `_surea11y_evidence`, the last 20 records per
+  post, at most 300 findings each. No new table, so a site's own backups
+  and exports carry it.
+- **Exports, generated on the server from the stored records.** CSV holds
+  every record, a row per place, with each rule's WCAG criteria and level
+  from the build (core's catalog); cells a spreadsheet would read as a
+  formula start with an apostrophe, and a byte order mark keeps the text
+  UTF-8. EARL holds the latest record in the shape core's EARL reporter
+  gives (`WCAG2:<id>` from core's own `scSlug`): each finding an automatic
+  assertion by the checker, each answer a manual one by the person who gave
+  it. Core's reporter needs a full scan result, which the record doesn't
+  keep, so the plugin writes the document itself, in the same shape.
+- **Who.** Anyone who sees the checker and can edit the post can read and
+  add records, the same as for reviews.
+- **EN 301 549 waits for its pack.** Core is moving it out to
+  `@surea11y/pack-en301549`; the exports will take its clauses from there.
+
 ## 2026-11-15: Editor wording for "Check it" lives in the panel, keyed by core
 
 - **Where.** `packages/panel/src/messages/review.<locale>.json`, beside the

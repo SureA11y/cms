@@ -110,6 +110,34 @@
 			.then( drawMarkers );
 	}
 
+	/*
+	 * The evidence trail: each check of the page, theme included, is
+	 * recorded with the post, with the answers given so far; the site leaves
+	 * out one that would repeat the last.
+	 */
+	function record() {
+		if ( ! config.evidencePath || ! config.restRoot ) {
+			return;
+		}
+		const findings = pageFindings.concat( phoneFindings ).map( ( f ) => ( {
+			key: f.key,
+			rule: f.ruleId,
+			code: f.reasonCode || '',
+			group: f.group,
+		} ) );
+		rest( config.evidencePath, 'POST', {
+			source: 'page',
+			url: window.location.href.split( '#' )[ 0 ],
+			engine: config.engineVersion || '',
+			profile: config.profile,
+			findings,
+		} )
+			.then( ( r ) => {
+				window.surea11yLastRecord = { added: r.added }; // read by the end-to-end tests
+			} )
+			.catch( ( error ) => window.console.error( '[SureA11y]', error ) );
+	}
+
 	function check() {
 		results.empty = false;
 		results.state = 'scanning';
@@ -136,6 +164,7 @@
 				results.findings = pageFindings.concat( phoneFindings );
 				window.surea11yLastPageScan = { scanMs: out.scanMs }; // read by the end-to-end tests
 				drawMarkers();
+				record();
 			} )
 			.catch( ( error ) => {
 				window.console.error( '[SureA11y]', error );  
@@ -185,6 +214,7 @@
 					results.findings = pageFindings.concat( phoneFindings );
 					drawMarkers();
 					status.textContent = Panel.fill( words.phoneDone, { n: out.findings.length } );
+					record();
 					window.surea11yLastPhoneScan = { findings: out.findings.length }; // read by the end-to-end tests
 				} )
 				.catch( ( error ) => {

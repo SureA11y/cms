@@ -55,6 +55,7 @@ post's content are marked "Your content", the rest "Theme or template".
 | `src/page.js` | The page checker on previews and published pages. |
 | `includes/settings.php` | The settings page, and who may see and review. |
 | `includes/reviews.php` | Shared reviews: storage and the REST route. |
+| `includes/evidence.php` | The evidence trail: records of checks, and their CSV and EARL exports. |
 | `includes/hidden.php` | "Hide for me" from the page checker, in the person's editor preferences. |
 | `build/` | Built by `node scripts/build.mjs` at the repository root: `panel.js` and a `panel.i18n.<locale>.js` per language, `engine.js` (core with the pack built in), the engine's message files, `rules.json`. Not committed. |
 | `readme.txt` | The WordPress.org readme. |
