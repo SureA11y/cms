@@ -4,12 +4,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright-core';
+import { siteContext } from './site.mjs';
 
 const { WP_URL, WP_USER = 'admin', WP_PASS = '', CHROMIUM, POST_TYPICAL = '9' } = process.env;
 const skip = !WP_URL && 'WP_URL is not set';
 
 async function login(browser) {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const context = await siteContext(browser, { viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
   await page.goto(`${WP_URL}/wp-login.php`);
   await page.fill('#user_login', WP_USER);
@@ -461,7 +462,7 @@ test("the page panel passes the engine's own checks", { skip }, async (t) => {
 test('visitors get nothing: no script, no toolbar item, no engine', { skip }, async (t) => {
   const browser = await chromium.launch({ executablePath: CHROMIUM });
   t.after(() => browser.close());
-  const context = await browser.newContext();
+  const context = await siteContext(browser);
   const page = await context.newPage();
   const requests = [];
   page.on('request', (r) => requests.push(r.url()));

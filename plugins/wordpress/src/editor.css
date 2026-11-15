@@ -49,3 +49,23 @@
 .surea11y-prepublish-note {
 	color: #50575e;
 }
+
+/* The record of checks, below the results. */
+.surea11y-evidence {
+	padding: 16px;
+	border-top: 1px solid #e0e0e0;
+}
+
+.surea11y-evidence__title {
+	margin: 0 0 8px;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.surea11y-evidence p {
+	margin: 0 0 8px;
+}
+
+.surea11y-evidence__actions .components-button {
+	margin: 0 8px 8px 0;
+}

@@ -617,7 +617,8 @@
 		// Opened from "Edit in the editor" on a page: show that finding once
 		// the first results are in.
 		function showTarget() {
-			if ( ! target ) {
+			// Wait for results of the post's content, not of an empty editor.
+			if ( ! target || checker.empty || ! checker.findings.length ) {
 				return;
 			}
 			const wanted = target;
@@ -703,6 +704,132 @@
 		const ref = useRef( null );
 		useEffect( () => ( ref.current ? mount( ref.current ) : undefined ), [] );
 		return el( 'div', { ref, className: 'surea11y-sidebar' } );
+	}
+
+	/*
+	 * The evidence trail: a record of the check each time the post is saved
+	 * by hand (not an autosave), with the answers given so far. The site
+	 * keeps it with the post, and leaves out one that would repeat the last.
+	 */
+	const evidence = {
+		records: null, // as the site lists them, newest first
+		listeners: new Set(),
+		set( records ) {
+			this.records = Array.isArray( records ) ? records : [];
+			this.listeners.forEach( ( fn ) => fn() );
+		},
+	};
+	function loadRecords() {
+		if ( ! config.evidencePath ) {
+			return;
+		}
+		wp.apiFetch( { path: config.evidencePath } )
+			.then( ( r ) => evidence.set( r.records ) )
+			.catch( ( error ) => window.console.error( '[SureA11y]', error ) );
+	}
+	function record() {
+		if ( ! config.evidencePath || checker.state !== 'done' || checker.empty ) {
+			return Promise.resolve();
+		}
+		const findings = checker.findings.map( ( f ) => ( {
+			key: f.key,
+			rule: f.ruleId,
+			code: f.reasonCode || '',
+			group: f.group,
+		} ) );
+		const editor = data.select( 'core/editor' );
+		const url = ( editor.getPermalink && editor.getPermalink() ) || '';
+		return wp
+			.apiFetch( {
+				path: config.evidencePath,
+				method: 'POST',
+				data: { source: 'editor', url, engine: config.engineVersion || '', profile: config.profile, findings },
+			} )
+			.then( ( r ) => {
+				evidence.set( r.records );
+				window.surea11yLastRecord = { added: r.added }; // read by the end-to-end tests
+			} )
+			.catch( ( error ) => window.console.error( '[SureA11y]', error ) );
+	}
+	// A save by hand, once it succeeded: check again first if the content
+	// changed since the last check, so the record is of what was saved.
+	let saving = false;
+	let autosaving = false;
+	data.subscribe( () => {
+		const editor = data.select( 'core/editor' );
+		if ( ! editor || ! editor.isSavingPost ) {
+			return;
+		}
+		const now = editor.isSavingPost();
+		if ( now && ! saving ) {
+			autosaving = editor.isAutosavingPost();
+		}
+		if ( ! now && saving && ! autosaving && editor.didPostSaveRequestSucceed() ) {
+			( dirty || checker.state !== 'done' ? scan() : Promise.resolve() ).then( record );
+		}
+		saving = now;
+	} );
+	loadRecords();
+
+	/** Saves an export: CSV of every record, or EARL of the latest. */
+	function download( format ) {
+		return wp
+			.apiFetch( { path: config.evidencePath + '/export?format=' + format, parse: false } )
+			.then( ( response ) => {
+				const name = ( /filename="([^"]+)"/.exec( response.headers.get( 'Content-Disposition' ) || '' ) || [] )[ 1 ] || 'accessibility.' + format;
+				return response.blob().then( ( blob ) => {
+					const url = window.URL.createObjectURL( blob );
+					const a = document.createElement( 'a' );
+					a.href = url;
+					a.download = name;
+					document.body.appendChild( a );
+					a.click();
+					a.remove();
+					window.setTimeout( () => window.URL.revokeObjectURL( url ), 1000 );
+				} );
+			} )
+			.catch( ( error ) => window.console.error( '[SureA11y]', error ) );
+	}
+
+	/** The last record, and the exports: below the results in the sidebar. */
+	function EvidencePanel() {
+		const [ , setTick ] = useState( 0 );
+		useEffect( () => {
+			const fn = () => setTick( ( n ) => n + 1 );
+			evidence.listeners.add( fn );
+			return () => evidence.listeners.delete( fn );
+		}, [] );
+		if ( ! config.evidencePath ) {
+			return null;
+		}
+		const last = evidence.records && evidence.records[ 0 ];
+		const c = last && last.counts;
+		const sentence = last
+			? wp.i18n.sprintf(
+					/* translators: 1: date and time, 2: a person's name, 3-5: numbers of findings. */
+					__( 'Last recorded %1$s by %2$s: %3$d to fix, %4$d likely problems, %5$d needing a person.', 'surea11y' ),
+					last.when,
+					last.by,
+					c.problem,
+					c.likely,
+					c.review
+			  )
+			: __( 'Nothing recorded yet. A record of the check is kept each time you save.', 'surea11y' );
+		return el(
+			'div',
+			{ className: 'surea11y-evidence' },
+			el( 'h3', { className: 'surea11y-evidence__title' }, __( 'Record of checks', 'surea11y' ) ),
+			el( 'p', null, sentence ),
+			last
+				? el(
+						'p',
+						{ className: 'surea11y-evidence__actions' },
+						el( Button, { variant: 'secondary', onClick: () => download( 'csv' ) }, __( 'Download as CSV', 'surea11y' ) ),
+						' ',
+						el( Button, { variant: 'secondary', onClick: () => download( 'earl' ) }, __( 'Download as EARL', 'surea11y' ) )
+				  )
+				: null
+		);
 	}
 
 	/** Places to fix or confirm: the count on the toolbar button. */
@@ -794,7 +921,8 @@
 			el(
 				PluginSidebar,
 				{ name: SIDEBAR, title: __( 'Accessibility', 'surea11y' ), icon: el( ToolbarIcon ) },
-				el( SidebarBody )
+				el( SidebarBody ),
+				el( EvidencePanel )
 			),
 			PluginPrePublishPanel
 				? el(
@@ -807,7 +935,19 @@
 	}
 
 	registerPlugin( 'surea11y', { render: Plugin } );
+	// While the editor starts it restores the sidebar that was open last,
+	// which can come after this opens ours: keep ours open until the finding
+	// has been shown (showTarget clears the target), for up to 15 seconds.
 	if ( target ) {
-		setTimeout( openSidebar, 0 );
+		let tries = 0;
+		( function keepOpen() {
+			if ( ! target || ++tries > 60 ) {
+				return;
+			}
+			if ( ! document.querySelector( 'surea11y-results' ) ) {
+				openSidebar();
+			}
+			setTimeout( keepOpen, 250 );
+		} )();
 	}
 } )( window.wp, window.SureA11yPanel );

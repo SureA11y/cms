@@ -53,6 +53,9 @@ editor has finished loading.
 == Changelog ==
 
 = Unreleased =
+* A record of each check, kept with the post when you save and when you
+  check the page, with your team's answers. Download it as CSV or EARL from
+  the Accessibility sidebar.
 * "Check it" speaks an editor's language for the findings met most: no
   developer tools or HTML in its steps.
 * "Check it" on findings the checker can't decide: the steps to check it,

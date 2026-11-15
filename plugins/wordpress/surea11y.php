@@ -21,6 +21,7 @@ define( 'SUREA11Y_FILE', __FILE__ );
 require_once __DIR__ . '/includes/settings.php';
 require_once __DIR__ . '/includes/reviews.php';
 require_once __DIR__ . '/includes/hidden.php';
+require_once __DIR__ . '/includes/evidence.php';
 
 /**
  * The locales the engine has messages for, besides English, each with its
@@ -74,6 +75,10 @@ function surea11y_config( $profile, $post_id = 0 ) {
 		'canReview'     => surea11y_can_review( $post_id ),
 		'reviewsPath'   => $post_id ? '/surea11y/v1/reviews/' . (int) $post_id : '',
 		'reviewUrls'    => $review,
+		// The evidence trail: where records of checks go, and the engine's
+		// version they name.
+		'evidencePath'  => $post_id ? '/surea11y/v1/evidence/' . (int) $post_id : '',
+		'engineVersion' => surea11y_core_version(),
 	);
 }
 
@@ -233,4 +238,14 @@ add_action( 'admin_bar_menu', 'surea11y_admin_bar', 90 );
 function surea11y_pack_version() {
 	$file = plugin_dir_path( __FILE__ ) . 'build/pack-version.txt';
 	return file_exists( $file ) ? trim( (string) file_get_contents( $file ) ) : '0.0.0'; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- A local file of the plugin's own.
+}
+
+/**
+ * The engine's (core's) version, from the build.
+ *
+ * @return string
+ */
+function surea11y_core_version() {
+	$file = plugin_dir_path( __FILE__ ) . 'build/core-version.txt';
+	return file_exists( $file ) ? trim( (string) file_get_contents( $file ) ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- A local file of the plugin's own.
 }

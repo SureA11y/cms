@@ -253,10 +253,20 @@ the author's.
       steps. Each replaces core's whole set; the others keep core's text.
 - [ ] Questions: more editor wording as sites show which steps editors meet
       (contrast's other cases, lists, page titles).
-- [ ] **Evidence trail.** A dated record of results and answers per page,
-      mapped to WCAG 2.2 and, through packs, to other standards such as
-      EN 301 549 (`@surea11y/pack-en301549`), with the law a profile is
-      assessed under where the pack gives one. Export as CSV and EARL.
+- [x] **Evidence trail.** A dated record of results and answers per page,
+      mapped to WCAG 2.2. Export as CSV and EARL. A record is made on each
+      save by hand in the editor and after each check of the page, with the
+      answers given so far, and one that would repeat the last is not kept;
+      the last 20 per post are kept with it (`_surea11y_evidence`). The
+      sidebar shows the last and downloads the CSV (every record, a row per
+      place, with the WCAG criteria and level, the answer, who and when) and
+      the EARL (the latest: the checker's assertions, automatic, and each
+      person's answer, manual).
+- [ ] Evidence trail: other standards through packs, such as EN 301 549
+      (`@surea11y/pack-en301549`, when core moves it out), with the law a
+      profile is assessed under where the pack gives one.
+- [ ] Evidence trail: a record on demand ("Record this check"), and records
+      kept longer, if sites ask (a candidate for the paid tier).
 - [ ] **Site overview** built from editors' own page views (no crawler):
       top problems, pages with most problems, recent reviews.
 - [ ] **Posts list column** with each post's counts from its last check,

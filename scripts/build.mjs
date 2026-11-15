@@ -4,7 +4,8 @@
 // - engine.js: core's browser bundle with the CMS pack built in, which runs
 //   where a Content Security Policy forbids eval and can't fall out of step;
 // - engine.i18n.<locale>.js: core's message side files;
-// - pack-version.txt: the pack version a scan names;
+// - pack-version.txt: the pack version a scan names; core-version.txt the
+//   engine's, which a record of a check names;
 // - rules.json: the rules a check can run, for the settings page;
 // - review.<locale>.js: how to check each undecided finding by hand (core's
 //   review dictionaries, cut to the rules a check can run), loaded only when
@@ -57,6 +58,10 @@ const { buildBrowserBundle } = require('@surea11y/core/pack');
 const pack = require(path.join(root, 'packages/pack-cms'));
 fs.writeFileSync(path.join(out, 'engine.js'), buildBrowserBundle({ packs: [pack] }));
 fs.writeFileSync(
+  path.join(out, 'core-version.txt'),
+  require('@surea11y/core/package.json').version
+);
+fs.writeFileSync(
   path.join(out, 'pack-version.txt'),
   require(path.join(root, 'packages/pack-cms/package.json')).version
 );
@@ -74,13 +79,25 @@ fs.writeFileSync(
       (c) => c.ruleId
     );
   const content = new Set(ids('cms-content'));
-  const titles = Object.fromEntries(
-    getChecksCatalog({ packs: [pack] }).map((r) => [r.ruleId, r.title])
-  );
+  const catalog = getChecksCatalog({ packs: [pack] });
+  const titles = Object.fromEntries(catalog.map((r) => [r.ruleId, r.title]));
+  // Each rule's WCAG criteria, with their level in WCAG 2.2 and the id EARL
+  // names them by (WCAG2:<id>), for the evidence trail's exports.
+  const { scSlug } = require('@surea11y/core/earl');
+  const wcagOf = (rule) =>
+    ((rule && rule.normativeMappings) || [])
+      .filter((m) => m && (!m.standard || m.standard === 'WCAG') && !m.type && m.requirement)
+      .map((m) => ({ sc: m.requirement, level: m.conformanceLevel || '', id: scSlug(m.title) }));
+  const byId = Object.fromEntries(catalog.map((r) => [r.ruleId, r]));
   const rules = ids('cms-page')
     .filter((id) => id !== 'manual-review')
     .sort()
-    .map((id) => ({ id, title: titles[id] || id, content: content.has(id) }));
+    .map((id) => ({
+      id,
+      title: titles[id] || id,
+      content: content.has(id),
+      wcag: wcagOf(byId[id])
+    }));
   fs.writeFileSync(path.join(out, 'rules.json'), JSON.stringify(rules));
 
   // How to check, by hand, the undecided findings of those rules: their
