@@ -372,8 +372,12 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
       the panel's words (cards, questions, rule titles) come from the panel's
       own files in five languages and won't. Decide whether WordPress's
       translations feed the panel too.
-- [ ] Documentation for editors (what each message means, how to fix it) and
-      a clear "this is not an overlay" statement.
+- [x] Documentation for editors (what each message means, how to fix it) and
+      a clear "this is not an overlay" statement: `docs/editors/README.md`
+      (the guide) and `docs/editors/messages.md` (every rule, made by
+      `scripts/editor-docs.mjs` from the build and the panel's messages,
+      checked in CI).
+- [ ] The editors' documentation on a public site, linked from the plugin.
 - [ ] Decide whether the repository becomes public.
 
 **Exit:** approved and listed.

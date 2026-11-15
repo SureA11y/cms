@@ -30,6 +30,7 @@ does not change what visitors see, and does not claim legal compliance.
 | --- | --- |
 | [`docs/ideas.md`](docs/ideas.md) | The idea as first discussed: where checks can run, what makes it different, open risks |
 | [`docs/decisions.md`](docs/decisions.md) | Decisions made so far, with the reasoning |
+| [`docs/editors/`](docs/editors/) | For editors: how to use the checker, and what each finding means |
 | [`docs/research/`](docs/research/) | Analysis of our engine and of existing CMS accessibility checkers |
 | [`packages/pack-cms/`](packages/pack-cms/) | `@surea11y/pack-cms`: core's rules sorted into content and theme profiles, and checks authors need |
 | [`packages/panel/`](packages/panel/) | `@surea11y/panel`: the results panel every CMS integration embeds |
