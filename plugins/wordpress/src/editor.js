@@ -80,9 +80,17 @@
 		}
 
 		async function scan() {
+			const items = contentItems();
+			if ( ! Panel.hasContent( items ) ) {
+				// Nothing to check: say so, and don't load the engine for it.
+				results.empty = true;
+				results.findings = [];
+				return;
+			}
+			results.empty = false;
 			results.state = 'scanning';
 			try {
-				const out = await sandboxFor().scan( contentItems(), {
+				const out = await sandboxFor().scan( items, {
 					profile: config.profile,
 					packs: config.packs,
 					locale: config.locale,
@@ -94,6 +102,7 @@
 				results.findings = out.findings;
 				window.surea11yLastScan = out.timing; // read by the end-to-end tests
 			} catch ( error ) {
+				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
 				results.error = error && error.message ? error.message : String( error );
 			}
 		}

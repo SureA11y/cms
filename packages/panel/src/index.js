@@ -2,6 +2,7 @@
 // gives it the content items, where they are rendered and what to do on
 // "Show"; the panel scans, sorts and lists what it finds.
 
+export { hasContent } from './content.js';
 export { createSandbox, renderItems, sandboxPolicy } from './sandbox.js';
 export { toFindings, groupOf, sortFindings, countByGroup, findingKey, GROUP_ORDER, ITEM_ATTRIBUTE } from './findings.js';
 export { MESSAGES, messagesFor } from './messages/index.js';

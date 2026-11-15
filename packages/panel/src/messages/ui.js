@@ -5,8 +5,10 @@ export const UI = {
     heading: 'Accessibility',
     checking: 'Checking…',
     checkingDone: 'Checked.',
-    error: 'The check could not run: {{message}}',
+    error: "The check didn't finish. Reload the page to try again. If it keeps happening, tell your site's administrator.",
+    errorDetails: 'Details for your administrator',
     nothingFound: 'Nothing to fix or review in this content.',
+    empty: 'Nothing to check yet. Add some content and it will be checked here.',
     summary: '{{problem}} to fix, {{likely}} likely, {{review}} to review, {{probably}} probably fine.',
     groups: {
       problem: 'To fix',
@@ -24,13 +26,16 @@ export const UI = {
     showLabel: 'Show in the content: {{summary}}',
     next: 'Next finding',
     howToFix: 'How to fix',
-    outsideContent: 'Not in the content: the template or theme.'
+    outsideContent: 'Not in the content: the template or theme.',
+    shown: 'Shown in the content'
   },
   es: {
     heading: 'Accesibilidad',
     checking: 'Comprobando…',
     checkingDone: 'Comprobado.',
-    error: 'No se pudo hacer la comprobación: {{message}}',
+    error: 'La comprobación no terminó. Recarga la página para volver a intentarlo. Si sigue pasando, avisa a quien administra el sitio.',
+    errorDetails: 'Detalles para quien administra el sitio',
+    empty: 'Aún no hay nada que comprobar. Añade contenido y se comprobará aquí.',
     nothingFound: 'No hay nada que corregir ni revisar en este contenido.',
     summary: '{{problem}} por corregir, {{likely}} probables, {{review}} por revisar, {{probably}} probablemente bien.',
     groups: {
@@ -49,7 +54,8 @@ export const UI = {
     showLabel: 'Mostrar en el contenido: {{summary}}',
     next: 'Siguiente hallazgo',
     howToFix: 'Cómo corregirlo',
-    outsideContent: 'Fuera del contenido: en la plantilla o el tema.'
+    outsideContent: 'Fuera del contenido: en la plantilla o el tema.',
+    shown: 'Mostrado en el contenido'
   }
 };
 

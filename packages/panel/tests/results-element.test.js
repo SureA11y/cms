@@ -98,3 +98,49 @@ test('Spanish', () => {
   assert.equal(el.shadowRoot.querySelector('li .show').textContent, 'Mostrar');
   el.remove();
 });
+
+test('an error reads as a plain sentence, with the detail behind a disclosure', () => {
+  const el = make();
+  el.error = 'The accessibility engine did not load in the sandbox.';
+  const root = el.shadowRoot;
+  const status = root.querySelector('[role="status"]').textContent;
+  assert.match(status, /Reload the page/);
+  assert.doesNotMatch(status, /engine|sandbox/);
+  const details = root.querySelector('details');
+  assert.equal(details.hidden, false);
+  assert.equal(details.querySelector('summary').textContent, 'Details for your administrator');
+  assert.match(details.textContent, /sandbox/);
+  el.findings = [];
+  assert.equal(details.hidden, true, 'the detail goes once a check succeeds');
+  el.remove();
+});
+
+test('empty content says there is nothing to check yet, not that it is clean', () => {
+  const el = make();
+  el.empty = true;
+  el.findings = [];
+  assert.match(el.shadowRoot.querySelector('[role="status"]').textContent, /Nothing to check yet/);
+  el.empty = false;
+  el.findings = [];
+  assert.equal(el.shadowRoot.querySelector('[role="status"]').textContent, 'Nothing to fix or review in this content.');
+  el.remove();
+});
+
+test('the finding last shown is marked, by words and not colour alone, and stays marked after a rescan', () => {
+  const el = make();
+  el.findings = findings;
+  const buttons = el.shadowRoot.querySelectorAll('li .show');
+  buttons[1].click();
+  let current = el.shadowRoot.querySelectorAll('li[aria-current="true"]');
+  assert.equal(current.length, 1);
+  assert.equal(current[0].dataset.key, 'b');
+  assert.equal(current[0].querySelector('.current-label').textContent, 'Shown in the content');
+  el.shadowRoot.querySelectorAll('li .show')[0].click();
+  current = el.shadowRoot.querySelectorAll('li[aria-current="true"]');
+  assert.deepEqual([...current].map((li) => li.dataset.key), ['a']);
+  el.findings = findings.slice();
+  assert.equal(el.shadowRoot.querySelector('li[aria-current="true"]').dataset.key, 'a');
+  el.findings = findings.slice(1);
+  assert.equal(el.shadowRoot.querySelector('li[aria-current="true"]'), null, 'gone when the finding is fixed');
+  el.remove();
+});

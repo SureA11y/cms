@@ -23,6 +23,10 @@ li { border-inline-start: 4px solid; padding: 8px 0 8px 10px; margin: 0 0 8px; }
 li[data-group="problem"] { border-inline-start-style: solid; }
 li[data-group="likely"] { border-inline-start-style: double; }
 li[data-group="review"], li[data-group="probably-fine"] { border-inline-start-style: dotted; }
+li.current { border-inline-start-width: 8px; padding-inline-start: 6px; background: rgba(127, 127, 127, 0.12); }
+.current-label { margin: 0 0 4px; font-size: 0.92em; font-weight: 600; }
+.details { margin: 0 0 12px; font-size: 0.92em; }
+.details summary { cursor: pointer; }
 .summary { margin: 0 0 4px; font-weight: 600; }
 .hint { margin: 0 0 6px; }
 .where { margin: 0 0 6px; font-style: italic; }
@@ -43,6 +47,8 @@ export class ResultsElement extends HTMLElement {
     this._findings = [];
     this._state = 'idle';
     this._error = '';
+    this._empty = false;
+    this._currentKey = null;
     this._locale = 'en';
     this._cursor = -1;
     const root = this.attachShadow({ mode: 'open' });
@@ -56,8 +62,12 @@ export class ResultsElement extends HTMLElement {
     this._busy = document.createElement('p');
     this._busy.className = 'busy';
     this._busy.hidden = true;
+    this._details = document.createElement('details');
+    this._details.className = 'details';
+    this._details.hidden = true;
+    this._details.append(document.createElement('summary'), document.createElement('p'));
     this._body = document.createElement('div');
-    root.append(style, this._busy, this._status, this._body);
+    root.append(style, this._busy, this._status, this._details, this._body);
   }
 
   /** The locale of the panel's own words. */
@@ -78,16 +88,37 @@ export class ResultsElement extends HTMLElement {
     return this._state;
   }
 
+  /**
+   * Ends a check with an error. Editors get a plain sentence; the technical
+   * message stays behind a disclosure for whoever supports the site.
+   */
   set error(message) {
     this._error = message || '';
     this._state = 'error';
     this._renderStatus();
   }
+  get error() {
+    return this._error;
+  }
+
+  /**
+   * True when there is no content to check yet (set by the host before it
+   * sets `findings`), so an empty post doesn't read as a clean one.
+   */
+  set empty(value) {
+    this._empty = !!value;
+    this._renderStatus();
+  }
+  get empty() {
+    return this._empty;
+  }
 
   /** The findings to show, as `toFindings` makes them. */
   set findings(list) {
     this._findings = Array.isArray(list) ? list : [];
-    this._cursor = -1;
+    const current = this._findings.findIndex((f) => f.key === this._currentKey);
+    if (current < 0) this._currentKey = null;
+    this._cursor = current;
     this._state = 'done';
     this._render();
   }
@@ -106,8 +137,11 @@ export class ResultsElement extends HTMLElement {
     this._busy.hidden = this._state !== 'scanning';
     this._body.setAttribute('aria-busy', String(this._state === 'scanning'));
     if (this._state === 'scanning') return; // the last outcome stays
+    this._details.hidden = this._state !== 'error' || !this._error;
     if (this._state === 'error') {
-      this._status.textContent = fill(t.error, { message: this._error });
+      this._status.textContent = t.error;
+      this._details.firstChild.textContent = t.errorDetails;
+      this._details.lastChild.textContent = this._error;
       return;
     }
     if (this._state !== 'done') {
@@ -122,7 +156,9 @@ export class ResultsElement extends HTMLElement {
           review: counts.review,
           probably: counts['probably-fine']
         })
-      : t.nothingFound;
+      : this._empty
+        ? t.empty
+        : t.nothingFound;
   }
 
   _render() {
@@ -186,6 +222,7 @@ export class ResultsElement extends HTMLElement {
     li.dataset.key = f.key;
     li.dataset.index = String(index);
     const summaryId = `${this._id}-f${index}`;
+    if (f.key === this._currentKey) this._markCurrent(li, t);
     const summary = document.createElement('p');
     summary.className = 'summary';
     summary.id = summaryId;
@@ -214,10 +251,29 @@ export class ResultsElement extends HTMLElement {
     return li;
   }
 
+  /** Marks the finding last shown: a label and a wider bar, not colour alone. */
+  _markCurrent(li, t) {
+    li.classList.add('current');
+    li.setAttribute('aria-current', 'true');
+    const label = document.createElement('p');
+    label.className = 'current-label';
+    label.textContent = t.shown;
+    li.prepend(label);
+  }
+
   _show(index) {
     const f = this._findings[index];
     if (!f) return;
     this._cursor = index;
+    this._currentKey = f.key;
+    const t = uiStrings(this._locale);
+    for (const li of this.shadowRoot.querySelectorAll('li.current')) {
+      li.classList.remove('current');
+      li.removeAttribute('aria-current');
+      li.querySelector('.current-label')?.remove();
+    }
+    const li = this.shadowRoot.querySelector(`li[data-index="${index}"]`);
+    if (li) this._markCurrent(li, t);
     this.dispatchEvent(
       new CustomEvent('surea11y-show', { detail: { itemId: f.itemId, finding: f }, bubbles: true, composed: true })
     );

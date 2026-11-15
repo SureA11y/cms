@@ -9,7 +9,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "npm test --workspaces --if-present",
-    "test:e2e": "node --test tests/e2e/"
+    "test:e2e": "node --test \"tests/e2e/*.test.mjs\""
   },
   "devDependencies": {
     "esbuild": "^0.25.0",

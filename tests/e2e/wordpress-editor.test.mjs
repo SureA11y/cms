@@ -3,7 +3,7 @@
 // (prototypes/phase-0/make-content.php).
 //
 //   WP_URL=http://127.0.0.1:8881 WP_USER=admin WP_PASS=... CHROMIUM=/path/to/chrome \
-//     POST_TYPICAL=9 POST_LONG=10 node --test tests/e2e/
+//     POST_TYPICAL=9 POST_LONG=10 npm run test:e2e
 //
 // Skipped when WP_URL is not set.
 import test from 'node:test';
