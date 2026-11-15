@@ -5,6 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright-core';
+import { siteContext } from './site.mjs';
 
 const { WP_URL, WP_USER = 'admin', WP_PASS = '', CHROMIUM, POST_TYPICAL = '9' } = process.env;
 const skip = !WP_URL && 'WP_URL is not set';
@@ -19,7 +20,7 @@ test.after(async () => {
 });
 
 async function login() {
-  const context = await browser.newContext({
+  const context = await siteContext(browser, {
     viewport: { width: 1440, height: 900 },
     acceptDownloads: true
   });
