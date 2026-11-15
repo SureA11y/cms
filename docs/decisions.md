@@ -23,7 +23,10 @@ A running log, newest first. Each entry says what was decided and why.
   was not started here. Both content scripts were run in a WordPress here:
   every block valid in the editor, and the checker finds what each page is
   meant to show; running them again changes nothing.
-- **One login helper with one retry.** See `tests/e2e/README.md`.
+- **One login helper, and the login flake's cause.** WordPress's login
+  page focuses and selects the username field 200 ms after it loads; when
+  that came mid-typing, the password landed in the username field. The
+  helper waits for that focus. See `tests/e2e/README.md`.
 
 ## 2026-11-15: The site overview reads a summary per post, never the records
 

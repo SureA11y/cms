@@ -19,18 +19,32 @@ export async function siteContext(browser, options = {}) {
 }
 
 /**
- * Logs in on WordPress's login page. Now and then (a few times in a hundred
- * runs of the suite, never in 150 logins on their own) the browser sends no
- * form after the click, and the page stays on the login screen; the server
- * never sees a request. The login page is WordPress's, not the plugin's, so
- * a login that doesn't leave it within 10 seconds is tried once more, and
- * what the page held is logged, to find the cause.
+ * Logs in on WordPress's login page. The page moves the focus to the
+ * username field and selects its text 200 ms after it loads
+ * (`wp_attempt_focus`); when that came while the password was being typed,
+ * the password went into the username field and the form, with an empty
+ * required password, was never sent. So this waits for that focus first,
+ * and checks both fields before logging in. If the login still doesn't
+ * leave the page within 10 seconds, it is tried once more and what the page
+ * held is logged.
  */
 export async function logIn(page, user, pass) {
   for (let attempt = 1; ; attempt++) {
     await page.goto(`${WP_URL}/wp-login.php`);
+    await page
+      .waitForFunction(() => document.activeElement?.id === 'user_login', null, {
+        timeout: 2000
+      })
+      .catch(() => {});
     await page.fill('#user_login', user);
     await page.fill('#user_pass', pass);
+    if (
+      (await page.inputValue('#user_login')) !== user ||
+      (await page.inputValue('#user_pass')) !== pass
+    ) {
+      await page.fill('#user_login', user);
+      await page.fill('#user_pass', pass);
+    }
     try {
       await Promise.all([
         page.waitForURL(/wp-admin/, { waitUntil: 'commit', timeout: 10000 }),
@@ -41,7 +55,7 @@ export async function logIn(page, user, pass) {
       const state = await page
         .evaluate(() => ({
           url: location.href,
-          user: document.querySelector('#user_login')?.value,
+          userLength: (document.querySelector('#user_login')?.value || '').length,
           passwordLength: (document.querySelector('#user_pass')?.value || '').length,
           formValid: document.querySelector('#loginform')?.checkValidity(),
           readyState: document.readyState

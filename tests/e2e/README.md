@@ -7,7 +7,8 @@ IDs 8, 9 and 10 by default). Every file is skipped when `WP_URL` is not set.
 With wp-env (see the main README), which creates the posts when it starts:
 
 ```sh
-WP_URL=http://localhost:8888 WP_PASS=password npm run test:e2e
+npm run e2e:browser     # once: the Chromium the tests use
+npm run test:e2e:local  # the address and login come from wp-env.env
 ```
 
 Against another WordPress, create the posts with
@@ -55,11 +56,14 @@ tool.
 
 ## Logging in
 
-Every file logs in through `logIn()` (`site.mjs`). A few times in a hundred
-runs of the suite the browser sent no form after the click on "Log In", and
-the server never saw a request; 150 logins on their own never did it. The
-login page is WordPress's, so a login that hasn't left it after 10 seconds
-is tried once more, and what the page held is logged (`# login attempt`).
+Every file logs in through `logIn()` (`site.mjs`). WordPress's login page
+moves the focus to the username field and selects it 200 ms after it loads;
+when that came while the password was being typed, the password went into
+the username field and the form was never sent (its password is required).
+That happened a few times in a hundred runs of the suite. `logIn()` waits
+for that focus before typing and checks both fields before logging in; if
+a login still doesn't leave the page, it is tried once more and what the
+page held is logged (`# login attempt`).
 
 ## No requests outside the site
 

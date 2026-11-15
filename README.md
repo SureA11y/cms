@@ -53,15 +53,15 @@ You need [Node.js](https://nodejs.org/) 22 or later and
 [Docker Desktop](https://www.docker.com/products/docker-desktop/), running.
 
 ```sh
-git clone https://github.com/SureA11y/core.git ../core
 npm install
-npm install --no-save ../core
+npm run setup:core
 npm run wp:start
 ```
 
-The two `core` lines are needed until the next release of
-`@surea11y/core`: the plugin uses rules that are on core's main branch but
-not yet in 1.17.0.
+`setup:core` is needed until the next release of `@surea11y/core`: the
+plugin uses rules that are on core's main branch but not yet in 1.17.0. It
+clones core beside this folder (`../core`) and installs it from there; run
+it again after any `npm install`, which puts the released version back.
 
 The first start downloads WordPress and a database, so it takes a few
 minutes. Then open <http://localhost:8888/wp-admin> and log in as `admin`
@@ -87,20 +87,22 @@ What to try:
 | `npm run wp:start` | Builds the plugin and starts WordPress (again) |
 | `npm run wp:stop` | Stops it; your changes are kept |
 | `npm run wp:reset` | Wipes the site and creates the demo content again |
+| `npm run test:e2e:local` | Runs the end-to-end tests against it |
 | `npx wp-env destroy` | Removes it from your computer entirely |
 
 After changing the plugin's code, `npm run build` and reload the page; the
 plugin folder is shared with the site, so there is no need to restart.
 
-The end-to-end tests run against it too:
+The end-to-end tests run against it too. Once, install the browser they
+use; then run them:
 
 ```sh
-WP_URL=http://localhost:8888 WP_PASS=password npm run test:e2e
+npm run e2e:browser
+npm run test:e2e:local
 ```
 
-They need a Chromium: install one once with
-`npx playwright-core install chromium`, or set `CHROMIUM` to the path of
-one you have. See [`tests/e2e/README.md`](tests/e2e/README.md).
+`test:e2e:local` takes the site's address and login from
+`tests/e2e/wp-env.env`. See [`tests/e2e/README.md`](tests/e2e/README.md).
 
 ## Related repositories
 
