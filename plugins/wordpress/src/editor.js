@@ -617,7 +617,8 @@
 		// Opened from "Edit in the editor" on a page: show that finding once
 		// the first results are in.
 		function showTarget() {
-			if ( ! target ) {
+			// Wait for results of the post's content, not of an empty editor.
+			if ( ! target || checker.empty || ! checker.findings.length ) {
 				return;
 			}
 			const wanted = target;
@@ -934,7 +935,19 @@
 	}
 
 	registerPlugin( 'surea11y', { render: Plugin } );
+	// While the editor starts it restores the sidebar that was open last,
+	// which can come after this opens ours: keep ours open until the finding
+	// has been shown (showTarget clears the target), for up to 15 seconds.
 	if ( target ) {
-		setTimeout( openSidebar, 0 );
+		let tries = 0;
+		( function keepOpen() {
+			if ( ! target || ++tries > 60 ) {
+				return;
+			}
+			if ( ! document.querySelector( 'surea11y-results' ) ) {
+				openSidebar();
+			}
+			setTimeout( keepOpen, 250 );
+		} )();
 	}
 } )( window.wp, window.SureA11yPanel );
