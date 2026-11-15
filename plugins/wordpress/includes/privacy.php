@@ -40,30 +40,30 @@ add_action( 'admin_init', 'surea11y_privacy_policy' );
 /**
  * Registers the exporter and the eraser.
  *
- * @param array $list Exporters or erasers.
+ * @param array $exporters The exporters.
  * @return array
  */
-function surea11y_register_exporter( $list ) {
-	$list['surea11y'] = array(
+function surea11y_register_exporter( $exporters ) {
+	$exporters['surea11y'] = array(
 		'exporter_friendly_name' => __( 'Accessibility checker', 'surea11y' ),
 		'callback'               => 'surea11y_export_personal_data',
 	);
-	return $list;
+	return $exporters;
 }
 add_filter( 'wp_privacy_personal_data_exporters', 'surea11y_register_exporter' );
 
 /**
  * Registers the eraser.
  *
- * @param array $list Erasers.
+ * @param array $erasers The erasers.
  * @return array
  */
-function surea11y_register_eraser( $list ) {
-	$list['surea11y'] = array(
+function surea11y_register_eraser( $erasers ) {
+	$erasers['surea11y'] = array(
 		'eraser_friendly_name' => __( 'Accessibility checker', 'surea11y' ),
 		'callback'             => 'surea11y_erase_personal_data',
 	);
-	return $list;
+	return $erasers;
 }
 add_filter( 'wp_privacy_personal_data_erasers', 'surea11y_register_eraser' );
 

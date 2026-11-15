@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-const SUREA11Y_SUMMARY_META   = '_surea11y_summary';
+const SUREA11Y_SUMMARY_META    = '_surea11y_summary';
 const SUREA11Y_SUMMARY_ANSWERS = 5;    // Latest answers kept per post.
 const SUREA11Y_OVERVIEW_POSTS  = 1000; // Posts read, most recently checked first.
 
@@ -132,7 +132,7 @@ function surea11y_overview_summaries() {
 			SUREA11Y_OVERVIEW_POSTS
 		)
 	);
-	$ids = array_map( 'intval', wp_list_pluck( $rows, 'post_id' ) );
+	$ids  = array_map( 'intval', wp_list_pluck( $rows, 'post_id' ) );
 	_prime_post_caches( $ids, false, false );
 	$out = array();
 	foreach ( $rows as $row ) {
@@ -184,22 +184,36 @@ function surea11y_overview_data( $summaries ) {
 			$answers[] = array( 'id' => $id ) + $a;
 		}
 	}
-	$rules = array_values( array_filter( $rules, function ( $r ) {
-		return $r['pages'] > 0;
-	} ) );
-	usort( $rules, function ( $a, $b ) {
-		$x = $a['counts'];
-		$y = $b['counts'];
-		return array( $b['pages'], $y['problem'], $y['likely'], $y['review'], $a['rule'] ) <=> array( $a['pages'], $x['problem'], $x['likely'], $x['review'], $b['rule'] );
-	} );
-	usort( $pages, function ( $a, $b ) {
-		$x = $a['counts'];
-		$y = $b['counts'];
-		return array( $y['problem'], $y['likely'], $y['review'], $b['date'] ) <=> array( $x['problem'], $x['likely'], $x['review'], $a['date'] );
-	} );
-	usort( $answers, function ( $a, $b ) {
-		return strcmp( $b['date'], $a['date'] );
-	} );
+	$rules = array_values(
+		array_filter(
+			$rules,
+			function ( $r ) {
+				return $r['pages'] > 0;
+			}
+		)
+	);
+	usort(
+		$rules,
+		function ( $a, $b ) {
+			$x = $a['counts'];
+			$y = $b['counts'];
+			return array( $b['pages'], $y['problem'], $y['likely'], $y['review'], $a['rule'] ) <=> array( $a['pages'], $x['problem'], $x['likely'], $x['review'], $b['rule'] );
+		}
+	);
+	usort(
+		$pages,
+		function ( $a, $b ) {
+			$x = $a['counts'];
+			$y = $b['counts'];
+			return array( $y['problem'], $y['likely'], $y['review'], $b['date'] ) <=> array( $x['problem'], $x['likely'], $x['review'], $a['date'] );
+		}
+	);
+	usort(
+		$answers,
+		function ( $a, $b ) {
+			return strcmp( $b['date'], $a['date'] );
+		}
+	);
 	return array(
 		'checked' => $checked,
 		'rules'   => array_slice( $rules, 0, 15 ),
@@ -278,13 +292,13 @@ function surea11y_render_overview() {
 	if ( ! surea11y_can_see_overview() ) {
 		return;
 	}
-	$data  = surea11y_overview_data( surea11y_overview_summaries() );
-	$known = surea11y_rules_by_id();
-	$words = surea11y_export_words();
-	$names = array();
-	$name  = function ( $user_id ) use ( &$names ) {
+	$data       = surea11y_overview_data( surea11y_overview_summaries() );
+	$known      = surea11y_rules_by_id();
+	$words      = surea11y_export_words();
+	$names      = array();
+	$name       = function ( $user_id ) use ( &$names ) {
 		if ( ! isset( $names[ $user_id ] ) ) {
-			$user               = $user_id ? get_userdata( $user_id ) : false;
+			$user              = $user_id ? get_userdata( $user_id ) : false;
 			$names[ $user_id ] = $user ? $user->display_name : '';
 		}
 		return $names[ $user_id ];

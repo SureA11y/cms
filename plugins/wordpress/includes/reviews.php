@@ -48,8 +48,8 @@ function surea11y_reviews_for_display( $post_id ) {
 		}
 		$time        = isset( $review['date'] ) ? strtotime( $review['date'] . ' UTC' ) : false;
 		$out[ $key ] = array(
-			'by'   => $names[ $user_id ],
-			'when' => $time ? wp_date( get_option( 'date_format' ), $time ) : '',
+			'by'     => $names[ $user_id ],
+			'when'   => $time ? wp_date( get_option( 'date_format' ), $time ) : '',
 			'note'   => isset( $review['note'] ) ? (string) $review['note'] : '',
 			'answer' => surea11y_clean_answer( isset( $review['answer'] ) ? $review['answer'] : 'pass' ),
 		);
@@ -137,7 +137,7 @@ function surea11y_register_review_routes() {
 				'callback'            => 'surea11y_add_reviews',
 				'permission_callback' => 'surea11y_reviews_write_permission',
 				'args'                => $args + array(
-					'keys' => array(
+					'keys'   => array(
 						'type'     => 'array',
 						'required' => true,
 						'items'    => array( 'type' => 'string' ),

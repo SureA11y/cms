@@ -69,7 +69,7 @@ function surea11y_set_hidden( $post_id, $keys, $hidden ) {
 	// posts), as the editor does.
 	ksort( $prefs['surea11y']['fine'], SORT_NUMERIC );
 	$prefs['surea11y']['fine'] = array_slice( $prefs['surea11y']['fine'], -SUREA11Y_MAX_HIDDEN_POSTS, null, true );
-	$prefs['_modified']                             = gmdate( 'Y-m-d\TH:i:s.000\Z' );
+	$prefs['_modified']        = gmdate( 'Y-m-d\TH:i:s.000\Z' );
 	update_user_meta( $user_id, $meta, $prefs );
 	return $now;
 }

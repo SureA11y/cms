@@ -1,0 +1,17 @@
+{
+	"name": "surea11y/cms-tools",
+	"description": "Development tools for the WordPress plugin: WordPress's coding standards. Not shipped with the plugin.",
+	"license": "GPL-2.0-or-later",
+	"require-dev": {
+		"wp-coding-standards/wpcs": "^3.2",
+		"phpcompatibility/phpcompatibility-wp": "^2.1"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"scripts": {
+		"lint:php": "phpcs"
+	}
+}

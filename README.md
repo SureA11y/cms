@@ -119,6 +119,19 @@ npm run test:e2e:local
 `test:e2e:local` takes the site's address and login from
 `tests/e2e/wp-env.env`. See [`tests/e2e/README.md`](tests/e2e/README.md).
 
+## Checks
+
+What CI runs on every pull request, and how to run it here:
+
+| Command | What it checks |
+| --- | --- |
+| `npm run lint` | JavaScript (ESLint) |
+| `npm run format:check` | Formatting (Prettier) |
+| `npm test` | Unit tests of the packages |
+| `npm run size` | Size budgets, after `npm run build` |
+| `composer install` then `composer lint:php` | The plugin's PHP: WordPress's coding standards, the security and database checks WordPress.org's Plugin Check runs, PHP 7.4 compatibility (`phpcs.xml.dist`) |
+| `npm run test:e2e:local` | End to end, in a real WordPress (see above) |
+
 ## Related repositories
 
 - [SureA11y/core](https://github.com/SureA11y/core): the accessibility engine

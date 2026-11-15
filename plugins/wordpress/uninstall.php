@@ -44,7 +44,12 @@ function surea11y_uninstall_site() {
 }
 
 if ( is_multisite() ) {
-	foreach ( get_sites( array( 'fields' => 'ids', 'number' => 0 ) ) as $site_id ) {
+	foreach ( get_sites(
+		array(
+			'fields' => 'ids',
+			'number' => 0,
+		)
+	) as $site_id ) {
 		switch_to_blog( $site_id );
 		surea11y_uninstall_site();
 		restore_current_blog();

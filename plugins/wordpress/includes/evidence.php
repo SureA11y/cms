@@ -17,13 +17,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
-const SUREA11Y_EVIDENCE_META     = '_surea11y_evidence'; // Before records were child posts.
-const SUREA11Y_RECORD_TYPE       = 'surea11y_record';
-const SUREA11Y_RECORD_META       = '_surea11y_record';
-const SUREA11Y_MAX_RECORDS       = 20;  // Per post; the oldest go first.
-const SUREA11Y_MAX_FINDINGS      = 300; // Per record.
-const SUREA11Y_EVIDENCE_SOURCES  = array( 'editor', 'page' );
-const SUREA11Y_EVIDENCE_GROUPS   = array( 'problem', 'likely', 'review', 'probably-fine' );
+const SUREA11Y_EVIDENCE_META    = '_surea11y_evidence'; // Before records were child posts.
+const SUREA11Y_RECORD_TYPE      = 'surea11y_record';
+const SUREA11Y_RECORD_META      = '_surea11y_record';
+const SUREA11Y_MAX_RECORDS      = 20;  // Per post; the oldest go first.
+const SUREA11Y_MAX_FINDINGS     = 300; // Per record.
+const SUREA11Y_EVIDENCE_SOURCES = array( 'editor', 'page' );
+const SUREA11Y_EVIDENCE_GROUPS  = array( 'problem', 'likely', 'review', 'probably-fine' );
 
 /** The hidden post type that holds the records: never shown, never public. */
 function surea11y_register_record_type() {
@@ -330,8 +330,8 @@ function surea11y_add_record( $request ) {
 		'answers'  => $answers,
 	);
 
-	$records = surea11y_records( $post_id );
-	$same    = function ( $a ) use ( $record ) {
+	$records        = surea11y_records( $post_id );
+	$same           = function ( $a ) use ( $record ) {
 		return array( $a['source'], $a['findings'], $a['answers'] ) === array( $record['source'], $record['findings'], $record['answers'] );
 	};
 	$last_of_source = null;
@@ -345,7 +345,7 @@ function surea11y_add_record( $request ) {
 		surea11y_store_record( $post_id, $record );
 		surea11y_update_summary( $post_id );
 	}
-	$response = surea11y_get_records( $request );
+	$response                = surea11y_get_records( $request );
 	$response->data['added'] = $added;
 	return $response;
 }
@@ -415,12 +415,12 @@ function surea11y_export_records( $request ) {
 	$names = array();
 	$name  = function ( $user_id ) use ( &$names ) {
 		if ( ! isset( $names[ $user_id ] ) ) {
-			$user               = $user_id ? get_userdata( $user_id ) : false;
+			$user              = $user_id ? get_userdata( $user_id ) : false;
 			$names[ $user_id ] = $user ? $user->display_name : '';
 		}
 		return $names[ $user_id ];
 	};
-	$slug = sanitize_title( get_post_field( 'post_name', $post_id ) ? get_post_field( 'post_name', $post_id ) : 'post-' . $post_id );
+	$slug  = sanitize_title( get_post_field( 'post_name', $post_id ) ? get_post_field( 'post_name', $post_id ) : 'post-' . $post_id );
 
 	if ( 'earl' === $request['format'] ) {
 		$body     = wp_json_encode( surea11y_earl( end( $records ), $rules, $name, $post_id ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
@@ -450,8 +450,11 @@ function surea11y_export_records( $request ) {
 		);
 		foreach ( $records as $record ) {
 			foreach ( $record['findings'] as $f ) {
-				$rule   = isset( $rules[ $f['rule'] ] ) ? $rules[ $f['rule'] ] : array( 'title' => '', 'wcag' => array() );
-				$wcag   = array();
+				$rule = isset( $rules[ $f['rule'] ] ) ? $rules[ $f['rule'] ] : array(
+					'title' => '',
+					'wcag'  => array(),
+				);
+				$wcag = array();
 				foreach ( isset( $rule['wcag'] ) ? $rule['wcag'] : array() as $c ) {
 					$wcag[] = $c['sc'] . ' (' . $c['level'] . ')';
 				}

@@ -19,6 +19,21 @@ A running log, newest first. Each entry says what was decided and why.
   end-to-end tests were run with the overrides.
 - **Remove them** once Playground raises its pins.
 
+## 2026-11-15: WordPress's coding standards in CI
+
+- **What.** `composer lint:php` runs PHP_CodeSniffer with WordPress-Extra,
+  the security and database sniffs WordPress.org's Plugin Check uses, the
+  i18n check for the `surea11y` text domain, and PHP 7.4 compatibility
+  (`phpcs.xml.dist`); CI runs it on every pull request. The tools are
+  development dependencies in `composer.json`, never shipped.
+- **Plugin Check itself.** Its static rules (`plugin-review.xml`, version
+  2.2.0) were run here without its four sniffs of its own: no finding. The
+  full tool needs WP-CLI or its admin screen in a WordPress; run it once
+  before submitting.
+- **What it found.** Layout only (alignment, function-call formatting),
+  fixed with `phpcbf`, and two parameters named `$list`, a reserved word,
+  renamed.
+
 ## 2026-11-15: Security review before the release (Phase 3)
 
 Read every PHP file of the plugin and the browser code that handles the
