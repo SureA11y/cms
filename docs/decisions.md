@@ -19,9 +19,12 @@ A running log, newest first. Each entry says what was decided and why.
   route changes only its own entry of the person's editor preferences, and
   sets their modified time, so the editor takes it over a copy it kept in
   the browser.
-- **The phone-width check waits for core.** It needs a reflow rule (WCAG
-  1.4.10), which core doesn't have. A check of our own would be a WCAG
-  judgement outside the engine.
+- **The phone-width check is a core rule, run by the page checker.** WCAG
+  1.4.10 belongs in core, so core gained `reflow-horizontal-scroll`: at a
+  viewport 320 CSS pixels wide it fails what makes the page scroll
+  sideways and asks about tables, media and code, which the exception for
+  two-dimensional content may cover. The page checker lays the page out at
+  that width in a hidden frame it names as the page, only when asked.
 - **Quality gates from "Quality, in every phase" are now in CI:** ESLint and
   Prettier as core uses them, size budgets on the built files, and a syntax
   check of every PHP file. The code was formatted once, in its own commit.

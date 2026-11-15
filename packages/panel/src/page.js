@@ -44,6 +44,7 @@ export function loadEngine(doc, urls) {
  * - excludeSelectors: what to leave out (the checker's own interface, the
  *   site's admin bar).
  * - profile, packs, locale, messages, runOnly: as for the engine.
+ * - engineOptions: more of the engine's options (`topLevelDocument`).
  * - labels: { content, theme }: the tag each finding gets.
  *
  * Returns { findings, outline, result, scanMs }: `outline` is the page's
@@ -61,11 +62,13 @@ export function scanPage(
     locale = 'en',
     messages,
     runOnly = null,
+    engineOptions: extra = null,
     labels = { content: 'Your content', theme: 'Theme or template' }
   } = {}
 ) {
   const win = doc.defaultView;
   const engineOptions = {
+    ...(extra || {}),
     profile,
     packs,
     locale,
@@ -128,5 +131,62 @@ function first(doc, selector) {
     return doc.querySelector(selector);
   } catch {
     return null;
+  }
+}
+
+/**
+ * Checks the page at `url` laid out at a phone's width, for WCAG 1.4.10
+ * (Reflow): the page is loaded again in a hidden frame `width` CSS pixels
+ * wide (320, the width 1.4.10 names), the engine is loaded into it, and
+ * `reflow-horizontal-scroll` runs there, told the frame is the page. The
+ * frame is removed after. Options as for scanPage, with `engineUrls`, the
+ * engine's scripts, and `timeoutMs` for the page to load.
+ *
+ * Returns what scanPage returns. Each finding's `itemId` is its selector,
+ * which finds the same element in the page as shown, since it is the same
+ * page.
+ */
+export async function scanPageAtWidth(
+  hostDoc,
+  { url, width = 320, height = 640, engineUrls = [], timeoutMs = 30000, ...options } = {}
+) {
+  const win = hostDoc.defaultView;
+  const frame = hostDoc.createElement('iframe');
+  frame.setAttribute('aria-hidden', 'true');
+  frame.setAttribute('tabindex', '-1');
+  frame.setAttribute('inert', '');
+  frame.title = 'SureA11y';
+  frame.setAttribute('data-surea11y-frame', '');
+  frame.style.cssText = `position:fixed;left:-20000px;top:0;width:${Number(width) || 320}px;height:${Number(height) || 640}px;border:0;visibility:hidden;pointer-events:none;`;
+  let timer = null;
+  try {
+    const loaded = new Promise((resolve, reject) => {
+      frame.addEventListener('load', resolve, { once: true });
+      timer = win.setTimeout(
+        () => reject(new Error('The page did not load at phone width.')),
+        timeoutMs
+      );
+    });
+    frame.src = url;
+    hostDoc.body.append(frame);
+    await loaded;
+    const doc = frame.contentDocument;
+    if (!doc || !doc.body) throw new Error('The page at phone width could not be read.');
+    // Measure the page as it settles: its fonts change the width of text.
+    if (doc.fonts && doc.fonts.ready) {
+      await Promise.race([
+        doc.fonts.ready,
+        new Promise((resolve) => win.setTimeout(resolve, 3000))
+      ]);
+    }
+    await loadEngine(doc, engineUrls);
+    return scanPage(doc, {
+      ...options,
+      runOnly: { includeRuleIds: ['reflow-horizontal-scroll'] },
+      engineOptions: { topLevelDocument: true }
+    });
+  } finally {
+    if (timer) win.clearTimeout(timer);
+    frame.remove();
   }
 }

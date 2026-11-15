@@ -188,10 +188,13 @@ WordPress plugin:
       around the one shown.
 - [x] Front-end checker: "Edit in the editor" opens the editor on that
       finding (the sidebar opens and shows it).
-- [ ] Front-end checker: the "phone-width layout" check (a check at a
-      narrow width). Waits for a reflow rule (WCAG 1.4.10) in core: none of
-      core's rules checks for horizontal scrolling at 320 CSS pixels, and a
-      check of our own would put a WCAG judgement outside the engine.
+- [x] Front-end checker: "Check at phone width" (WCAG 1.4.10, Reflow).
+      On request, the page is loaded again in a hidden frame 320 CSS pixels
+      wide and core's `reflow-horizontal-scroll` runs there; what sticks
+      out past the edge joins the list, as content or theme, and Show finds
+      it in the page as shown. It runs only when asked, since it loads the
+      page a second time (0.6 seconds on the typical post). Needs core's
+      rule, on core's main branch until a release.
 - [x] Front-end checker: shared reviews there too. A finding is now
       identified by its rule, reason and what the element is and says (tag,
       link, image source, alternative text, text), not its markup, so it
@@ -380,7 +383,7 @@ on 2026-11-15.
 | Compact results for storage | Phase 1 | Done: `output.detail: 'findings'` |
 | Other standards and laws | Phase 2 | Done, as packs (experimental until 1.18.0 for parts of the standard API) |
 | Option to skip rules that touch the live page | Phase 1 | Not found. Until then, exclude them by ID |
-| A reflow rule (WCAG 1.4.10): horizontal scrolling at 320 CSS pixels, for a host that renders the page at that width | Phase 1 (phone-width check) | Not found. To ask for in core |
+| A reflow rule (WCAG 1.4.10): horizontal scrolling at 320 CSS pixels, for a host that renders the page at that width | Phase 1 (phone-width check) | Done on a core branch, awaiting release: `reflow-horizontal-scroll` |
 | Content checks the others have: "click here" inside a paragraph, PDF and Office links, bold paragraphs used as headings, tables without headers | **Phase 1** (parity, found in Phase 0) | Done on a core branch, awaiting release: `td-has-header` from 2 by 2, `p-as-heading` `BOLD_SHORT_PARAGRAPH`, `link-name-quality-link-only` (2.4.9). Links to documents: `cms-link-to-document` in the pack |
 | More content checks: ALL CAPS, fake lists, adjacent duplicate links, readability, web address as link text | Phase 2 | Not found in 1.17.0. A pack, or core |
 | An official grouping of rules into content-level and theme-level | Phase 1 | Done in the pack: profiles `cms-content` and `cms-theme` |

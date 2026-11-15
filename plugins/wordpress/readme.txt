@@ -59,6 +59,8 @@ editor has finished loading.
   a link's text.
 * "Hide for me" on pages too, and "Edit in the editor" opens the editor on
   that finding.
+* "Check at phone width" on pages: finds what makes the page scroll
+  sideways on a phone (WCAG 1.4.10).
 * Fewer buttons on each finding: "Reviewed" and "Hide for me" are under
   "More".
 

@@ -86,5 +86,10 @@
   "emptyHeading": "(encabezado vacío)",
   "noAlt": "Sin texto alternativo",
   "decorative": "Decorativa: los lectores de pantalla la omiten",
-  "quoted": "«{{text}}»"
+  "quoted": "«{{text}}»",
+  "phoneHelp": "Carga esta página de nuevo con 320 píxeles de ancho, como la muestra un móvil, y comprueba que nada necesite desplazarse hacia los lados.",
+  "phoneCheck": "Comprobar con ancho de móvil",
+  "phoneChecking": "Comprobando con ancho de móvil…",
+  "phoneDone": "Comprobado con ancho de móvil (320 píxeles): {{n}} encontrados.",
+  "phoneError": "La comprobación con ancho de móvil no terminó."
 }

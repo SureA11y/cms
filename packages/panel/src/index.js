@@ -21,7 +21,7 @@ export { UI, uiStrings, fill } from './messages/ui.js';
 export { ResultsElement, defineResultsElement } from './ui/results-element.js';
 export { createMarkers } from './ui/markers.js';
 export { createPagePanel } from './ui/page-panel.js';
-export { scanPage, loadEngine } from './page.js';
+export { scanPage, scanPageAtWidth, loadEngine } from './page.js';
 export { readOutline, pathSelector } from './outline.js';
 export { createScheduler } from './scheduler.js';
 export { toCards, countPlaces, cardKey } from './cards.js';
