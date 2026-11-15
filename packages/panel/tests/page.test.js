@@ -8,7 +8,14 @@ const win = installDom(`<!doctype html><html lang="en"><body>
   <button id="opener">Check</button>
 </body></html>`);
 // jsdom has no layout: give elements a size, as a browser would.
-win.HTMLElement.prototype.getBoundingClientRect = () => ({ top: 0, left: 0, right: 100, bottom: 20, width: 100, height: 20 });
+win.HTMLElement.prototype.getBoundingClientRect = () => ({
+  top: 0,
+  left: 0,
+  right: 100,
+  bottom: 20,
+  width: 100,
+  height: 20
+});
 const { scanPage } = await import('../src/page.js');
 const { createPagePanel } = await import('../src/ui/page-panel.js');
 
@@ -16,12 +23,29 @@ function fakeEngine(seen) {
   win.a11ycore = {
     runa11yCoreInPage(url, context, options) {
       seen.push({ context, options });
-      const occ = (selector, summary) => ({ selector, summary, html: `<x ${selector}>`, data: { details: { reasonCode: 'R' } } });
+      const occ = (selector, summary) => ({
+        selector,
+        summary,
+        html: `<x ${selector}>`,
+        data: { details: { reasonCode: 'R' } }
+      });
       return {
         checksResults: [
-          { ruleId: 'p-as-heading', outcome: 'cantTell', occurrences: [occ('#bold', 'Bold line.')] },
-          { ruleId: 'img-alt-quality', outcome: 'cantTell', occurrences: [{ ...occ('#pic', 'File name.'), lean: { toward: 'fail' } }] },
-          { ruleId: 'link-name-quality', outcome: 'fail', occurrences: [occ('#menu', 'Menu link.'), occ('#gone', 'Gone.')] }
+          {
+            ruleId: 'p-as-heading',
+            outcome: 'cantTell',
+            occurrences: [occ('#bold', 'Bold line.')]
+          },
+          {
+            ruleId: 'img-alt-quality',
+            outcome: 'cantTell',
+            occurrences: [{ ...occ('#pic', 'File name.'), lean: { toward: 'fail' } }]
+          },
+          {
+            ruleId: 'link-name-quality',
+            outcome: 'fail',
+            occurrences: [occ('#menu', 'Menu link.'), occ('#gone', 'Gone.')]
+          }
         ]
       };
     }
@@ -31,7 +55,10 @@ function fakeEngine(seen) {
 test('findings in the content and in the theme are told apart', () => {
   const seen = [];
   fakeEngine(seen);
-  const { findings } = scanPage(document, { contentSelector: '.entry-content', excludeSelectors: ['[data-surea11y-panel]'] });
+  const { findings } = scanPage(document, {
+    contentSelector: '.entry-content',
+    excludeSelectors: ['[data-surea11y-panel]']
+  });
   const by = Object.fromEntries(findings.map((f) => [f.summary, f]));
   assert.equal(by['Bold line.'].outside, false);
   assert.equal(by['Bold line.'].itemLabel, 'Your content');
@@ -44,7 +71,7 @@ test('findings in the content and in the theme are told apart', () => {
   assert.equal(seen[0].options.profile, 'cms-page');
 });
 
-test('without a content area, everything is the theme\'s', () => {
+test("without a content area, everything is the theme's", () => {
   fakeEngine([]);
   const { findings } = scanPage(document, { contentSelector: '.nope' });
   assert.ok(findings.every((f) => f.outside));
@@ -71,14 +98,25 @@ test('the page panel is a labelled region with a named close button', () => {
   const panel = createPagePanel(document, { title: 'Accessibility' });
   const root = panel.host.shadowRoot;
   const section = root.querySelector('section');
-  assert.equal(root.getElementById(section.getAttribute('aria-labelledby')).textContent, 'Accessibility');
+  assert.equal(
+    root.getElementById(section.getAttribute('aria-labelledby')).textContent,
+    'Accessibility'
+  );
   assert.equal(root.querySelector('.close').getAttribute('aria-label'), 'Close');
   panel.host.remove();
 });
 
 test('a finding about the whole page has nothing to show', () => {
   win.a11ycore = {
-    runa11yCoreInPage: () => ({ checksResults: [{ ruleId: 'page-title-patterns', outcome: 'cantTell', occurrences: [{ selector: 'html', summary: 'Title.', html: '<html>' }] }] })
+    runa11yCoreInPage: () => ({
+      checksResults: [
+        {
+          ruleId: 'page-title-patterns',
+          outcome: 'cantTell',
+          occurrences: [{ selector: 'html', summary: 'Title.', html: '<html>' }]
+        }
+      ]
+    })
   };
   const { findings } = scanPage(document, { contentSelector: '.entry-content' });
   assert.equal(findings[0].itemId, null);
@@ -86,9 +124,20 @@ test('a finding about the whole page has nothing to show', () => {
 });
 
 test('nothing is reported inside what was excluded, even by a rule that missed it', () => {
-  document.body.insertAdjacentHTML('afterbegin', '<div id="wpadminbar"><form id="adminbarsearch"></form></div>');
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    '<div id="wpadminbar"><form id="adminbarsearch"></form></div>'
+  );
   win.a11ycore = {
-    runa11yCoreInPage: () => ({ checksResults: [{ ruleId: 'page-zones-landmark', outcome: 'cantTell', occurrences: [{ selector: '#adminbarsearch', summary: 'Zone.', html: '<form>' }] }] })
+    runa11yCoreInPage: () => ({
+      checksResults: [
+        {
+          ruleId: 'page-zones-landmark',
+          outcome: 'cantTell',
+          occurrences: [{ selector: '#adminbarsearch', summary: 'Zone.', html: '<form>' }]
+        }
+      ]
+    })
   };
   const { findings } = scanPage(document, { excludeSelectors: ['#wpadminbar'] });
   assert.equal(findings.length, 0);

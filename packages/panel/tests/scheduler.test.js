@@ -4,8 +4,15 @@ import { createScheduler } from '../src/scheduler.js';
 
 test('scans once after a pause, not per change', async () => {
   let runs = 0;
-  const s = createScheduler(async () => { runs++; }, { delay: 20 });
-  s.changed(); s.changed(); s.changed();
+  const s = createScheduler(
+    async () => {
+      runs++;
+    },
+    { delay: 20 }
+  );
+  s.changed();
+  s.changed();
+  s.changed();
   await new Promise((r) => setTimeout(r, 60));
   assert.equal(runs, 1);
   s.cancel();
@@ -14,7 +21,16 @@ test('scans once after a pause, not per change', async () => {
 test('a change during a scan schedules one more scan after it', async () => {
   let runs = 0;
   let release;
-  const s = createScheduler(async () => { runs++; if (runs === 1) await new Promise((r) => { release = r; }); }, { delay: 10 });
+  const s = createScheduler(
+    async () => {
+      runs++;
+      if (runs === 1)
+        await new Promise((r) => {
+          release = r;
+        });
+    },
+    { delay: 10 }
+  );
   const first = s.now();
   s.changed();
   await new Promise((r) => setTimeout(r, 30));
@@ -29,7 +45,11 @@ test('a change during a scan schedules one more scan after it', async () => {
 test('the pause can change between changes', async () => {
   const timers = [];
   let pause = 1000;
-  const s = createScheduler(async () => {}, { delay: () => pause, setTimer: (fn, ms) => (timers.push(ms), timers.length), clearTimer: () => {} });
+  const s = createScheduler(async () => {}, {
+    delay: () => pause,
+    setTimer: (fn, ms) => (timers.push(ms), timers.length),
+    clearTimer: () => {}
+  });
   s.changed();
   pause = 3000;
   s.changed();

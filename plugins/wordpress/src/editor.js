@@ -19,7 +19,7 @@
 	let config;
 	try {
 		config = JSON.parse( node.textContent );
-	} catch ( e ) {
+	} catch {
 		return;
 	}
 
@@ -395,7 +395,7 @@
 		}
 		wp.apiFetch( { path: config.reviewsPath } )
 			.then( ( r ) => setReviews( r.reviews ) )
-			.catch( ( error ) => window.console.error( '[SureA11y]', error ) ); // eslint-disable-line no-console
+			.catch( ( error ) => window.console.error( '[SureA11y]', error ) );  
 	}
 	function sendReview( method, keys, note ) {
 		if ( ! config.reviewsPath ) {
@@ -406,7 +406,7 @@
 			.apiFetch( { path: config.reviewsPath, method, data: body } )
 			.then( ( r ) => setReviews( r.reviews ) )
 			.catch( ( error ) => {
-				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+				window.console.error( '[SureA11y]', error );  
 				setReviews( Object.assign( {}, checker.reviews ) ); // takes back what the list showed
 			} );
 	}
@@ -511,7 +511,7 @@
 			// Read by the end-to-end tests.
 			window.surea11yLastScan = Object.assign( {}, out.timing, { contrastRan, contrastMs: contrast.ms, coloured: coloured.length } );
 		} catch ( error ) {
-			window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+			window.console.error( '[SureA11y]', error );  
 			Object.assign( checker, { state: 'error', error: error && error.message ? error.message : String( error ) } );
 		}
 		checker.notify();
@@ -777,7 +777,7 @@
 			const query = params.toString();
 			window.history.replaceState( window.history.state, '', window.location.pathname + ( query ? '?' + query : '' ) + window.location.hash );
 		}
-	} catch ( e ) {
+	} catch {
 		target = null;
 	}
 

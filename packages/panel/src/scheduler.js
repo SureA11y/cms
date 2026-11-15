@@ -8,7 +8,10 @@
  * a function returning it (a longer pause while nobody is looking).
  * Returns { changed(), now(), cancel() }.
  */
-export function createScheduler(run, { delay = 1000, setTimer = setTimeout, clearTimer = clearTimeout } = {}) {
+export function createScheduler(
+  run,
+  { delay = 1000, setTimer = setTimeout, clearTimer = clearTimeout } = {}
+) {
   let timer = null;
   let running = false;
   let again = false;

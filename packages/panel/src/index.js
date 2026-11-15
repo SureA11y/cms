@@ -4,7 +4,17 @@
 
 export { hasContent } from './content.js';
 export { createSandbox, renderItems, sandboxPolicy } from './sandbox.js';
-export { toFindings, groupOf, sortFindings, countByGroup, findingKey, shortKey, FINDING_PARAM, GROUP_ORDER, ITEM_ATTRIBUTE } from './findings.js';
+export {
+  toFindings,
+  groupOf,
+  sortFindings,
+  countByGroup,
+  findingKey,
+  shortKey,
+  FINDING_PARAM,
+  GROUP_ORDER,
+  ITEM_ATTRIBUTE
+} from './findings.js';
 export { MESSAGES, messagesFor } from './messages/index.js';
 export { addLocale, LOCALES } from './locales.js';
 export { UI, uiStrings, fill } from './messages/ui.js';

@@ -45,7 +45,9 @@ export function toCards(findings, marked = [], reviews = {}) {
   const cards = [...byKey.values()];
   for (const card of cards) {
     card.marked = card.places.every((p) => markedSet.has(p.key));
-    card.review = card.places.every((p) => reviews && reviews[p.key]) ? reviews[card.places[0].key] : null;
+    card.review = card.places.every((p) => reviews && reviews[p.key])
+      ? reviews[card.places[0].key]
+      : null;
     card.settled = card.marked || !!card.review;
     card.inContent = card.places.some((p) => p.itemId);
     card.outside = card.places.every((p) => p.outside || !p.itemId);

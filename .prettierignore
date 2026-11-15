@@ -1,0 +1,8 @@
+node_modules
+plugins/*/build
+plugins/wordpress/src
+prototypes
+package-lock.json
+*.json
+*.md
+*.php

@@ -298,7 +298,8 @@ export class ResultsElement extends HTMLElement {
    * readOutline makes them). When set, the list offers a view of each.
    */
   set outline(value) {
-    this._outline = value && Array.isArray(value.headings) && Array.isArray(value.images) ? value : null;
+    this._outline =
+      value && Array.isArray(value.headings) && Array.isArray(value.images) ? value : null;
     if (!this._outline) this._view = 'findings';
     this._render();
   }
@@ -353,7 +354,13 @@ export class ResultsElement extends HTMLElement {
     this._retry.addEventListener('click', () => this._emit('surea11y-retry', {}));
     this._details = el(doc, 'details');
     this._details.append(el(doc, 'summary', '', t.errorDetails), el(doc, 'p', 'technical'));
-    this._stateBox.append(this._stateIcon, this._status, this._stateText, this._retry, this._details);
+    this._stateBox.append(
+      this._stateIcon,
+      this._status,
+      this._stateText,
+      this._retry,
+      this._details
+    );
 
     this._list = el(doc, 'div', 'root');
     this._root.append(this._busy, this._stateBox, this._list);
@@ -379,7 +386,15 @@ export class ResultsElement extends HTMLElement {
     // The state box: errors, nothing to check, nothing found; otherwise only
     // its live region, read but not seen (the tiles show the counts).
     const kind =
-      this._state === 'error' ? 'error' : this._state !== 'done' ? null : this._empty ? 'empty' : open.length ? 'found' : 'nothing';
+      this._state === 'error'
+        ? 'error'
+        : this._state !== 'done'
+          ? null
+          : this._empty
+            ? 'empty'
+            : open.length
+              ? 'found'
+              : 'nothing';
     const views = !!this._outline && (kind === 'found' || kind === 'nothing');
     const listing = !views || this._view === 'findings';
     const visible = kind && kind !== 'found' && (listing || !views);
@@ -392,7 +407,9 @@ export class ResultsElement extends HTMLElement {
     this._stateIcon.textContent = '';
     if (visible) {
       this._stateIcon.dataset.kind = kind;
-      this._stateIcon.append(icon(doc, kind === 'empty' ? 'empty' : kind === 'error' ? 'problem' : 'marked', 28));
+      this._stateIcon.append(
+        icon(doc, kind === 'empty' ? 'empty' : kind === 'error' ? 'problem' : 'marked', 28)
+      );
     }
     if (kind === 'error') {
       this._status.textContent = t.errorTitle;
@@ -418,7 +435,8 @@ export class ResultsElement extends HTMLElement {
     this._list.textContent = '';
     if (views) this._list.append(this._renderViews(doc, t));
     if (!listing) this._list.append(this._renderOutline(doc, t, this._view));
-    else if (kind === 'found' || (kind === 'nothing' && cards.length)) this._renderList(doc, t, cards, counts);
+    else if (kind === 'found' || (kind === 'nothing' && cards.length))
+      this._renderList(doc, t, cards, counts);
     this._restoreFocus(focusId);
   }
 
@@ -456,7 +474,11 @@ export class ResultsElement extends HTMLElement {
           this._only = null;
           this._render();
         });
-        filter.append(el(doc, 'span', '', t.showingOnly), el(doc, 'strong', '', t.groups[this._only]), all);
+        filter.append(
+          el(doc, 'span', '', t.showingOnly),
+          el(doc, 'strong', '', t.groups[this._only]),
+          all
+        );
         this._list.append(filter);
       }
 
@@ -467,7 +489,18 @@ export class ResultsElement extends HTMLElement {
         const i = this._currentIndex(places);
         const prev = this._navButton(doc, 'previous', t.previous, () => this.showPrevious());
         const next = this._navButton(doc, 'next', t.next, () => this.showNext());
-        nav.append(prev, el(doc, 'span', 'nav-label', i >= 0 ? fill(t.position, { n: i + 1, total: places.length }) : fill(t.toLookAt, { total: places.length })), next);
+        nav.append(
+          prev,
+          el(
+            doc,
+            'span',
+            'nav-label',
+            i >= 0
+              ? fill(t.position, { n: i + 1, total: places.length })
+              : fill(t.toLookAt, { total: places.length })
+          ),
+          next
+        );
         this._list.append(nav);
       }
     }
@@ -566,10 +599,20 @@ export class ResultsElement extends HTMLElement {
         b.type = 'button';
         b.dataset.focus = `outline:${view}:${i}`;
         b.setAttribute('aria-describedby', textId);
-        b.addEventListener('click', () => this._emit('surea11y-show', { itemId: entry.itemId, finding: null, card: null, via: 'show' }));
+        b.addEventListener('click', () =>
+          this._emit('surea11y-show', {
+            itemId: entry.itemId,
+            finding: null,
+            card: null,
+            via: 'show'
+          })
+        );
         li.append(b);
       }
-      const tags = [view === 'images' && entry.src ? entry.src : '', entry.outside ? t.themeOrTemplate : ''].filter(Boolean);
+      const tags = [
+        view === 'images' && entry.src ? entry.src : '',
+        entry.outside ? t.themeOrTemplate : ''
+      ].filter(Boolean);
       if (tags.length) {
         const box = el(doc, 'p', 'tags');
         for (const tag of tags) box.append(el(doc, 'span', 'tag', tag));
@@ -606,7 +649,11 @@ export class ResultsElement extends HTMLElement {
     ic.append(icon(doc, group.id === 'reviewed' ? 'probably-fine' : group.id, 18));
     const chevron = icon(doc, 'chevron', 18);
     chevron.classList.add('chevron');
-    toggle.append(ic, el(doc, 'span', 'group-name', `${t.groups[group.id]} (${group.count})`), chevron);
+    toggle.append(
+      ic,
+      el(doc, 'span', 'group-name', `${t.groups[group.id]} (${group.count})`),
+      chevron
+    );
     toggle.addEventListener('click', () => {
       if (this._closed.has(group.id)) this._closed.delete(group.id);
       else this._closed.add(group.id);
@@ -632,9 +679,19 @@ export class ResultsElement extends HTMLElement {
     if (here) {
       li.setAttribute('aria-current', 'true');
       const n = card.places.length;
-      li.append(el(doc, 'p', 'current-label', n > 1 ? fill(t.shownPlace, { n: this._current.place + 1, total: n }) : t.shown));
+      li.append(
+        el(
+          doc,
+          'p',
+          'current-label',
+          n > 1 ? fill(t.shownPlace, { n: this._current.place + 1, total: n }) : t.shown
+        )
+      );
     }
-    const tags = [card.itemLabel, card.places.length > 1 ? fill(t.places, { n: card.places.length }) : ''].filter(Boolean);
+    const tags = [
+      card.itemLabel,
+      card.places.length > 1 ? fill(t.places, { n: card.places.length }) : ''
+    ].filter(Boolean);
     if (tags.length) {
       const box = el(doc, 'p', 'tags');
       for (const tag of tags) box.append(el(doc, 'span', 'tag', tag));
@@ -652,7 +709,8 @@ export class ResultsElement extends HTMLElement {
       hint.append(el(doc, 'strong', '', `${t.howToFix}: `), doc.createTextNode(card.hint));
       li.append(hint);
     }
-    if (card.outside) li.append(el(doc, 'p', 'where', card.inContent ? t.inTheme : t.outsideContent));
+    if (card.outside)
+      li.append(el(doc, 'p', 'where', card.inContent ? t.inTheme : t.outsideContent));
 
     const actions = el(doc, 'div', 'actions');
     const add = (label, cls, focus, action, expanded) => {
@@ -669,7 +727,16 @@ export class ResultsElement extends HTMLElement {
     };
     if (card.review) {
       const r = card.review;
-      li.append(el(doc, 'p', 'review-meta', r.by ? fill(t.reviewedBy, { by: r.by, when: r.when || '' }) : fill(t.reviewedOn, { when: r.when || '' })));
+      li.append(
+        el(
+          doc,
+          'p',
+          'review-meta',
+          r.by
+            ? fill(t.reviewedBy, { by: r.by, when: r.when || '' })
+            : fill(t.reviewedOn, { when: r.when || '' })
+        )
+      );
       if (r.note) li.append(el(doc, 'p', 'note', r.note));
       if (this._canReview) add(t.reopen, 'button', 'reopen', () => this._reopen(card));
     } else if (card.marked) {
@@ -677,17 +744,26 @@ export class ResultsElement extends HTMLElement {
     } else {
       if (card.inContent) {
         const next = here && card.places.length > 1;
-        add(next ? t.showNextPlace : t.show, 'button primary show', 'show', () => this._showCard(card));
+        add(next ? t.showNextPlace : t.show, 'button primary show', 'show', () =>
+          this._showCard(card)
+        );
       }
       if (card.hint) {
-        add(t.howToFix, 'button', 'how', () => {
-          if (this._howOpen.has(card.key)) this._howOpen.delete(card.key);
-          else this._howOpen.add(card.key);
-          this._render();
-        }, howOpen);
+        add(
+          t.howToFix,
+          'button',
+          'how',
+          () => {
+            if (this._howOpen.has(card.key)) this._howOpen.delete(card.key);
+            else this._howOpen.add(card.key);
+            this._render();
+          },
+          howOpen
+        );
       }
       // The host's own actions, such as opening the setting that fixes it.
-      const extra = typeof this._actionsFor === 'function' ? this._actionsFor(card, this._current) || [] : [];
+      const extra =
+        typeof this._actionsFor === 'function' ? this._actionsFor(card, this._current) || [] : [];
       for (const action of extra) {
         if (action && action.label && typeof action.run === 'function') {
           add(action.label, 'button', `act:${action.id || action.label}`, () => action.run(card));
@@ -697,7 +773,9 @@ export class ResultsElement extends HTMLElement {
         const a = el(doc, 'a', 'link edit', t.editInEditor);
         // The editor opens on this finding.
         const first = card.places.find((p) => p.key) || {};
-        a.href = first.key ? `${this._editUrl}${this._editUrl.includes('?') ? '&' : '?'}${FINDING_PARAM}=${shortKey(first.key)}` : this._editUrl;
+        a.href = first.key
+          ? `${this._editUrl}${this._editUrl.includes('?') ? '&' : '?'}${FINDING_PARAM}=${shortKey(first.key)}`
+          : this._editUrl;
         a.setAttribute('aria-describedby', id);
         a.dataset.focus = `card:${hash(card.key)}:edit`;
         actions.append(a);
@@ -707,13 +785,19 @@ export class ResultsElement extends HTMLElement {
       // four buttons and what fixes it comes first.
       const later = [];
       if (this._canReview && card.group !== 'problem' && this._reviewing !== card.key) {
-        later.push([t.reviewedFine, 'button', 'review', () => {
-          this._reviewing = card.key;
-          this._render();
-          this._restoreFocus(`card:${hash(card.key)}:note`);
-        }]);
+        later.push([
+          t.reviewedFine,
+          'button',
+          'review',
+          () => {
+            this._reviewing = card.key;
+            this._render();
+            this._restoreFocus(`card:${hash(card.key)}:note`);
+          }
+        ]);
       }
-      if (this._canMark && card.group !== 'problem') later.push([t.hideForMe, 'link', 'fine', () => this._mark(card, true)]);
+      if (this._canMark && card.group !== 'problem')
+        later.push([t.hideForMe, 'link', 'fine', () => this._mark(card, true)]);
       if (later.length > 1) {
         const open = this._moreOpen.has(card.key);
         const moreId = `${id}-more`;
@@ -736,7 +820,8 @@ export class ResultsElement extends HTMLElement {
             row.append(target.lastChild);
           }
           li.append(row);
-          if (this._reviewing === card.key && !card.settled) li.append(this._reviewForm(doc, t, card, id));
+          if (this._reviewing === card.key && !card.settled)
+            li.append(this._reviewForm(doc, t, card, id));
           return li;
         }
       } else {
@@ -744,7 +829,8 @@ export class ResultsElement extends HTMLElement {
       }
     }
     li.append(actions);
-    if (this._reviewing === card.key && !card.settled) li.append(this._reviewForm(doc, t, card, id));
+    if (this._reviewing === card.key && !card.settled)
+      li.append(this._reviewForm(doc, t, card, id));
     return li;
   }
 
@@ -800,7 +886,9 @@ export class ResultsElement extends HTMLElement {
 
   _currentIndex(places) {
     if (!this._current) return -1;
-    return places.findIndex((p) => p.card.key === this._current.cardKey && p.place === this._current.place);
+    return places.findIndex(
+      (p) => p.card.key === this._current.cardKey && p.place === this._current.place
+    );
   }
 
   /** After a rescan, the card last shown stays shown while it exists. */
@@ -808,7 +896,8 @@ export class ResultsElement extends HTMLElement {
     if (!this._current) return;
     const card = cards.find((c) => c.key === this._current.cardKey && !c.settled);
     if (!card) this._current = null;
-    else if (this._current.place >= card.places.length) this._current.place = card.places.length - 1;
+    else if (this._current.place >= card.places.length)
+      this._current.place = card.places.length - 1;
   }
 
   _showCard(card) {
@@ -843,7 +932,8 @@ export class ResultsElement extends HTMLElement {
     const places = this._places();
     if (!places.length) return false;
     const i = this._currentIndex(places);
-    const j = i < 0 ? (delta > 0 ? 0 : places.length - 1) : (i + delta + places.length) % places.length;
+    const j =
+      i < 0 ? (delta > 0 ? 0 : places.length - 1) : (i + delta + places.length) % places.length;
     this._go(places[j].card, places[j].place, focusId);
     return true;
   }
@@ -915,7 +1005,8 @@ export class ResultsElement extends HTMLElement {
       return;
     }
     // The control is gone (the finding was fixed): keep focus in the panel.
-    const fallback = this.shadowRoot.querySelector('[data-focus^="group:"], [data-focus^="tile:"]') || this._list;
+    const fallback =
+      this.shadowRoot.querySelector('[data-focus^="group:"], [data-focus^="tile:"]') || this._list;
     if (fallback === this._list) this._list.setAttribute('tabindex', '-1');
     fallback.focus();
   }
@@ -941,5 +1032,6 @@ function cssEscape(value) {
 
 /** Defines <surea11y-results> once. */
 export function defineResultsElement(registry = globalThis.customElements) {
-  if (registry && !registry.get('surea11y-results')) registry.define('surea11y-results', ResultsElement);
+  if (registry && !registry.get('surea11y-results'))
+    registry.define('surea11y-results', ResultsElement);
 }

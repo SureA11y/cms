@@ -7,16 +7,25 @@ const pack = require('../..');
 
 const RULE = 'cms-link-to-document';
 const run = (body) => {
-  const result = runa11yCoreOnHtml(`<!doctype html><html lang="en"><body><main>${body}</main></body></html>`, {
-    engineOptions: { packs: [pack] },
-    runOnly: [RULE]
-  });
+  const result = runa11yCoreOnHtml(
+    `<!doctype html><html lang="en"><body><main>${body}</main></body></html>`,
+    {
+      engineOptions: { packs: [pack] },
+      runOnly: [RULE]
+    }
+  );
   return result.checksResults.find((c) => c.ruleId === RULE);
 };
 const codes = (rule) => rule.occurrences.map((o) => o.data.details.reasonCode);
 
 test(`${RULE}: a link to a document that doesn't say so is asked about`, () => {
-  for (const href of ['/files/report.pdf', '/f/budget.XLSX', '/f/form.docx?v=2', '/f/slides.pptx#p3', '/f/a%20b.odt']) {
+  for (const href of [
+    '/files/report.pdf',
+    '/f/budget.XLSX',
+    '/f/form.docx?v=2',
+    '/f/slides.pptx#p3',
+    '/f/a%20b.odt'
+  ]) {
     const rule = run(`<p>Download the <a href="${href}">annual report</a>.</p>`);
     assert.equal(rule.outcome, 'cantTell', href);
     assert.deepEqual(codes(rule), ['DOCUMENT_LINK_FORMAT_UNSTATED'], href);
@@ -40,9 +49,14 @@ test(`${RULE}: a type attribute names the format too`, () => {
 });
 
 test(`${RULE}: other links, and a format word inside another word, don't count`, () => {
-  assert.equal(run('<p><a href="/reports/">Reports</a> <a href="/page.html">Page</a></p>').outcome, 'notApplicable');
+  assert.equal(
+    run('<p><a href="/reports/">Reports</a> <a href="/page.html">Page</a></p>').outcome,
+    'notApplicable'
+  );
   // "pdfs" is not the word "pdf": the format is still unstated.
-  assert.deepEqual(codes(run('<p><a href="/r.pdf">All our pdfs</a></p>')), ['DOCUMENT_LINK_FORMAT_UNSTATED']);
+  assert.deepEqual(codes(run('<p><a href="/r.pdf">All our pdfs</a></p>')), [
+    'DOCUMENT_LINK_FORMAT_UNSTATED'
+  ]);
 });
 
 test(`${RULE}: tagged best practice, mapped to no WCAG criterion`, () => {

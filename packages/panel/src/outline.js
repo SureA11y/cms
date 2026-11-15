@@ -24,7 +24,10 @@ const IMAGES = 'img, [role="img"], input[type="image"]';
  *           images: [{ alt, decorative, src, itemId, outside, keys, group }] }.
  * `alt` is null when the image has no text alternative at all.
  */
-export function readOutline(root, { findings = [], itemOf = taggedItem, skip = () => false, outside = () => false } = {}) {
+export function readOutline(
+  root,
+  { findings = [], itemOf = taggedItem, skip = () => false, outside = () => false } = {}
+) {
   const out = { headings: [], images: [] };
   if (!root || !root.querySelectorAll) return out;
   const doc = root.ownerDocument || root;
@@ -37,8 +40,16 @@ export function readOutline(root, { findings = [], itemOf = taggedItem, skip = (
     if (skip(el) || hidden(el)) continue;
     const role = el.getAttribute('role');
     const level =
-      role === 'heading' ? Number(el.getAttribute('aria-level')) || 2 : Number(el.tagName.slice(1)) || 2;
-    out.headings.push({ level, text: textOf(el), itemId: itemOf(el), outside: !!outside(el), ...flags(el) });
+      role === 'heading'
+        ? Number(el.getAttribute('aria-level')) || 2
+        : Number(el.tagName.slice(1)) || 2;
+    out.headings.push({
+      level,
+      text: textOf(el),
+      itemId: itemOf(el),
+      outside: !!outside(el),
+      ...flags(el)
+    });
   }
   for (const el of root.querySelectorAll(IMAGES)) {
     if (skip(el) || hidden(el)) continue;
@@ -74,7 +85,7 @@ function findingsByElement(doc, findings) {
   const map = new Map();
   for (const f of findings || []) {
     if (!f.selector) continue;
-    let el = null;
+    let el;
     try {
       el = doc.querySelector(f.selector);
     } catch {
@@ -150,7 +161,9 @@ function decodeSafe(text) {
 }
 
 function clean(text) {
-  return String(text || '').replace(/\s+/g, ' ').trim();
+  return String(text || '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /**
@@ -161,13 +174,18 @@ export function pathSelector(el) {
   const parts = [];
   let node = el;
   while (node && node.nodeType === 1 && node.tagName !== 'HTML') {
-    if (node.id && /^[A-Za-z][\w-]*$/.test(node.id) && node.ownerDocument.querySelectorAll(`#${node.id}`).length === 1) {
+    if (
+      node.id &&
+      /^[A-Za-z][\w-]*$/.test(node.id) &&
+      node.ownerDocument.querySelectorAll(`#${node.id}`).length === 1
+    ) {
       parts.unshift(`#${node.id}`);
       break;
     }
     const tag = node.tagName.toLowerCase();
     let n = 1;
-    for (let s = node.previousElementSibling; s; s = s.previousElementSibling) if (s.tagName === node.tagName) n++;
+    for (let s = node.previousElementSibling; s; s = s.previousElementSibling)
+      if (s.tagName === node.tagName) n++;
     parts.unshift(`${tag}:nth-of-type(${n})`);
     node = node.parentElement;
   }

@@ -21,7 +21,10 @@ test('headings in order, with their level, text and block', () => {
   const main = content([
     { id: 'b1', html: '<h2>Intro</h2>' },
     { id: 'b2', html: '<div><h4>Deep <img src="x.png" alt="logo"></h4></div>' },
-    { id: 'b3', html: '<h3></h3><h3 hidden>Hidden</h3><div role="heading" aria-level="5">Fake</div>' }
+    {
+      id: 'b3',
+      html: '<h3></h3><h3 hidden>Hidden</h3><div role="heading" aria-level="5">Fake</div>'
+    }
   ]);
   const { headings } = readOutline(main);
   assert.deepEqual(
@@ -37,7 +40,10 @@ test('headings in order, with their level, text and block', () => {
 
 test('images say what a screen reader says: text, decorative, or nothing', () => {
   const main = content([
-    { id: 'i1', html: '<figure><img src="/up/dog%20park.jpg?w=300" alt="A dog in a park"></figure>' },
+    {
+      id: 'i1',
+      html: '<figure><img src="/up/dog%20park.jpg?w=300" alt="A dog in a park"></figure>'
+    },
     { id: 'i2', html: '<img src="a.png" alt="">' },
     { id: 'i3', html: '<img src="b.png">' },
     { id: 'i4', html: '<svg role="img"><title>Chart</title></svg>' }
@@ -100,7 +106,11 @@ test('the list offers Findings, Headings and Images, and Show names the block', 
   );
   views[1].click();
   assert.equal(el.view, 'headings');
-  assert.equal(el.shadowRoot.activeElement.textContent, 'Headings (2)', 'focus stays on the pressed view');
+  assert.equal(
+    el.shadowRoot.activeElement.textContent,
+    'Headings (2)',
+    'focus stays on the pressed view'
+  );
   const entries = $$('section[data-view="headings"] li');
   assert.equal(entries.length, 2);
   assert.match(entries[0].textContent, /Level 2: Intro/);

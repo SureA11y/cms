@@ -91,9 +91,7 @@ export function createSandbox(hostDocument, options) {
       })
     )
   ];
-  const scripts = scriptUrls
-    .map((src) => `<script src="${escapeAttr(src)}"></script>`)
-    .join('');
+  const scripts = scriptUrls.map((src) => `<script src="${escapeAttr(src)}"></script>`).join('');
   frame.srcdoc =
     '<!doctype html>' +
     `<html lang="${escapeAttr(lang)}" dir="${escapeAttr(dir)}"><head><meta charset="utf-8">` +
@@ -125,7 +123,17 @@ export function createSandbox(hostDocument, options) {
      * profile and leaves rules out, `includeRuleIds` runs only those).
      * `withOutline` adds the content's headings and images (readOutline).
      */
-    async scan(items, { profile = 'cms-content', packs = [], locale = 'en', messages, runOnly = null, withOutline = false } = {}) {
+    async scan(
+      items,
+      {
+        profile = 'cms-content',
+        packs = [],
+        locale = 'en',
+        messages,
+        runOnly = null,
+        withOutline = false
+      } = {}
+    ) {
       const win = await ready;
       const doc = win.document;
       const t0 = win.performance.now();
@@ -134,9 +142,17 @@ export function createSandbox(hostDocument, options) {
       const t1 = win.performance.now();
       const engineOptions = { profile, packs, locale, output: { detail: 'findings' } };
       if (messages) engineOptions.messages = messages;
-      const result = win.a11ycore.runa11yCoreInPage(win.location.href, `#${CONTENT_ID}`, engineOptions, runOnly);
+      const result = win.a11ycore.runa11yCoreInPage(
+        win.location.href,
+        `#${CONTENT_ID}`,
+        engineOptions,
+        runOnly
+      );
       const t2 = win.performance.now();
-      const findings = sortFindings(toFindings(result, doc), items.map((i) => i.id));
+      const findings = sortFindings(
+        toFindings(result, doc),
+        items.map((i) => i.id)
+      );
       const outline = withOutline ? readOutline(main, { findings }) : null;
       return {
         findings,

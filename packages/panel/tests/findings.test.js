@@ -1,7 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { toFindings, groupOf, countByGroup, sortFindings, findingKey, ITEM_ATTRIBUTE } from '../src/findings.js';
+import {
+  toFindings,
+  groupOf,
+  countByGroup,
+  sortFindings,
+  findingKey,
+  ITEM_ATTRIBUTE
+} from '../src/findings.js';
 
 const doc = new JSDOM(`<main>
   <div ${ITEM_ATTRIBUTE}="block-a"><p id="p1"><strong>Opening hours</strong></p></div>
@@ -10,14 +17,45 @@ const doc = new JSDOM(`<main>
 
 const result = {
   checksResults: [
-    { ruleId: 'p-as-heading', title: 'T1', outcome: 'cantTell', severity: 'minor', occurrences: [
-      { selector: '#p1', html: '<p id="p1">', summary: 'Bold line', hint: 'Make it a heading',
-        data: { details: { reasonCode: 'BOLD_SHORT_PARAGRAPH' } } }] },
-    { ruleId: 'td-has-header', title: 'T2', outcome: 'cantTell', severity: 'serious', occurrences: [
-      { selector: '#t1', html: '<table id="t1">', summary: 'No headers', lean: { toward: 'fail' },
-        data: { details: { reasonCode: 'TD_TABLE_NO_HEADERS' } } }] },
-    { ruleId: 'img-alt-present', title: 'T3', outcome: 'fail', severity: 'critical', occurrences: [
-      { selector: '#foot', html: '<footer>', summary: 'No alt', data: { details: {} } }] },
+    {
+      ruleId: 'p-as-heading',
+      title: 'T1',
+      outcome: 'cantTell',
+      severity: 'minor',
+      occurrences: [
+        {
+          selector: '#p1',
+          html: '<p id="p1">',
+          summary: 'Bold line',
+          hint: 'Make it a heading',
+          data: { details: { reasonCode: 'BOLD_SHORT_PARAGRAPH' } }
+        }
+      ]
+    },
+    {
+      ruleId: 'td-has-header',
+      title: 'T2',
+      outcome: 'cantTell',
+      severity: 'serious',
+      occurrences: [
+        {
+          selector: '#t1',
+          html: '<table id="t1">',
+          summary: 'No headers',
+          lean: { toward: 'fail' },
+          data: { details: { reasonCode: 'TD_TABLE_NO_HEADERS' } }
+        }
+      ]
+    },
+    {
+      ruleId: 'img-alt-present',
+      title: 'T3',
+      outcome: 'fail',
+      severity: 'critical',
+      occurrences: [
+        { selector: '#foot', html: '<footer>', summary: 'No alt', data: { details: {} } }
+      ]
+    },
     { ruleId: 'manual-review', outcome: 'cantTell', occurrences: [{ selector: 'html', html: '' }] },
     { ruleId: 'region', outcome: 'pass', occurrences: [] }
   ]
@@ -41,17 +79,29 @@ test('findings are tied to their content item, grouped and sorted', () => {
     ]
   );
   assert.equal(findings[2].key, findingKey('p-as-heading', 'BOLD_SHORT_PARAGRAPH', '<p id="p1">'));
-  assert.deepEqual(countByGroup(findings), { problem: 1, likely: 1, review: 1, 'probably-fine': 0 });
+  assert.deepEqual(countByGroup(findings), {
+    problem: 1,
+    likely: 1,
+    review: 1,
+    'probably-fine': 0
+  });
 });
 
 test('within a group, findings follow the content order', () => {
   const f = (id, item) => ({ key: id, group: 'review', itemId: item });
   const sorted = sortFindings([f('x', 'b'), f('y', 'a'), f('z', null)], ['a', 'b']);
-  assert.deepEqual(sorted.map((x) => x.key), ['y', 'x', 'z']);
+  assert.deepEqual(
+    sorted.map((x) => x.key),
+    ['y', 'x', 'z']
+  );
 });
 
 test('a selector that does not resolve leaves the finding unattributed', () => {
-  const r = { checksResults: [{ ruleId: 'x', outcome: 'fail', occurrences: [{ selector: '#nope', html: '' }] }] };
+  const r = {
+    checksResults: [
+      { ruleId: 'x', outcome: 'fail', occurrences: [{ selector: '#nope', html: '' }] }
+    ]
+  };
   assert.equal(toFindings(r, doc)[0].itemId, null);
   assert.deepEqual(toFindings(null, doc), []);
 });
@@ -62,7 +112,13 @@ test("a finding's identity doesn't change with the item id, which changes betwee
       {
         ruleId: 'p-as-heading',
         outcome: 'cantTell',
-        occurrences: [{ selector: 'p', html: `<p data-surea11y-item="${id}" class="x"><strong>Opening times</strong></p>`, data: { details: { reasonCode: 'BOLD_SHORT_PARAGRAPH' } } }]
+        occurrences: [
+          {
+            selector: 'p',
+            html: `<p data-surea11y-item="${id}" class="x"><strong>Opening times</strong></p>`,
+            data: { details: { reasonCode: 'BOLD_SHORT_PARAGRAPH' } }
+          }
+        ]
       }
     ]
   });
@@ -73,7 +129,11 @@ test("a finding's identity doesn't change with the item id, which changes betwee
 });
 
 test('the same finding has the same identity in the editor and on the published page', () => {
-  const editor = findingKey('img-alt-quality', 'FILE', '<img src="/wp-content/uploads/a.png" alt="IMG_1234.png"/>');
+  const editor = findingKey(
+    'img-alt-quality',
+    'FILE',
+    '<img src="/wp-content/uploads/a.png" alt="IMG_1234.png"/>'
+  );
   const page = findingKey(
     'img-alt-quality',
     'FILE',
@@ -81,7 +141,11 @@ test('the same finding has the same identity in the editor and on the published 
   );
   assert.equal(editor, page);
   const p1 = findingKey('p-as-heading', 'B', '<p><strong>Opening&nbsp;times</strong></p>');
-  const p2 = findingKey('p-as-heading', 'B', '<p class="has-text-align-left"><strong>Opening times</strong></p>');
+  const p2 = findingKey(
+    'p-as-heading',
+    'B',
+    '<p class="has-text-align-left"><strong>Opening times</strong></p>'
+  );
   assert.equal(p1, p2);
 });
 

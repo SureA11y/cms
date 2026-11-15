@@ -17,7 +17,7 @@
 	let config;
 	try {
 		config = JSON.parse( node.textContent );
-	} catch ( e ) {
+	} catch {
 		return;
 	}
 
@@ -33,7 +33,7 @@
 	function elementFor( selector ) {
 		try {
 			return selector ? document.querySelector( selector ) : null;
-		} catch ( e ) {
+		} catch {
 			return null;
 		}
 	}
@@ -81,7 +81,7 @@
 				results.reviews = confirmed;
 			} )
 			.catch( ( error ) => {
-				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+				window.console.error( '[SureA11y]', error );  
 				results.reviews = confirmed;
 			} )
 			.then( drawMarkers );
@@ -101,7 +101,7 @@
 				hidden = Array.isArray( r.hidden ) ? r.hidden : [];
 			} )
 			.catch( ( error ) => {
-				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+				window.console.error( '[SureA11y]', error );  
 				results.marked = hidden;
 			} )
 			.then( drawMarkers );
@@ -134,7 +134,7 @@
 				drawMarkers();
 			} )
 			.catch( ( error ) => {
-				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+				window.console.error( '[SureA11y]', error );  
 				results.error = error && error.message ? error.message : String( error );
 			} );
 	}

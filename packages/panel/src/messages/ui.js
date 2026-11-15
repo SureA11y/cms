@@ -2,12 +2,12 @@
 // built in; other languages are added with addLocale (../locales.js), each
 // from its own file, loaded only where that language is used.
 
-
 export const UI = {
   en: {
     heading: 'Accessibility',
     checking: 'Checking…',
-    summary: '{{problem}} to fix, {{likely}} likely, {{review}} to review, {{probably}} probably fine.',
+    summary:
+      '{{problem}} to fix, {{likely}} likely, {{review}} to review, {{probably}} probably fine.',
     groups: {
       problem: 'To fix',
       likely: 'Likely problems',
@@ -27,7 +27,8 @@ export const UI = {
       likely: "The checker can't be sure, but the evidence points to a problem. Confirm each one.",
       review: 'Only a person can tell whether these are right.',
       'probably-fine': 'The evidence says these are fine. A quick look confirms it.',
-      reviewed: 'Someone checked these and found them fine. Everyone who edits this content sees them here.',
+      reviewed:
+        'Someone checked these and found them fine. Everyone who edits this content sees them here.',
       marked: 'Hidden only for you, and left out of your counts. Undo brings one back.'
     },
     showingOnly: 'Showing only:',
@@ -53,13 +54,15 @@ export const UI = {
     reopen: 'Reopen',
     undo: 'Undo',
     outsideContent: 'Not in the content: the template or theme.',
-    inTheme: 'In the theme or template, not in your content: whoever looks after the theme can fix it.',
+    inTheme:
+      'In the theme or template, not in your content: whoever looks after the theme can fix it.',
     editInEditor: 'Edit in the editor',
     yourContent: 'Your content',
     themeOrTemplate: 'Theme or template',
     close: 'Close',
     panelLabel: 'Accessibility checker',
-    prepublish: 'To fix: {{problem}}. Likely problems to confirm: {{likely}}. Need a person: {{review}}.',
+    prepublish:
+      'To fix: {{problem}}. Likely problems to confirm: {{likely}}. Need a person: {{review}}.',
     prepublishNothing: 'Nothing to fix or review.',
     prepublishReview: 'Review in the Accessibility panel',
     prepublishNote: "This doesn't stop you publishing.",
@@ -72,33 +75,38 @@ export const UI = {
     emptyTitle: 'Nothing to check yet',
     empty: 'Add some content and it will be checked here as you write.',
     nothingTitle: 'Nothing to fix or review in this content.',
-    nothing: 'The checks that can be automated found nothing. Some things only a person can judge, such as whether the text is clear.',
+    nothing:
+      'The checks that can be automated found nothing. Some things only a person can judge, such as whether the text is clear.',
     errorTitle: "The check didn't finish.",
     error: "Try again. If it keeps happening, tell your site's administrator.",
     tryAgain: 'Try again',
     errorDetails: 'Details for your administrator',
-    viewLabel: "What to show",
-    viewFindings: "Findings",
-    viewHeadings: "Headings ({{n}})",
-    viewImages: "Images ({{n}})",
-    headingsTitle: "Headings",
-    imagesTitle: "Images",
-    headingsHelp: "The headings in order, as a screen reader lists them. Each level should follow the one above it, and each heading should say what its section is about.",
-    imagesHelp: "Each image and what a screen reader says for it. The text should say what the image shows or does, unless the image is only decoration.",
-    noHeadings: "No headings here.",
-    noImages: "No images here.",
-    level: "Level {{n}}",
-    emptyHeading: "(empty heading)",
-    noAlt: "No text alternative",
-    decorative: "Decorative: screen readers skip it",
-    quoted: "“{{text}}”",
+    viewLabel: 'What to show',
+    viewFindings: 'Findings',
+    viewHeadings: 'Headings ({{n}})',
+    viewImages: 'Images ({{n}})',
+    headingsTitle: 'Headings',
+    imagesTitle: 'Images',
+    headingsHelp:
+      'The headings in order, as a screen reader lists them. Each level should follow the one above it, and each heading should say what its section is about.',
+    imagesHelp:
+      'Each image and what a screen reader says for it. The text should say what the image shows or does, unless the image is only decoration.',
+    noHeadings: 'No headings here.',
+    noImages: 'No images here.',
+    level: 'Level {{n}}',
+    emptyHeading: '(empty heading)',
+    noAlt: 'No text alternative',
+    decorative: 'Decorative: screen readers skip it',
+    quoted: '“{{text}}”',
     marker: '{{group}}: {{summary}}'
   }
 };
 
 /** The panel's words in `locale`, falling back to English. */
 export function uiStrings(locale) {
-  const primary = String(locale || 'en').toLowerCase().split(/[-_]/)[0];
+  const primary = String(locale || 'en')
+    .toLowerCase()
+    .split(/[-_]/)[0];
   return UI[primary] || UI.en;
 }
 

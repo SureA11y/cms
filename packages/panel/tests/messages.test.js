@@ -15,17 +15,26 @@ const packEn = require('../../pack-cms/i18n/en.json');
 
 test('every message replaces a key that core or the pack has', () => {
   const known = new Set([...Object.keys(coreEn), ...Object.keys(packEn)]);
-  for (const key of Object.keys(MESSAGES.en)) assert.ok(known.has(key), `${key} is a key core or the pack has`);
+  for (const key of Object.keys(MESSAGES.en))
+    assert.ok(known.has(key), `${key} is a key core or the pack has`);
 });
 
 test('every locale has the same keys and placeholders as English', () => {
-  const ph = (s) => [...String(s).matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort().join(',');
+  const ph = (s) =>
+    [...String(s).matchAll(/\{\{(\w+)\}\}/g)]
+      .map((m) => m[1])
+      .sort()
+      .join(',');
   for (const [locale, dict] of Object.entries(MESSAGES)) {
     assert.deepEqual(Object.keys(dict).sort(), Object.keys(MESSAGES.en).sort(), locale);
-    for (const [k, v] of Object.entries(dict)) assert.equal(ph(v), ph(MESSAGES.en[k]), `${locale} ${k}`);
+    for (const [k, v] of Object.entries(dict))
+      assert.equal(ph(v), ph(MESSAGES.en[k]), `${locale} ${k}`);
   }
   // The panel's own words: the same keys, nested groups included, and placeholders, in every locale.
-  const flat = (o, p = '') => Object.entries(o).flatMap(([k, v]) => (v && typeof v === 'object' ? flat(v, p + k + '.') : [[p + k, v]]));
+  const flat = (o, p = '') =>
+    Object.entries(o).flatMap(([k, v]) =>
+      v && typeof v === 'object' ? flat(v, p + k + '.') : [[p + k, v]]
+    );
   const en = Object.fromEntries(flat(UI.en));
   for (const locale of ['es', 'de', 'fr', 'ja']) {
     const dict = Object.fromEntries(flat(UI[locale]));

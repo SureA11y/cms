@@ -41,11 +41,31 @@ export function findingKey(ruleId, reasonCode, html) {
   };
   // An address as written, without the site's origin or a query.
   const where = (url) => url.replace(/^https?:\/\/[^/]+/i, '').replace(/[?#].*$/, '');
-  const text = decode(source.replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim().slice(0, 120);
-  return [ruleId, reasonCode || '', tag.toLowerCase(), where(attr('src')), where(attr('href')), attr('alt'), text].join('|');
+  const text = decode(source.replace(/<[^>]*>/g, ' '))
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120);
+  return [
+    ruleId,
+    reasonCode || '',
+    tag.toLowerCase(),
+    where(attr('src')),
+    where(attr('href')),
+    attr('alt'),
+    text
+  ].join('|');
 }
 
-const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', '#39': "'", '#039': "'" };
+const ENTITIES = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  '#39': "'",
+  '#039': "'"
+};
 function decode(text) {
   return text.replace(/&(#?\w+);/g, (m, e) => (e in ENTITIES ? ENTITIES[e] : m));
 }
@@ -100,7 +120,7 @@ export function withoutItemAttribute(html) {
 
 function itemOf(doc, selector) {
   if (!doc || !selector) return null;
-  let el = null;
+  let el;
   try {
     el = doc.querySelector(selector);
   } catch {
