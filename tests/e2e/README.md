@@ -16,20 +16,34 @@ when it ends, whatever happened.
 
 ## The WordPress to run them against
 
-Any WordPress 6.6 or later. One way, with PHP's built-in server and the
-SQLite database plugin:
+Any WordPress 6.6 or later, **served by a real web server**: nginx or Apache
+with PHP-FPM, or `wp-env`. A minimal nginx site:
 
-```sh
-PHP_CLI_SERVER_WORKERS=16 php -S 127.0.0.1:8881 -t /path/to/wordpress
+```nginx
+server {
+    listen 127.0.0.1:8881;
+    root /path/to/wordpress;
+    index index.php;
+    location / { try_files $uri $uri/ /index.php?$args; }
+    location ~ \.php$ {
+        try_files $uri =404;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass 127.0.0.1:9083; # a PHP-FPM pool
+    }
+}
 ```
 
-Give the built-in server **at least 16 workers**. With the 4 used at first,
-a browser's next request after a login sometimes waited 30 seconds to be
-taken up while the workers sat on other browsers' open connections; four
-logins in 563 never reached the dashboard, and the tests that made them
-timed out at random. Nothing in the server's log was slow: the requests
-were never accepted. PHP's built-in server is a development tool; a site
-behind nginx or Apache doesn't need this.
+**Not PHP's built-in server (`php -S`).** With several workers
+(`PHP_CLI_SERVER_WORKERS`), a worker sometimes answers a request for a
+static file and then never closes the connection; that worker takes no more
+requests. The system hands each new connection to one worker's queue, so a
+connection handed to a stuck worker waits until the test times out: a login
+whose next page never comes, an editor whose scripts never finish loading.
+Its log shows it: requests accepted and answered, never "Closing", each in a
+different worker. With 4 workers about one run in two failed somewhere; with
+16, still most runs. PHP documents the built-in server as a development
+tool.
 
 ## No requests outside the site
 
