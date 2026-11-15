@@ -28,9 +28,13 @@ jobs:
         run: |
           rm -rf node_modules/@surea11y/core packages/*/node_modules/@surea11y/core
           ln -s "$GITHUB_WORKSPACE/core-src" node_modules/@surea11y/core
+      - run: npm run lint
+      - run: npm run format:check
       - run: npm test
       - run: node scripts/build.mjs
+      - name: Size budgets
+        run: npm run size
       - name: PHP syntax
-        run: php -l plugins/wordpress/surea11y.php
+        run: for f in $(git ls-files 'plugins/*.php'); do php -l "$f" || exit 1; done
       - name: Editor script syntax
         run: node --check plugins/wordpress/src/editor.js && node --check plugins/wordpress/src/page.js

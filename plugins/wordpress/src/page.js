@@ -17,7 +17,7 @@
 	let config;
 	try {
 		config = JSON.parse( node.textContent );
-	} catch ( e ) {
+	} catch {
 		return;
 	}
 
@@ -33,7 +33,7 @@
 	function elementFor( selector ) {
 		try {
 			return selector ? document.querySelector( selector ) : null;
-		} catch ( e ) {
+		} catch {
 			return null;
 		}
 	}
@@ -59,26 +59,50 @@
 	 * the list showed.
 	 */
 	let confirmed = config.reviews && ! Array.isArray( config.reviews ) ? config.reviews : {};
-	function sendReview( method, body ) {
-		if ( ! config.reviewsPath || ! config.restRoot ) {
-			return;
-		}
-		const url = config.restRoot.replace( /\/$/, '' ) + config.reviewsPath;
-		window
+	/** A request to the plugin's REST routes, with the cookie nonce. */
+	function rest( path, method, body ) {
+		const url = config.restRoot.replace( /\/$/, '' ) + path;
+		return window
 			.fetch( url, {
 				method,
 				credentials: 'same-origin',
 				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': config.restNonce },
 				body: JSON.stringify( body ),
 			} )
-			.then( ( r ) => ( r.ok ? r.json() : Promise.reject( new Error( 'HTTP ' + r.status ) ) ) )
+			.then( ( r ) => ( r.ok ? r.json() : Promise.reject( new Error( 'HTTP ' + r.status ) ) ) );
+	}
+	function sendReview( method, body ) {
+		if ( ! config.reviewsPath || ! config.restRoot ) {
+			return;
+		}
+		rest( config.reviewsPath, method, body )
 			.then( ( r ) => {
 				confirmed = r.reviews && ! Array.isArray( r.reviews ) ? r.reviews : {};
 				results.reviews = confirmed;
 			} )
 			.catch( ( error ) => {
-				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+				window.console.error( '[SureA11y]', error );  
 				results.reviews = confirmed;
+			} )
+			.then( drawMarkers );
+	}
+
+	/**
+	 * "Hide for me": kept in the person's editor preferences, so it is the
+	 * same here and in the editor. An error takes back what the list showed.
+	 */
+	let hidden = Array.isArray( config.hidden ) ? config.hidden : [];
+	function sendHidden( keys, hide ) {
+		if ( ! config.hiddenPath || ! config.restRoot ) {
+			return;
+		}
+		rest( config.hiddenPath, 'POST', { keys, hidden: hide } )
+			.then( ( r ) => {
+				hidden = Array.isArray( r.hidden ) ? r.hidden : [];
+			} )
+			.catch( ( error ) => {
+				window.console.error( '[SureA11y]', error );  
+				results.marked = hidden;
 			} )
 			.then( drawMarkers );
 	}
@@ -104,12 +128,13 @@
 				if ( out.skippedPacks.length ) {
 					throw new Error( out.skippedPacks.map( ( p ) => p.reason || p.name ).join( '; ' ) );
 				}
+				results.outline = out.outline;
 				results.findings = out.findings;
 				window.surea11yLastPageScan = { scanMs: out.scanMs }; // read by the end-to-end tests
 				drawMarkers();
 			} )
 			.catch( ( error ) => {
-				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+				window.console.error( '[SureA11y]', error );  
 				results.error = error && error.message ? error.message : String( error );
 			} );
 	}
@@ -129,9 +154,10 @@
 			results = document.createElement( 'surea11y-results' );
 			results.setAttribute( 'heading-level', '3' );
 			results.locale = config.locale;
-			// Personal hides are kept in the editor's preferences; shared
-			// reviews are the same here as there, so they can be made here.
-			results.canMark = false;
+			// Personal hides and shared reviews are the same here as in the
+			// editor, so both can be made here.
+			results.canMark = !! config.hiddenPath;
+			results.marked = hidden;
 			results.canReview = !! config.canReview;
 			results.reviewer = config.reviewer || '';
 			results.reviews = config.reviews && ! Array.isArray( config.reviews ) ? config.reviews : {};
@@ -145,6 +171,7 @@
 				drawMarkers();
 			} );
 			results.addEventListener( 'surea11y-retry', check );
+			results.addEventListener( 'surea11y-mark', ( event ) => sendHidden( event.detail.keys, event.detail.fine ) );
 			results.addEventListener( 'surea11y-review', ( event ) => sendReview( 'POST', { keys: event.detail.keys, note: event.detail.note } ) );
 			results.addEventListener( 'surea11y-reopen', ( event ) => sendReview( 'DELETE', { keys: event.detail.keys } ) );
 		}

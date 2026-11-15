@@ -20,6 +20,7 @@ define( 'SUREA11Y_FILE', __FILE__ );
 
 require_once __DIR__ . '/includes/settings.php';
 require_once __DIR__ . '/includes/reviews.php';
+require_once __DIR__ . '/includes/hidden.php';
 
 /**
  * The locales the engine has messages for, besides English, each with its
@@ -186,6 +187,9 @@ function surea11y_enqueue_page_assets() {
 			// changes go through the REST API with the cookie nonce.
 			'reviews'         => surea11y_reviews_for_display( $post_id ),
 			'reviewer'        => $user ? $user->display_name : '',
+			// "Hide for me", the same as in the editor's preferences.
+			'hidden'          => surea11y_hidden_keys( $post_id ),
+			'hiddenPath'      => '/surea11y/v1/hidden/' . (int) $post_id,
 			'restRoot'        => esc_url_raw( rest_url() ),
 			'restNonce'       => wp_create_nonce( 'wp_rest' ),
 			'contentSelector' => surea11y_content_selector(),

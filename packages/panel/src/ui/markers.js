@@ -53,7 +53,17 @@ ${tokenCss()}
  *   a panel of the host's covers the page).
  * Returns { update(cards, current), position(), destroy(), doc }.
  */
-export function createMarkers(doc, { anchorFor, onPick, label = (card) => card.summary, outline = false, zIndex = 30, reserveEnd = () => 0 }) {
+export function createMarkers(
+  doc,
+  {
+    anchorFor,
+    onPick,
+    label = (card) => card.summary,
+    outline = false,
+    zIndex = 30,
+    reserveEnd = () => 0
+  }
+) {
   const host = doc.createElement('div');
   host.setAttribute('data-surea11y-markers', '');
   host.setAttribute('aria-hidden', 'true');
@@ -95,7 +105,8 @@ export function createMarkers(doc, { anchorFor, onPick, label = (card) => card.s
       const r = anchor.getBoundingClientRect();
       // Beside the item's end edge, or just inside it when there is no room.
       const outside = r.right + 12;
-      const left = outside + SIZE <= width ? outside : Math.max(0, Math.min(r.right, width) - SIZE - 4);
+      const left =
+        outside + SIZE <= width ? outside : Math.max(0, Math.min(r.right, width) - SIZE - 4);
       m.button.hidden = false;
       m.button.style.left = `${left + win.scrollX}px`;
       m.button.style.top = `${r.top + win.scrollY + m.slot * (SIZE + GAP)}px`;
@@ -160,14 +171,26 @@ export function createMarkers(doc, { anchorFor, onPick, label = (card) => card.s
       const shown = list.length > MAX_PER_ITEM ? list.slice(0, MAX_PER_ITEM - 1) : list;
       shown.forEach(({ card, place }, slot) => {
         const isCurrent = !!current && current.cardKey === card.key && current.place === place;
-        const button = makeButton(card.group, '', label(card), () => onPick(card.key, place), isCurrent);
+        const button = makeButton(
+          card.group,
+          '',
+          label(card),
+          () => onPick(card.key, place),
+          isCurrent
+        );
         layer.append(button);
         placed.push({ button, itemId, slot });
       });
       if (shown.length < list.length) {
         const rest = list.slice(shown.length);
         const first = rest[0];
-        const button = makeButton('more', `+${rest.length}`, rest.map((r) => label(r.card)).join('\n'), () => onPick(first.card.key, first.place), false);
+        const button = makeButton(
+          'more',
+          `+${rest.length}`,
+          rest.map((r) => label(r.card)).join('\n'),
+          () => onPick(first.card.key, first.place),
+          false
+        );
         layer.append(button);
         placed.push({ button, itemId, slot: shown.length });
       }

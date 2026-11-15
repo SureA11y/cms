@@ -150,7 +150,13 @@ Panel:
 - [x] Inline markers: beside each block with a finding, in its group's
       colour and icon; a shortcut for pointer users, kept out of the tab
       order because the list and its arrows do the same from the keyboard.
-- [ ] Heading outline and alt-text views.
+- [x] Heading outline and alt-text views: "Findings", "Headings" and
+      "Images" above the list. The headings in order, by level; each image
+      with what a screen reader says for it (its text, "Decorative", or "No
+      text alternative"). An entry is flagged only where the engine
+      reported on that element, so the views never disagree with the
+      findings. On a page, the theme's headings and images are there too,
+      marked "Theme or template".
 - [x] Attribution: content vs. template (each finding names its block; the
       `cms-content` profile runs no theme rule).
 - [x] Nested blocks named by their own block, not their top-level one
@@ -163,7 +169,10 @@ WordPress plugin:
 - [x] Open the right setting from a finding: "Edit the alternative text"
       (image) and "Open the header setting" (table) select the block, open
       its settings and put focus on the field.
-- [ ] More settings to open: heading level, link text, colours.
+- [x] More settings to open: "Change the heading level" (focus on the
+      level the heading has now), "Open the text colour" (the Typography
+      panel's Color), and "Select the link text" (the link's text selected
+      in its block, ready to type over: link text has no setting).
 - [x] "Hide for me" (first called "Mark as fine"), kept per person and
       per post in their editor preferences.
 - [x] Count on the toolbar button: what to fix or confirm, from a check
@@ -177,14 +186,19 @@ WordPress plugin:
       say "Theme or template". Same cards and tiles as the sidebar, in a
       panel at the side, with markers beside the elements and a frame
       around the one shown.
+- [x] Front-end checker: "Edit in the editor" opens the editor on that
+      finding (the sidebar opens and shows it).
 - [ ] Front-end checker: the "phone-width layout" check (a check at a
-      narrow width), and links that land on the block, not just the post.
+      narrow width). Waits for a reflow rule (WCAG 1.4.10) in core: none of
+      core's rules checks for horizontal scrolling at 320 CSS pixels, and a
+      check of our own would put a WCAG judgement outside the engine.
 - [x] Front-end checker: shared reviews there too. A finding is now
       identified by its rule, reason and what the element is and says (tag,
       link, image source, alternative text, text), not its markup, so it
       is the same in the editor and on the page.
-- [ ] Front-end checker: "Hide for me" there too (the editor's
-      preferences are not loaded on the page).
+- [x] Front-end checker: "Hide for me" there too. It changes the same
+      entry of the person's editor preferences, through the plugin's REST
+      route, so a hide made on the page is there in the editor.
 - [x] Before publishing: one line in WordPress's pre-publish panel ("To
       fix: 0. Likely problems to confirm: 1. Need a person: 3."), with a
       button that opens the sidebar. It never blocks publishing.
@@ -198,8 +212,11 @@ WordPress plugin:
 - [x] Settings (Settings → Accessibility checker): who, the content area
       selector, the background check on or off, rules on or off.
 - [ ] Settings: severity, if sites ask for it.
-- [ ] Fewer buttons per card: five actions at most today (Show, How to fix,
-      a setting, Reviewed, Hide for me); try a "More" menu with people.
+- [x] Fewer buttons per card: when both "Reviewed, it's fine" and "Hide
+      for me" are offered, they sit behind "More" (a disclosure button, not
+      a menu), so a card shows at most four actions, with what fixes it
+      first.
+- [ ] Try "More" with people, with the screen-reader test.
 - [x] No front-end changes for visitors. No external requests.
 
 - [x] Content checks at least on par with the other checkers: "click here"
@@ -285,7 +302,8 @@ it affects them.
 - **Editor responsiveness.** No noticeable typing lag; long scans are
   scheduled after a pause in typing, never on every keystroke.
 - **Size budgets** for the panel's JavaScript and CSS (compressed), checked
-  in CI. The engine bundle has its own line in the budget, starting from
+  in CI (`npm run size`): the panel 22 KB, each of its languages 6 KB, the
+  engine 540 KB, each of its languages 75 KB. The engine bundle has its own line in the budget, starting from
   core 1.17.0's 0.49 MB compressed, so a core upgrade that grows it is
   noticed and judged, not just absorbed.
 - **Server cost.** No crawling from PHP; a fixed, small number of database
@@ -319,7 +337,9 @@ it affects them.
 ### Code quality and tests
 
 - Linting and formatting enforced in CI, matching SureA11y/core's
-  conventions where they apply.
+  conventions where they apply: ESLint and Prettier with core's settings;
+  the WordPress scripts keep WordPress's own layout and are linted only.
+  Every PHP file is syntax-checked.
 - Unit tests for the panel; end-to-end tests in a real browser against a
   local WordPress (Playwright with wp-env).
 - Every user-facing string translatable, including right-to-left languages.
@@ -360,6 +380,7 @@ on 2026-11-15.
 | Compact results for storage | Phase 1 | Done: `output.detail: 'findings'` |
 | Other standards and laws | Phase 2 | Done, as packs (experimental until 1.18.0 for parts of the standard API) |
 | Option to skip rules that touch the live page | Phase 1 | Not found. Until then, exclude them by ID |
+| A reflow rule (WCAG 1.4.10): horizontal scrolling at 320 CSS pixels, for a host that renders the page at that width | Phase 1 (phone-width check) | Not found. To ask for in core |
 | Content checks the others have: "click here" inside a paragraph, PDF and Office links, bold paragraphs used as headings, tables without headers | **Phase 1** (parity, found in Phase 0) | Done on a core branch, awaiting release: `td-has-header` from 2 by 2, `p-as-heading` `BOLD_SHORT_PARAGRAPH`, `link-name-quality-link-only` (2.4.9). Links to documents: `cms-link-to-document` in the pack |
 | More content checks: ALL CAPS, fake lists, adjacent duplicate links, readability, web address as link text | Phase 2 | Not found in 1.17.0. A pack, or core |
 | An official grouping of rules into content-level and theme-level | Phase 1 | Done in the pack: profiles `cms-content` and `cms-theme` |

@@ -16,13 +16,18 @@ async function login(browser) {
   await page.goto(`${WP_URL}/wp-login.php`);
   await page.fill('#user_login', WP_USER);
   await page.fill('#user_pass', WP_PASS);
-  await Promise.all([page.waitForURL(/wp-admin/, { waitUntil: 'commit' }), page.click('#wp-submit')]);
+  await Promise.all([
+    page.waitForURL(/wp-admin/, { waitUntil: 'commit' }),
+    page.click('#wp-submit')
+  ]);
   return { context, page };
 }
 
 async function editor(page, path, { open = true } = {}) {
   await page.goto(`${WP_URL}${path}`, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => window.wp && window.wp.data && window.wp.data.select('core/block-editor').getBlocks);
+  await page.waitForFunction(
+    () => window.wp && window.wp.data && window.wp.data.select('core/block-editor').getBlocks
+  );
   await page.evaluate(() => {
     try {
       window.wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false);
@@ -39,7 +44,9 @@ async function openSidebar(page) {
 }
 
 const waitDone = (page) =>
-  page.waitForFunction(() => document.querySelector('surea11y-results')?.state === 'done', null, { timeout: 30000 });
+  page.waitForFunction(() => document.querySelector('surea11y-results')?.state === 'done', null, {
+    timeout: 30000
+  });
 
 /** Waits for the check after an edit: the next scan's timing replaces the last. */
 async function checkAfterEdit(page, edit) {
@@ -47,85 +54,138 @@ async function checkAfterEdit(page, edit) {
     window.__lastScan = window.surea11yLastScan;
   });
   await page.evaluate(edit);
-  await page.waitForFunction(() => window.surea11yLastScan !== window.__lastScan, null, { timeout: 15000 });
+  await page.waitForFunction(() => window.surea11yLastScan !== window.__lastScan, null, {
+    timeout: 15000
+  });
   await waitDone(page);
   return page.evaluate(() => ({
     timing: window.surea11yLastScan,
-    findings: document.querySelector('surea11y-results').findings.map((f) => ({ ruleId: f.ruleId, itemId: f.itemId, label: f.itemLabel }))
+    findings: document
+      .querySelector('surea11y-results')
+      .findings.map((f) => ({ ruleId: f.ruleId, itemId: f.itemId, label: f.itemLabel }))
   }));
 }
 
-test('contrast runs only for the author\'s colours, and only when they change', { skip }, async (t) => {
-  const browser = await chromium.launch({ executablePath: CHROMIUM });
-  t.after(() => browser.close());
-  const { page } = await login(browser);
-  await editor(page, '/wp-admin/post-new.php');
-  // A plain paragraph: no contrast check at all.
-  let r = await checkAfterEdit(page, () => {
-    const { createBlock } = window.wp.blocks;
-    window.wp.data.dispatch('core/block-editor').insertBlocks(createBlock('core/paragraph', { content: 'Plain text.' }));
-  });
-  assert.equal(r.timing.contrastRan, false);
-  assert.equal(r.timing.coloured, 0);
-  // Pale text on white, chosen by the author: found.
-  r = await checkAfterEdit(page, () => {
-    const { createBlock } = window.wp.blocks;
-    window.wp.data
-      .dispatch('core/block-editor')
-      .insertBlocks(createBlock('core/paragraph', { content: 'Pale text.', style: { color: { text: '#cccccc', background: '#ffffff' } } }));
-  });
-  assert.equal(r.timing.contrastRan, true);
-  assert.ok(r.findings.some((f) => f.ruleId === 'contrast-minimum'), 'the pale text is found');
-  assert.ok(!r.findings.some((f) => f.ruleId === 'contrast-enhanced'), 'no AAA rule joins in');
-  report.contrastMs = Math.round(r.timing.contrastMs);
-  // Editing another block: the contrast finding stays, without a new contrast check.
-  r = await checkAfterEdit(page, () => {
-    const blocks = window.wp.data.select('core/block-editor').getBlocks();
-    window.wp.data.dispatch('core/block-editor').updateBlockAttributes(blocks[0].clientId, { content: 'Plain text, edited.' });
-  });
-  assert.equal(r.timing.contrastRan, false);
-  assert.ok(r.findings.some((f) => f.ruleId === 'contrast-minimum'), 'still listed');
-});
+test(
+  "contrast runs only for the author's colours, and only when they change",
+  { skip },
+  async (t) => {
+    const browser = await chromium.launch({ executablePath: CHROMIUM });
+    t.after(() => browser.close());
+    const { page } = await login(browser);
+    await editor(page, '/wp-admin/post-new.php');
+    // A plain paragraph: no contrast check at all.
+    let r = await checkAfterEdit(page, () => {
+      const { createBlock } = window.wp.blocks;
+      window.wp.data
+        .dispatch('core/block-editor')
+        .insertBlocks(createBlock('core/paragraph', { content: 'Plain text.' }));
+    });
+    assert.equal(r.timing.contrastRan, false);
+    assert.equal(r.timing.coloured, 0);
+    // Pale text on white, chosen by the author: found.
+    r = await checkAfterEdit(page, () => {
+      const { createBlock } = window.wp.blocks;
+      window.wp.data.dispatch('core/block-editor').insertBlocks(
+        createBlock('core/paragraph', {
+          content: 'Pale text.',
+          style: { color: { text: '#cccccc', background: '#ffffff' } }
+        })
+      );
+    });
+    assert.equal(r.timing.contrastRan, true);
+    assert.ok(
+      r.findings.some((f) => f.ruleId === 'contrast-minimum'),
+      'the pale text is found'
+    );
+    assert.ok(!r.findings.some((f) => f.ruleId === 'contrast-enhanced'), 'no AAA rule joins in');
+    report.contrastMs = Math.round(r.timing.contrastMs);
+    // Editing another block: the contrast finding stays, without a new contrast check.
+    r = await checkAfterEdit(page, () => {
+      const blocks = window.wp.data.select('core/block-editor').getBlocks();
+      window.wp.data
+        .dispatch('core/block-editor')
+        .updateBlockAttributes(blocks[0].clientId, { content: 'Plain text, edited.' });
+    });
+    assert.equal(r.timing.contrastRan, false);
+    assert.ok(
+      r.findings.some((f) => f.ruleId === 'contrast-minimum'),
+      'still listed'
+    );
+  }
+);
 
-test('a finding inside a group or columns names its own block, and Show selects it', { skip }, async (t) => {
-  const browser = await chromium.launch({ executablePath: CHROMIUM });
-  t.after(() => browser.close());
-  const { page } = await login(browser);
-  await editor(page, '/wp-admin/post-new.php');
-  const ids = await page.evaluate(() => {
-    const { createBlock } = window.wp.blocks;
-    const img = createBlock('core/image', { url: '/wp-content/uploads/x.png', alt: 'IMG_1234.png' });
-    const group = createBlock('core/group', {}, [
-      createBlock('core/columns', {}, [createBlock('core/column', {}, [img]), createBlock('core/column', {}, [createBlock('core/paragraph', { content: 'Beside it.' })])])
-    ]);
-    window.wp.data.dispatch('core/block-editor').insertBlocks(group);
-    return { img: img.clientId, group: group.clientId };
-  });
-  await page.waitForFunction((id) => document.querySelector('surea11y-results')?.findings.some((f) => f.itemId === id), ids.img, { timeout: 15000 });
-  const finding = await page.evaluate((id) => {
-    const f = document.querySelector('surea11y-results').findings.find((x) => x.itemId === id);
-    return { ruleId: f.ruleId, label: f.itemLabel, html: f.html };
-  }, ids.img);
-  assert.equal(finding.label, 'Image');
-  assert.doesNotMatch(finding.html, /data-surea11y-item/, 'the tag is not part of the finding');
-  await page.locator('surea11y-results').locator('li.card', { hasText: 'IMG_1234.png' }).getByRole('button', { name: 'Show' }).click();
-  assert.equal(await page.evaluate(() => window.wp.data.select('core/block-editor').getSelectedBlockClientId()), ids.img);
-  // Nothing of the checker in what is saved.
-  const saved = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
-  assert.doesNotMatch(saved, /surea11y/);
-});
+test(
+  'a finding inside a group or columns names its own block, and Show selects it',
+  { skip },
+  async (t) => {
+    const browser = await chromium.launch({ executablePath: CHROMIUM });
+    t.after(() => browser.close());
+    const { page } = await login(browser);
+    await editor(page, '/wp-admin/post-new.php');
+    const ids = await page.evaluate(() => {
+      const { createBlock } = window.wp.blocks;
+      const img = createBlock('core/image', {
+        url: '/wp-content/uploads/x.png',
+        alt: 'IMG_1234.png'
+      });
+      const group = createBlock('core/group', {}, [
+        createBlock('core/columns', {}, [
+          createBlock('core/column', {}, [img]),
+          createBlock('core/column', {}, [createBlock('core/paragraph', { content: 'Beside it.' })])
+        ])
+      ]);
+      window.wp.data.dispatch('core/block-editor').insertBlocks(group);
+      return { img: img.clientId, group: group.clientId };
+    });
+    await page.waitForFunction(
+      (id) => document.querySelector('surea11y-results')?.findings.some((f) => f.itemId === id),
+      ids.img,
+      { timeout: 15000 }
+    );
+    const finding = await page.evaluate((id) => {
+      const f = document.querySelector('surea11y-results').findings.find((x) => x.itemId === id);
+      return { ruleId: f.ruleId, label: f.itemLabel, html: f.html };
+    }, ids.img);
+    assert.equal(finding.label, 'Image');
+    assert.doesNotMatch(finding.html, /data-surea11y-item/, 'the tag is not part of the finding');
+    await page
+      .locator('surea11y-results')
+      .locator('li.card', { hasText: 'IMG_1234.png' })
+      .getByRole('button', { name: 'Show' })
+      .click();
+    assert.equal(
+      await page.evaluate(() =>
+        window.wp.data.select('core/block-editor').getSelectedBlockClientId()
+      ),
+      ids.img
+    );
+    // Nothing of the checker in what is saved.
+    const saved = await page.evaluate(() =>
+      window.wp.data.select('core/editor').getEditedPostContent()
+    );
+    assert.doesNotMatch(saved, /surea11y/);
+  }
+);
 
 test('a finding opens the setting that fixes it, with focus on the field', { skip }, async (t) => {
   const browser = await chromium.launch({ executablePath: CHROMIUM });
   t.after(() => browser.close());
   const { page } = await login(browser);
   for (const [action, expected] of [
-    ['Edit the alternative text', { tag: 'TEXTAREA', label: 'Alternative text', block: 'core/image' }],
+    [
+      'Edit the alternative text',
+      { tag: 'TEXTAREA', label: 'Alternative text', block: 'core/image' }
+    ],
     ['Open the header setting', { tag: 'INPUT', label: 'Header section', block: 'core/table' }]
   ]) {
     await editor(page, `/wp-admin/post.php?post=${POST_TYPICAL}&action=edit`);
     await page.locator('surea11y-results').getByRole('button', { name: action }).first().click();
-    await page.waitForFunction((tag) => document.activeElement && document.activeElement.tagName === tag, expected.tag, { timeout: 5000 });
+    await page.waitForFunction(
+      (tag) => document.activeElement && document.activeElement.tagName === tag,
+      expected.tag,
+      { timeout: 5000 }
+    );
     const r = await page.evaluate(() => {
       const a = document.activeElement;
       return {
@@ -138,39 +198,158 @@ test('a finding opens the setting that fixes it, with focus on the field', { ski
   }
 });
 
-test('"Hide for me" on a whole block survives a reload: the item id is not part of a finding', { skip }, async (t) => {
-  const browser = await chromium.launch({ executablePath: CHROMIUM });
-  t.after(() => browser.close());
-  let { context, page } = await login(browser);
-  await editor(page, `/wp-admin/post.php?post=${POST_TYPICAL}&action=edit`);
-  const counts = () => page.evaluate(() => [...document.querySelector('surea11y-results').shadowRoot.querySelectorAll('.tile .count')].map((c) => Number(c.textContent)));
-  const serverMarks = (want) =>
-    page.waitForFunction(
-      async ({ post, want }) => {
-        const u = await window.wp.apiFetch({ path: '/wp/v2/users/me?context=edit' });
-        const fine = (u.meta.persisted_preferences.surea11y || {}).fine || {};
-        return want ? (fine[post] || []).length > 0 : (fine[post] || []).length === 0;
-      },
-      { post: POST_TYPICAL, want },
-      { timeout: 20000, polling: 1000 }
+test(
+  'a heading finding opens its level, a link finding selects the link text, a contrast finding opens the text colour',
+  { skip },
+  async (t) => {
+    const browser = await chromium.launch({ executablePath: CHROMIUM });
+    t.after(() => browser.close());
+    const { page } = await login(browser);
+    const cardWith = (text) =>
+      page.locator('surea11y-results').locator('li.card', { hasText: text });
+
+    // The skipped heading level: focus on the level it has now.
+    await editor(page, `/wp-admin/post.php?post=${POST_TYPICAL}&action=edit`);
+    await page
+      .locator('surea11y-results')
+      .getByRole('button', { name: 'Change the heading level' })
+      .first()
+      .click();
+    await page.waitForFunction(
+      () =>
+        document.activeElement &&
+        document.activeElement.tagName === 'BUTTON' &&
+        /Heading 5/.test(
+          document.activeElement.getAttribute('aria-label') || document.activeElement.textContent
+        ),
+      null,
+      { timeout: 5000 }
     );
-  const before = await counts();
-  // The bold-line finding is on the <p> itself, the block's own element.
-  const card = page.locator('surea11y-results').locator('li.card', { hasText: 'This bold line comes before plain text' });
-  await card.getByRole('button', { name: 'Hide for me' }).click();
-  const after = await counts();
-  assert.ok(after[2] < before[2]);
-  await serverMarks(true);
-  await context.close();
-  ({ context, page } = await login(browser));
-  await editor(page, `/wp-admin/post.php?post=${POST_TYPICAL}&action=edit`);
-  assert.deepEqual(await counts(), after, 'still marked after a reload, with new block ids');
-  const marked = page.locator('surea11y-results').locator('section[data-group="marked"]');
-  await marked.getByRole('button', { expanded: false }).click();
-  await marked.getByRole('button', { name: 'Undo' }).click();
-  assert.deepEqual(await counts(), before);
-  await serverMarks(false);
-});
+    assert.equal(
+      await page.evaluate(
+        () => window.wp.data.select('core/block-editor').getSelectedBlock()?.name
+      ),
+      'core/heading'
+    );
+
+    // "click here": its text selected in the paragraph, ready to type over.
+    await editor(page, `/wp-admin/post.php?post=${POST_TYPICAL}&action=edit`);
+    await page
+      .locator('surea11y-results')
+      .getByRole('button', { name: 'Select the link text' })
+      .first()
+      .click();
+    await page.waitForFunction(
+      () => {
+        const frame = document.querySelector('iframe[name="editor-canvas"]');
+        const doc = (frame && frame.contentDocument) || document;
+        return /\S/.test(String(doc.getSelection()));
+      },
+      null,
+      { timeout: 5000 }
+    );
+    const selected = await page.evaluate(() => {
+      const frame = document.querySelector('iframe[name="editor-canvas"]');
+      const doc = (frame && frame.contentDocument) || document;
+      return String(doc.getSelection()).trim();
+    });
+    const linkCards = await page.evaluate(() =>
+      document
+        .querySelector('surea11y-results')
+        .cards.filter((c) =>
+          ['link-name-quality', 'link-name-quality-link-only', 'cms-link-to-document'].includes(
+            c.ruleId
+          )
+        )
+        .map((c) => c.places[0].html)
+    );
+    assert.ok(
+      linkCards.some((html) => html.includes(`>${selected}<`)),
+      `selected "${selected}" is a reported link`
+    );
+
+    // Pale text the author chose: the Typography panel's Color button.
+    await editor(page, '/wp-admin/post-new.php');
+    await page.evaluate(() => {
+      const { createBlock } = window.wp.blocks;
+      window.wp.data.dispatch('core/block-editor').insertBlocks(
+        createBlock('core/paragraph', {
+          content: 'Pale text.',
+          style: { color: { text: '#cccccc', background: '#ffffff' } }
+        })
+      );
+    });
+    await page.waitForFunction(
+      () =>
+        document
+          .querySelector('surea11y-results')
+          ?.findings.some((f) => f.ruleId === 'contrast-minimum'),
+      null,
+      { timeout: 15000 }
+    );
+    await cardWith('').getByRole('button', { name: 'Open the text colour' }).first().click();
+    await page.waitForFunction(
+      () => {
+        const a = document.activeElement;
+        const panel = a && a.closest('.components-tools-panel');
+        return (
+          a.tagName === 'BUTTON' &&
+          a.textContent.trim() === 'Color' &&
+          panel &&
+          /Typography/.test(panel.querySelector('h2')?.textContent || '')
+        );
+      },
+      null,
+      { timeout: 5000 }
+    );
+  }
+);
+
+test(
+  '"Hide for me" on a whole block survives a reload: the item id is not part of a finding',
+  { skip },
+  async (t) => {
+    const browser = await chromium.launch({ executablePath: CHROMIUM });
+    t.after(() => browser.close());
+    let { context, page } = await login(browser);
+    await editor(page, `/wp-admin/post.php?post=${POST_TYPICAL}&action=edit`);
+    const counts = () =>
+      page.evaluate(() =>
+        [
+          ...document.querySelector('surea11y-results').shadowRoot.querySelectorAll('.tile .count')
+        ].map((c) => Number(c.textContent))
+      );
+    const serverMarks = (want) =>
+      page.waitForFunction(
+        async ({ post, want }) => {
+          const u = await window.wp.apiFetch({ path: '/wp/v2/users/me?context=edit' });
+          const fine = (u.meta.persisted_preferences.surea11y || {}).fine || {};
+          return want ? (fine[post] || []).length > 0 : (fine[post] || []).length === 0;
+        },
+        { post: POST_TYPICAL, want },
+        { timeout: 20000, polling: 1000 }
+      );
+    const before = await counts();
+    // The bold-line finding is on the <p> itself, the block's own element.
+    const card = page
+      .locator('surea11y-results')
+      .locator('li.card', { hasText: 'This bold line comes before plain text' });
+    await card.getByRole('button', { name: 'More' }).click();
+    await card.getByRole('button', { name: 'Hide for me' }).click();
+    const after = await counts();
+    assert.ok(after[2] < before[2]);
+    await serverMarks(true);
+    await context.close();
+    page = (await login(browser)).page;
+    await editor(page, `/wp-admin/post.php?post=${POST_TYPICAL}&action=edit`);
+    assert.deepEqual(await counts(), after, 'still marked after a reload, with new block ids');
+    const marked = page.locator('surea11y-results').locator('section[data-group="marked"]');
+    await marked.getByRole('button', { expanded: false }).click();
+    await marked.getByRole('button', { name: 'Undo' }).click();
+    assert.deepEqual(await counts(), before);
+    await serverMarks(false);
+  }
+);
 
 test.after(() => {
   if (Object.keys(report).length) console.log(JSON.stringify(report));

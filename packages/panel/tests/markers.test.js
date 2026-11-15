@@ -26,7 +26,10 @@ test('one marker per place, hidden from the tab order and from assistive technol
   assert.equal(list.length, 3);
   assert.ok(list.every((b) => b.tabIndex === -1));
   assert.equal(m.host.getAttribute('aria-hidden'), 'true');
-  assert.deepEqual(list.map((b) => b.dataset.group), ['problem', 'likely', 'likely']);
+  assert.deepEqual(
+    list.map((b) => b.dataset.group),
+    ['problem', 'likely', 'likely']
+  );
   m.destroy();
 });
 
@@ -50,7 +53,10 @@ test('marked cards and places outside the content get no marker', () => {
 
 test('more than three on one item fold into "+N"', () => {
   const m = make();
-  m.update(['a', 'b', 'c', 'd', 'e'].map((k) => card(k, 'review', ['b1'])), null);
+  m.update(
+    ['a', 'b', 'c', 'd', 'e'].map((k) => card(k, 'review', ['b1'])),
+    null
+  );
   const list = buttons(m);
   assert.equal(list.length, 3);
   assert.equal(list[2].textContent, '+3');
@@ -66,7 +72,11 @@ test('markers sit outside the content, and leave nothing behind', () => {
 });
 
 test('with outline, the place last shown gets a frame', () => {
-  const m = createMarkers(document, { anchorFor: (id) => document.getElementById(id), onPick() {}, outline: true });
+  const m = createMarkers(document, {
+    anchorFor: (id) => document.getElementById(id),
+    onPick() {},
+    outline: true
+  });
   m.update([card('t', 'likely', ['b1', 'b2'])], { cardKey: 't', place: 1 });
   assert.equal(m.host.shadowRoot.querySelectorAll('.outline').length, 1);
   m.update([card('t', 'likely', ['b1', 'b2'])], null);

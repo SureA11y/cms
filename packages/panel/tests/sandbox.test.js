@@ -11,12 +11,19 @@ test('items are rendered as siblings, each top-level element marked with its id'
     { id: 'b"x', html: '<p>Monday to Friday.</p>\n<ul><li>Note</li></ul>' }
   ]);
   const els = [...main.children];
-  assert.deepEqual(els.map((e) => [e.localName, e.getAttribute('data-surea11y-item')]), [
-    ['p', 'a'],
-    ['p', 'b"x'],
-    ['ul', 'b"x']
-  ]);
-  assert.equal(els[0].nextElementSibling, els[1], 'a bold line and the paragraph after it are siblings');
+  assert.deepEqual(
+    els.map((e) => [e.localName, e.getAttribute('data-surea11y-item')]),
+    [
+      ['p', 'a'],
+      ['p', 'b"x'],
+      ['ul', 'b"x']
+    ]
+  );
+  assert.equal(
+    els[0].nextElementSibling,
+    els[1],
+    'a bold line and the paragraph after it are siblings'
+  );
 });
 
 test('rendering runs no script in the content', () => {

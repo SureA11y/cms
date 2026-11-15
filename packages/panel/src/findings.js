@@ -41,11 +41,31 @@ export function findingKey(ruleId, reasonCode, html) {
   };
   // An address as written, without the site's origin or a query.
   const where = (url) => url.replace(/^https?:\/\/[^/]+/i, '').replace(/[?#].*$/, '');
-  const text = decode(source.replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim().slice(0, 120);
-  return [ruleId, reasonCode || '', tag.toLowerCase(), where(attr('src')), where(attr('href')), attr('alt'), text].join('|');
+  const text = decode(source.replace(/<[^>]*>/g, ' '))
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120);
+  return [
+    ruleId,
+    reasonCode || '',
+    tag.toLowerCase(),
+    where(attr('src')),
+    where(attr('href')),
+    attr('alt'),
+    text
+  ].join('|');
 }
 
-const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', '#39': "'", '#039': "'" };
+const ENTITIES = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  '#39': "'",
+  '#039': "'"
+};
 function decode(text) {
   return text.replace(/&(#?\w+);/g, (m, e) => (e in ENTITIES ? ENTITIES[e] : m));
 }
@@ -100,7 +120,7 @@ export function withoutItemAttribute(html) {
 
 function itemOf(doc, selector) {
   if (!doc || !selector) return null;
-  let el = null;
+  let el;
   try {
     el = doc.querySelector(selector);
   } catch {
@@ -108,6 +128,19 @@ function itemOf(doc, selector) {
   }
   const item = el && el.closest ? el.closest(`[${ITEM_ATTRIBUTE}]`) : null;
   return item ? item.getAttribute(ITEM_ATTRIBUTE) : null;
+}
+
+/**
+ * A short form of a finding key, for a link that opens the editor on that
+ * finding ("Edit in the editor" on a page). The same key gives the same
+ * short form everywhere.
+ */
+export const FINDING_PARAM = 'surea11y-finding';
+export function shortKey(key) {
+  let h = 5381;
+  const text = String(key || '');
+  for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
 }
 
 /** Groups first, in GROUP_ORDER; within a group, in the content's order. */

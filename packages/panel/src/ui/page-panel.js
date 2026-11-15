@@ -71,7 +71,10 @@ export function createPagePanel(doc, { title, locale = 'en', onClose = () => {} 
     opener = from || doc.activeElement;
     // Below the site's admin bar, when there is one.
     const bar = doc.getElementById('wpadminbar');
-    host.style.setProperty('--surea11y-top', bar ? `${bar.getBoundingClientRect().bottom}px` : '0px');
+    host.style.setProperty(
+      '--surea11y-top',
+      bar ? `${bar.getBoundingClientRect().bottom}px` : '0px'
+    );
     panel.hidden = false;
     heading.focus();
   }
@@ -95,7 +98,17 @@ export function createPagePanel(doc, { title, locale = 'en', onClose = () => {} 
 function closeIcon(doc) {
   const ns = 'http://www.w3.org/2000/svg';
   const svg = doc.createElementNS(ns, 'svg');
-  for (const [k, v] of Object.entries({ width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'aria-hidden': 'true', focusable: 'false' })) svg.setAttribute(k, String(v));
+  for (const [k, v] of Object.entries({
+    width: 20,
+    height: 20,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': 1.8,
+    'aria-hidden': 'true',
+    focusable: 'false'
+  }))
+    svg.setAttribute(k, String(v));
   const p = doc.createElementNS(ns, 'path');
   p.setAttribute('d', 'M6 6l12 12M18 6 6 18');
   svg.append(p);

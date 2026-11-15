@@ -11,7 +11,9 @@ export const MESSAGES = { en };
 
 /** `engineOptions.messages` for a scan in `locale`. */
 export function messagesFor(locale) {
-  const primary = String(locale || 'en').toLowerCase().split(/[-_]/)[0];
+  const primary = String(locale || 'en')
+    .toLowerCase()
+    .split(/[-_]/)[0];
   const out = { en: MESSAGES.en };
   if (primary !== 'en' && MESSAGES[primary]) out[primary] = MESSAGES[primary];
   return out;

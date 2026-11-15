@@ -19,7 +19,7 @@
 	let config;
 	try {
 		config = JSON.parse( node.textContent );
-	} catch ( e ) {
+	} catch {
 		return;
 	}
 
@@ -130,26 +130,102 @@
 	 * found by their label, read through WordPress's own translations (the
 	 * default text domain), so this works in any language WordPress speaks.
 	 */
+	const TEXT_BLOCKS = [ 'core/paragraph', 'core/heading', 'core/list', 'core/list-item', 'core/quote', 'core/verse', 'core/preformatted', 'core/pullquote' ];
 	const SETTINGS = [
 		{
 			id: 'alt',
-			block: 'core/image',
+			blocks: [ 'core/image' ],
 			rules: [ 'img-alt-present', 'img-alt-quality', 'img-alt-decorative', 'image-redundant-alt' ],
 			label: () => words.openAltText,
-			field: () => wp.i18n.__( 'Alternative text' ),
+			find: () => labelledControl( wp.i18n.__( 'Alternative text' ) ),
 		},
 		{
 			id: 'headers',
-			block: 'core/table',
+			blocks: [ 'core/table' ],
 			rules: [ 'td-has-header', 'empty-table-header' ],
 			label: () => words.openTableHeaders,
-			field: () => wp.i18n.__( 'Header section' ),
+			find: () => labelledControl( wp.i18n.__( 'Header section' ) ),
+		},
+		{
+			// The level is a row of buttons ("Heading 2", "Transform to
+			// Heading 3"…): focus goes to the level the heading has now.
+			id: 'level',
+			blocks: [ 'core/heading' ],
+			rules: [ 'heading-order' ],
+			label: () => words.openHeadingLevel,
+			find: () => groupButton( wp.i18n.__( 'Transform to variation' ) ),
+		},
+		{
+			// The text colour, in the Typography panel; the background colour
+			// is in the next panel down.
+			id: 'colour',
+			blocks: TEXT_BLOCKS,
+			rules: [ 'contrast-minimum', 'contrast-computable' ],
+			label: () => words.openTextColour,
+			find: () => panelButton( wp.i18n.__( 'Typography' ), wp.i18n.__( 'Color' ) ),
 		},
 	];
 
+	/*
+	 * Link text has no setting: it is the text in the block. "Select the link
+	 * text" selects it in the canvas, so the author can type over it.
+	 */
+	const LINK_RULES = [ 'link-name-quality', 'link-name-quality-link-only', 'cms-link-to-document' ];
+
+	/** The link a finding is about, inside its block on the canvas. */
+	function linkInBlock( clientId, html ) {
+		const n = blockNode( clientId );
+		if ( ! n ) {
+			return null;
+		}
+		const template = document.createElement( 'template' );
+		template.innerHTML = html || '';
+		const want = template.content.querySelector( 'a' ) || template.content.firstElementChild;
+		if ( ! want ) {
+			return null;
+		}
+		const href = want.getAttribute( 'href' );
+		const text = want.textContent.trim();
+		const links = Array.prototype.slice.call( n.querySelectorAll( 'a' ) );
+		return (
+			links.find( ( a ) => a.getAttribute( 'href' ) === href && a.textContent.trim() === text ) ||
+			links.find( ( a ) => a.textContent.trim() === text ) ||
+			null
+		);
+	}
+
+	/** Selects a link's text on the canvas, with the caret in its block. */
+	function selectLinkText( clientId, html ) {
+		data.dispatch( 'core/block-editor' ).selectBlock( clientId, null );
+		let tries = 0;
+		( function selectWhenThere() {
+			const a = linkInBlock( clientId, html );
+			const editable = a && a.closest( '[contenteditable="true"]' );
+			if ( ! a || ! editable ) {
+				if ( ++tries < 60 ) {
+					window.requestAnimationFrame( selectWhenThere );
+				}
+				return;
+			}
+			a.scrollIntoView( { block: 'center' } );
+			editable.focus();
+			const doc = a.ownerDocument;
+			const range = doc.createRange();
+			range.selectNodeContents( a );
+			const sel = doc.defaultView.getSelection();
+			sel.removeAllRanges();
+			sel.addRange( range );
+		} )();
+	}
+
+	/** The block settings, when shown. */
+	function inspector() {
+		return document.querySelector( '.block-editor-block-inspector' );
+	}
+
 	/** The control a visible label names in the block settings, if shown. */
-	function settingControl( text ) {
-		const scope = document.querySelector( '.block-editor-block-inspector' );
+	function labelledControl( text ) {
+		const scope = inspector();
 		if ( ! scope ) {
 			return null;
 		}
@@ -165,8 +241,50 @@
 		return null;
 	}
 
+	/** In a group of options named `name`, the chosen one, or the first. */
+	function groupButton( name ) {
+		const scope = inspector();
+		if ( ! scope ) {
+			return null;
+		}
+		for ( const group of scope.querySelectorAll( '[role="radiogroup"], [role="group"]' ) ) {
+			if ( ( group.getAttribute( 'aria-label' ) || '' ).trim() !== name ) {
+				continue;
+			}
+			const options = group.querySelectorAll( 'button' );
+			const chosen = Array.prototype.find.call(
+				options,
+				( b ) => b.getAttribute( 'aria-checked' ) === 'true' || b.getAttribute( 'aria-pressed' ) === 'true'
+			);
+			if ( chosen || options[ 0 ] ) {
+				return chosen || options[ 0 ];
+			}
+		}
+		return null;
+	}
+
+	/** A button by its text, in the settings panel whose heading is `panelTitle`. */
+	function panelButton( panelTitle, buttonText ) {
+		const scope = inspector();
+		if ( ! scope ) {
+			return null;
+		}
+		for ( const h of scope.querySelectorAll( 'h2, h3' ) ) {
+			if ( h.textContent.trim() !== panelTitle ) {
+				continue;
+			}
+			const panel = h.closest( '.components-tools-panel, .components-panel__body' );
+			const buttons = panel ? panel.querySelectorAll( 'button' ) : [];
+			const found = Array.prototype.find.call( buttons, ( b ) => b.textContent.trim() === buttonText );
+			if ( found ) {
+				return found;
+			}
+		}
+		return null;
+	}
+
 	/** Selects the block, opens its settings, and moves focus to the field. */
-	function openSetting( clientId, fieldText ) {
+	function openSetting( clientId, find ) {
 		data.dispatch( 'core/block-editor' ).selectBlock( clientId, null );
 		const n = blockNode( clientId );
 		if ( n ) {
@@ -180,7 +298,7 @@
 		// The settings render a moment later.
 		let tries = 0;
 		( function focusWhenThere() {
-			const control = settingControl( fieldText );
+			const control = find();
 			if ( control ) {
 				control.scrollIntoView( { block: 'center' } );
 				control.focus();
@@ -198,11 +316,15 @@
 		if ( ! place || ! place.itemId ) {
 			return [];
 		}
-		return SETTINGS.filter( ( s ) => s.block === place.blockName && s.rules.includes( card.ruleId ) ).map( ( s ) => ( {
+		const actions = SETTINGS.filter( ( s ) => s.blocks.includes( place.blockName ) && s.rules.includes( card.ruleId ) ).map( ( s ) => ( {
 			id: s.id,
 			label: s.label(),
-			run: () => openSetting( place.itemId, s.field() ),
+			run: () => openSetting( place.itemId, s.find ),
 		} ) );
+		if ( LINK_RULES.includes( card.ruleId ) && TEXT_BLOCKS.includes( place.blockName ) ) {
+			actions.push( { id: 'link', label: words.selectLinkText, run: () => selectLinkText( place.itemId, place.html ) } );
+		}
+		return actions;
 	}
 
 	/**
@@ -230,6 +352,7 @@
 	const checker = {
 		state: 'idle', // 'idle', 'scanning', 'done' or 'error'
 		findings: [],
+		outline: null, // the post's headings and images, from the last check
 		empty: false,
 		error: '',
 		marked: null, // read from the preferences on first use
@@ -272,7 +395,7 @@
 		}
 		wp.apiFetch( { path: config.reviewsPath } )
 			.then( ( r ) => setReviews( r.reviews ) )
-			.catch( ( error ) => window.console.error( '[SureA11y]', error ) ); // eslint-disable-line no-console
+			.catch( ( error ) => window.console.error( '[SureA11y]', error ) );  
 	}
 	function sendReview( method, keys, note ) {
 		if ( ! config.reviewsPath ) {
@@ -283,7 +406,7 @@
 			.apiFetch( { path: config.reviewsPath, method, data: body } )
 			.then( ( r ) => setReviews( r.reviews ) )
 			.catch( ( error ) => {
-				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+				window.console.error( '[SureA11y]', error );  
 				setReviews( Object.assign( {}, checker.reviews ) ); // takes back what the list showed
 			} );
 	}
@@ -337,7 +460,7 @@
 		const { items, labels, names, order } = contentItems();
 		if ( ! Panel.hasContent( items ) ) {
 			// Nothing to check: say so, and don't load the engine for it.
-			Object.assign( checker, { state: 'done', empty: true, findings: [], error: '' } );
+			Object.assign( checker, { state: 'done', empty: true, findings: [], outline: null, error: '' } );
 			checker.notify();
 			return;
 		}
@@ -352,7 +475,7 @@
 			};
 			const out = await sandboxFor().scan(
 				items,
-				Object.assign( {}, options, { runOnly: { excludeRuleIds: CONTRAST_RULES.concat( DISABLED ) } } )
+				Object.assign( {}, options, { runOnly: { excludeRuleIds: CONTRAST_RULES.concat( DISABLED ) }, withOutline: true } )
 			);
 			if ( out.skippedPacks && out.skippedPacks.length ) {
 				throw new Error( out.skippedPacks.map( ( p ) => p.reason || p.name ).join( '; ' ) );
@@ -380,6 +503,7 @@
 				state: 'done',
 				empty: false,
 				error: '',
+				outline: out.outline,
 				findings: findings.map( ( f ) =>
 					Object.assign( {}, f, { itemLabel: labels[ f.itemId ] || '', blockName: names[ f.itemId ] || '' } )
 				),
@@ -387,7 +511,7 @@
 			// Read by the end-to-end tests.
 			window.surea11yLastScan = Object.assign( {}, out.timing, { contrastRan, contrastMs: contrast.ms, coloured: coloured.length } );
 		} catch ( error ) {
-			window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+			window.console.error( '[SureA11y]', error );  
 			Object.assign( checker, { state: 'error', error: error && error.message ? error.message : String( error ) } );
 		}
 		checker.notify();
@@ -485,6 +609,20 @@
 
 		let shown = null;
 		let shownReviews = checker.reviews;
+		// Opened from "Edit in the editor" on a page: show that finding once
+		// the first results are in.
+		function showTarget() {
+			if ( ! target ) {
+				return;
+			}
+			const wanted = target;
+			target = null;
+			const card = results.cards.find( ( c ) => ! c.settled && c.places.some( ( p ) => Panel.shortKey( p.key ) === wanted ) );
+			if ( card ) {
+				const place = Math.max( 0, card.places.findIndex( ( p ) => Panel.shortKey( p.key ) === wanted && p.itemId ) );
+				results.showPlace( card.key, place );
+			}
+		}
 		function sync() {
 			if ( shownReviews !== checker.reviews ) {
 				shownReviews = checker.reviews;
@@ -507,8 +645,10 @@
 			}
 			shown = checker.findings;
 			results.empty = checker.empty;
+			results.outline = checker.outline;
 			results.findings = checker.findings;
 			drawMarkers();
+			showTarget();
 		}
 
 		const onShow = ( event ) => {
@@ -623,6 +763,24 @@
 		);
 	}
 
+	/*
+	 * A link from the page checker names a finding: open the sidebar, and
+	 * show it once checked. The address loses the parameter, so a reload
+	 * doesn't do it again.
+	 */
+	let target = null;
+	try {
+		const params = new URLSearchParams( window.location.search );
+		target = params.get( Panel.FINDING_PARAM );
+		if ( target ) {
+			params.delete( Panel.FINDING_PARAM );
+			const query = params.toString();
+			window.history.replaceState( window.history.state, '', window.location.pathname + ( query ? '?' + query : '' ) + window.location.hash );
+		}
+	} catch {
+		target = null;
+	}
+
 	function Plugin() {
 		return el(
 			Fragment,
@@ -644,4 +802,7 @@
 	}
 
 	registerPlugin( 'surea11y', { render: Plugin } );
+	if ( target ) {
+		setTimeout( openSidebar, 0 );
+	}
 } )( window.wp, window.SureA11yPanel );

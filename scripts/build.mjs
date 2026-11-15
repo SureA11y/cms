@@ -52,7 +52,10 @@ for (const locale of ['es', 'de', 'fr', 'ja']) {
 const { buildBrowserBundle } = require('@surea11y/core/pack');
 const pack = require(path.join(root, 'packages/pack-cms'));
 fs.writeFileSync(path.join(out, 'engine.js'), buildBrowserBundle({ packs: [pack] }));
-fs.writeFileSync(path.join(out, 'pack-version.txt'), require(path.join(root, 'packages/pack-cms/package.json')).version);
+fs.writeFileSync(
+  path.join(out, 'pack-version.txt'),
+  require(path.join(root, 'packages/pack-cms/package.json')).version
+);
 
 // The rules a check can run (the page profile holds the content profile's
 // and the theme's), with their titles, for the settings page's list of
@@ -60,10 +63,16 @@ fs.writeFileSync(path.join(out, 'pack-version.txt'), require(path.join(root, 'pa
 {
   const { runa11yCoreOnHtml } = require('@surea11y/core/testing');
   const { getChecksCatalog } = require('@surea11y/core');
-  const page = '<!doctype html><html lang="en"><head><title>t</title></head><body><p>t</p></body></html>';
-  const ids = (profile) => runa11yCoreOnHtml(page, { engineOptions: { packs: [pack], profile } }).checksResults.map((c) => c.ruleId);
+  const page =
+    '<!doctype html><html lang="en"><head><title>t</title></head><body><p>t</p></body></html>';
+  const ids = (profile) =>
+    runa11yCoreOnHtml(page, { engineOptions: { packs: [pack], profile } }).checksResults.map(
+      (c) => c.ruleId
+    );
   const content = new Set(ids('cms-content'));
-  const titles = Object.fromEntries(getChecksCatalog({ packs: [pack] }).map((r) => [r.ruleId, r.title]));
+  const titles = Object.fromEntries(
+    getChecksCatalog({ packs: [pack] }).map((r) => [r.ruleId, r.title])
+  );
   const rules = ids('cms-page')
     .filter((id) => id !== 'manual-review')
     .sort()
@@ -73,9 +82,14 @@ fs.writeFileSync(path.join(out, 'pack-version.txt'), require(path.join(root, 'pa
 
 const coreDir = path.dirname(require.resolve('@surea11y/core/package.json'));
 for (const locale of ['de', 'es', 'fr', 'ja']) {
-  fs.copyFileSync(path.join(coreDir, `surea11y.i18n.${locale}.js`), path.join(out, `engine.i18n.${locale}.js`));
+  fs.copyFileSync(
+    path.join(coreDir, `surea11y.i18n.${locale}.js`),
+    path.join(out, `engine.i18n.${locale}.js`)
+  );
 }
 
 for (const f of fs.readdirSync(out)) {
-  console.log(`${f.padEnd(24)} ${(fs.statSync(path.join(out, f)).size / 1024).toFixed(0).padStart(6)} KB`);
+  console.log(
+    `${f.padEnd(24)} ${(fs.statSync(path.join(out, f)).size / 1024).toFixed(0).padStart(6)} KB`
+  );
 }

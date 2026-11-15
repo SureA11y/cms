@@ -36,12 +36,20 @@ test('the content profile: WCAG 2.2 A and AA about content, best practice, the p
   ]) {
     assert.ok(ids.includes(id), `${id} runs`);
   }
-  for (const id of ['text-spacing-content-loss', 'css-focus-indicator-suppressed', 'region', 'page-title-present']) {
+  for (const id of [
+    'text-spacing-content-loss',
+    'css-focus-indicator-suppressed',
+    'region',
+    'page-title-present'
+  ]) {
     assert.ok(!ids.includes(id), `${id}, a theme rule, does not run`);
   }
   assert.equal(check(result, 'cms-link-to-document').outcome, 'cantTell');
   assert.equal(check(result, 'link-name-quality-link-only').outcome, 'cantTell');
-  assert.equal(check(result, 'p-as-heading').occurrences[0].data.details.reasonCode, 'BOLD_SHORT_PARAGRAPH');
+  assert.equal(
+    check(result, 'p-as-heading').occurrences[0].data.details.reasonCode,
+    'BOLD_SHORT_PARAGRAPH'
+  );
 });
 
 test('the theme profile runs the theme rules and none about content', () => {
@@ -56,12 +64,21 @@ test('the theme profile runs the theme rules and none about content', () => {
 
 test('every rule the pack names exists in core or in the pack', () => {
   const { getChecksCatalog } = require('@surea11y/core');
-  const known = new Set([...getChecksCatalog().map((r) => r.ruleId), ...pack.rules.map((r) => r.id)]);
+  const known = new Set([
+    ...getChecksCatalog().map((r) => r.ruleId),
+    ...pack.rules.map((r) => r.id)
+  ]);
   const named = [
-    ...Object.values(pack.profiles).flatMap((p) => [...(p.rules || []), ...((p.exclude && p.exclude.rules) || [])]),
+    ...Object.values(pack.profiles).flatMap((p) => [
+      ...(p.rules || []),
+      ...((p.exclude && p.exclude.rules) || [])
+    ]),
     ...pack.rollups.flatMap((r) => r.checksIds)
   ];
-  assert.deepEqual(named.filter((id) => !known.has(id)), []);
+  assert.deepEqual(
+    named.filter((id) => !known.has(id)),
+    []
+  );
 });
 
 test('the content and theme profiles share no rule', () => {
@@ -72,7 +89,16 @@ test('the content and theme profiles share no rule', () => {
 
 test('the page profile runs both the content and the theme rules', () => {
   const ids = ran(scan('cms-page'));
-  for (const id of ['img-alt-quality', 'p-as-heading', 'link-name-quality-link-only', 'cms-link-to-document', 'heading-order', 'region', 'page-title-present', 'text-spacing-content-loss']) {
+  for (const id of [
+    'img-alt-quality',
+    'p-as-heading',
+    'link-name-quality-link-only',
+    'cms-link-to-document',
+    'heading-order',
+    'region',
+    'page-title-present',
+    'text-spacing-content-loss'
+  ]) {
     assert.ok(ids.includes(id), `${id} runs`);
   }
 });
