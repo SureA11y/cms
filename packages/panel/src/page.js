@@ -15,6 +15,21 @@ import { readOutline, pathSelector } from './outline.js';
 export function loadEngine(doc, urls) {
   const win = doc.defaultView;
   if (win.a11ycore) return Promise.resolve(win.a11ycore);
+  return loadScripts(
+    doc,
+    urls,
+    () => !!win.a11ycore,
+    'The accessibility engine did not load.'
+  ).then(() => win.a11ycore);
+}
+
+/**
+ * Loads scripts into `doc`, in order, unless `done()` says they are there.
+ * Rejects if one fails to load, or, with `failure` as the message, if
+ * `done()` is still false after.
+ */
+export function loadScripts(doc, urls, done = null, failure = 'A script did not load.') {
+  if (done && done()) return Promise.resolve();
   return urls
     .filter(Boolean)
     .reduce(
@@ -33,8 +48,7 @@ export function loadEngine(doc, urls) {
       Promise.resolve()
     )
     .then(() => {
-      if (!win.a11ycore) throw new Error('The accessibility engine did not load.');
-      return win.a11ycore;
+      if (done && !done()) throw new Error(failure);
     });
 }
 

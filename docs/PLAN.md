@@ -235,11 +235,18 @@ the author's.
 
 ### Phase 2: What sets us apart
 
-- [ ] **Questions instead of warnings.** Each uncertain result becomes a
+- [x] **Questions instead of warnings.** Each uncertain result becomes a
       question the author answers (Yes / No / Not sure), built on core's "How
       to check" steps and what passing and failing look like (`passWhen`,
-      `failWhen`), reworded for editors where needed. Answers are kept, by
-      core's finding identity, until the content they refer to changes.
+      `failWhen`). Answers are kept, by core's finding identity, until the
+      content they refer to changes. "Check it" on an uncertain card shows
+      what to do, the steps, and what fine and a problem look like; "Yes" is
+      a shared review, "No" makes it one to fix, saying who confirmed it, and
+      "Not sure" leaves it open, saying so. The steps load on the first
+      question (about 48 KB compressed per language), never with the panel.
+- [ ] Questions: steps reworded for editors where core's assume developer
+      tools (the Accessibility pane, the Styles pane): a pack of editor
+      wording, by rule and reason code, ahead of core's.
 - [ ] **Evidence trail.** A dated record of results and answers per page,
       mapped to WCAG 2.2 and, through packs, to other standards such as
       EN 301 549 (`@surea11y/pack-en301549`), with the law a profile is

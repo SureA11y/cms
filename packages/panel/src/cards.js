@@ -17,10 +17,13 @@ export function cardKey(f) {
  * are. A card either way is `settled`: out of the counts and the steps.
  *
  * Each card: { key, group, ruleId, summary, hint, itemLabel, places, marked,
- * inContent, outside }. `places` are the findings, in order. `inContent`
- * (can be shown) is true when a place has an `itemId`; `outside` is true when
- * every place is outside the author's content (a template or theme problem:
- * a finding with no `itemId`, or one the host flags `outside`).
+ * inContent, outside, answer, review, confirmed, unsure }. A review's
+ * `answer` is 'pass' (also when it has none: reviews made before answers),
+ * 'fail', which moves the card to the problems, or 'unsure'. `places` are
+ * the findings, in order. `inContent` (can be shown) is true when a place
+ * has an `itemId`; `outside` is true when every place is outside the
+ * author's content (a template or theme problem: a finding with no
+ * `itemId`, or one the host flags `outside`).
  */
 export function toCards(findings, marked = [], reviews = {}) {
   const markedSet = marked instanceof Set ? marked : new Set(marked);
@@ -45,9 +48,18 @@ export function toCards(findings, marked = [], reviews = {}) {
   const cards = [...byKey.values()];
   for (const card of cards) {
     card.marked = card.places.every((p) => markedSet.has(p.key));
-    card.review = card.places.every((p) => reviews && reviews[p.key])
+    // A person's answer about every place: "fine" (pass) settles the card,
+    // "a problem" (fail) makes it one to fix, and "not sure" (unsure)
+    // leaves it open, saying so.
+    const answer = card.places.every((p) => reviews && reviews[p.key])
       ? reviews[card.places[0].key]
       : null;
+    const kind = answer ? answer.answer || 'pass' : null;
+    card.answer = answer ? { ...answer, answer: kind } : null;
+    card.review = kind === 'pass' ? card.answer : null;
+    card.confirmed = kind === 'fail' ? card.answer : null;
+    card.unsure = kind === 'unsure' ? card.answer : null;
+    if (card.confirmed) card.group = 'problem';
     card.settled = card.marked || !!card.review;
     card.inContent = card.places.some((p) => p.itemId);
     card.outside = card.places.every((p) => p.outside || !p.itemId);

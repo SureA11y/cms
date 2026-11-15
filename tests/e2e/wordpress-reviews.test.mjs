@@ -158,16 +158,11 @@ test(
     const card = admin.page
       .locator('surea11y-results')
       .locator('li.card', { hasText: 'This bold line comes before plain text' });
-    await card.getByRole('button', { name: 'More' }).click();
-    await card.getByRole('button', { name: "Reviewed, it's fine" }).click();
-    await admin.page
-      .locator('surea11y-results')
-      .getByLabel('Note (optional)')
-      .fill('A styled lead-in, not a heading.');
-    await admin.page
-      .locator('surea11y-results')
-      .getByRole('button', { name: 'Save review' })
-      .click();
+    // Check it: core's steps, then the answer, "it's fine", with a note.
+    await card.getByRole('button', { name: 'Check it' }).click();
+    await card.locator('ol.steps li').first().waitFor();
+    await card.getByLabel('Note (optional)').fill('A styled lead-in, not a heading.');
+    await card.getByRole('button', { name: "Yes, it's fine" }).click();
     await admin.page.waitForFunction(async (p) => {
       const r = await window.wp.apiFetch({ path: `/surea11y/v1/reviews/${p}` });
       return Object.keys(r.reviews).length > 0;
@@ -175,6 +170,7 @@ test(
     const stored = await reviewsOf(admin.page, POST_TYPICAL);
     const [key] = Object.keys(stored);
     assert.match(key, /^p-as-heading\|/);
+    assert.equal(stored[key].answer, 'pass');
     assert.equal(stored[key].note, 'A styled lead-in, not a heading.');
 
     // The editor user sees it, in the editor.
@@ -220,6 +216,42 @@ test(
   }
 );
 
+test('an answer of No makes it one to fix, for everyone who edits the post', { skip }, async () => {
+  const admin = await login();
+  await editor(admin.page, POST_TYPICAL, { open: false });
+  await clearReviews(admin.page, POST_TYPICAL);
+  await editor(admin.page);
+  await ensureEditorUser(admin.page);
+  const card = admin.page
+    .locator('surea11y-results')
+    .locator('li.card', { hasText: 'This bold line comes before plain text' });
+  await card.getByRole('button', { name: 'Check it' }).click();
+  await card.locator('ol.steps li').first().waitFor();
+  await card.getByRole('button', { name: "No, it's a problem" }).click();
+  await admin.page.waitForFunction(async (p) => {
+    const r = await window.wp.apiFetch({ path: `/surea11y/v1/reviews/${p}` });
+    return Object.values(r.reviews).some((v) => v.answer === 'fail');
+  }, POST_TYPICAL);
+  try {
+    const eda = await login(EDITOR.username, EDITOR.password);
+    await editor(eda.page);
+    const confirmed = eda.page
+      .locator('surea11y-results')
+      .locator('section[data-group="problem"] li.card', {
+        hasText: 'This bold line comes before plain text'
+      });
+    await confirmed.waitFor();
+    assert.match(
+      await confirmed.locator('.review-meta').textContent(),
+      /confirmed it is a problem on/
+    );
+    await eda.context.close();
+  } finally {
+    await clearReviews(admin.page, POST_TYPICAL);
+    await admin.context.close();
+  }
+});
+
 test('who may review is a setting, and the site enforces it', { skip }, async () => {
   const admin = await login();
   await editor(admin.page, POST_TYPICAL, { open: false });
@@ -230,11 +262,17 @@ test('who may review is a setting, and the site enforces it', { skip }, async ()
   try {
     const eda = await login(EDITOR.username, EDITOR.password);
     await editor(eda.page);
-    const buttons = await eda.page
+    // The steps are there for an Editor, the answers are not.
+    const edaCard = eda.page
       .locator('surea11y-results')
-      .getByRole('button', { name: "Reviewed, it's fine" })
-      .count();
-    assert.equal(buttons, 0, 'no review button for an Editor');
+      .locator('li.card', { hasText: 'This bold line comes before plain text' });
+    await edaCard.getByRole('button', { name: 'Check it' }).click();
+    await edaCard.locator('ol.steps li').first().waitFor();
+    assert.equal(
+      await edaCard.getByRole('button', { name: "Yes, it's fine" }).count(),
+      0,
+      'no answer for an Editor'
+    );
     assert.ok(
       (await eda.page
         .locator('surea11y-results')

@@ -397,11 +397,11 @@
 			.then( ( r ) => setReviews( r.reviews ) )
 			.catch( ( error ) => window.console.error( '[SureA11y]', error ) );  
 	}
-	function sendReview( method, keys, note ) {
+	function sendReview( method, keys, note, answer ) {
 		if ( ! config.reviewsPath ) {
 			return Promise.resolve();
 		}
-		const body = method === 'POST' ? { keys, note } : { keys };
+		const body = method === 'POST' ? { keys, note, answer: answer || 'pass' } : { keys };
 		return wp
 			.apiFetch( { path: config.reviewsPath, method, data: body } )
 			.then( ( r ) => setReviews( r.reviews ) )
@@ -411,6 +411,9 @@
 			} );
 	}
 	loadReviews();
+
+	// Core's steps for checking a finding by hand, shared by every view.
+	const questions = Panel.createQuestionLoader( document, { urls: config.reviewUrls || [], locale: config.locale } );
 
 	// Rules the site turned off, in Settings.
 	const DISABLED = Array.isArray( config.disabledRules ) ? config.disabledRules : [];
@@ -584,6 +587,8 @@
 		results.actionsFor = settingsFor;
 		results.canReview = !! config.canReview;
 		results.reviews = checker.reviews;
+		// How to check each undecided finding, loaded on the first question.
+		results.questionFor = questions;
 		const me = data.select( 'core' ) && data.select( 'core' ).getCurrentUser ? data.select( 'core' ).getCurrentUser() : null;
 		results.reviewer = ( me && me.name ) || '';
 		host.appendChild( results );
@@ -663,7 +668,7 @@
 		};
 		const onReview = ( event ) => {
 			drawMarkers();
-			sendReview( 'POST', event.detail.keys, event.detail.note );
+			sendReview( 'POST', event.detail.keys, event.detail.note, event.detail.answer );
 		};
 		const onReopen = ( event ) => {
 			drawMarkers();

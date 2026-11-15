@@ -53,6 +53,9 @@ editor has finished loading.
 == Changelog ==
 
 = Unreleased =
+* "Check it" on findings the checker can't decide: the steps to check it,
+  what fine and a problem look like, and your answer, shared with your
+  team: it's fine, it's a problem, or not sure.
 * Headings and Images views: the headings in order, and what a screen
   reader says for each image.
 * From a finding: change a heading's level, open the text colour, or select

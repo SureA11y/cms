@@ -222,6 +222,7 @@
 			results.reviewer = config.reviewer || '';
 			results.reviews = config.reviews && ! Array.isArray( config.reviews ) ? config.reviews : {};
 			results.editUrl = config.editUrl || '';
+			results.questionFor = Panel.createQuestionLoader( document, { urls: config.reviewUrls || [], locale: config.locale } );
 			panel.body.appendChild( results );
 			phoneCheck( panel.footer );
 			results.addEventListener( 'surea11y-show', ( event ) => {
@@ -233,7 +234,9 @@
 			} );
 			results.addEventListener( 'surea11y-retry', check );
 			results.addEventListener( 'surea11y-mark', ( event ) => sendHidden( event.detail.keys, event.detail.fine ) );
-			results.addEventListener( 'surea11y-review', ( event ) => sendReview( 'POST', { keys: event.detail.keys, note: event.detail.note } ) );
+			results.addEventListener( 'surea11y-review', ( event ) =>
+				sendReview( 'POST', { keys: event.detail.keys, note: event.detail.note, answer: event.detail.answer || 'pass' } )
+			);
 			results.addEventListener( 'surea11y-reopen', ( event ) => sendReview( 'DELETE', { keys: event.detail.keys } ) );
 		}
 		if ( panel.isOpen() ) {

@@ -5,7 +5,11 @@
 //   where a Content Security Policy forbids eval and can't fall out of step;
 // - engine.i18n.<locale>.js: core's message side files;
 // - pack-version.txt: the pack version a scan names;
-// - rules.json: the rules a check can run, for the settings page.
+// - rules.json: the rules a check can run, for the settings page;
+// - review.<locale>.js: how to check each undecided finding by hand (core's
+//   review dictionaries, cut to the rules a check can run), loaded only when
+//   someone opens a question; review.en.js also has core's helper that reads
+//   them (window.SureA11yReview).
 import { build } from 'esbuild';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -78,6 +82,45 @@ fs.writeFileSync(
     .sort()
     .map((id) => ({ id, title: titles[id] || id, content: content.has(id) }));
   fs.writeFileSync(path.join(out, 'rules.json'), JSON.stringify(rules));
+
+  // How to check, by hand, the undecided findings of those rules: their
+  // entries in core's review dictionaries, keyed by each rule's prefix.
+  const prefixes = new Set(
+    getChecksCatalog({ packs: [pack] })
+      .filter((r) => rules.some((x) => x.id === r.ruleId))
+      .map((r) => ((r.i18n && r.i18n.titleKey) || '').replace(/_title$/, ''))
+      .filter(Boolean)
+  );
+  const reviewOf = (locale) => {
+    const all = require(`@surea11y/core/review/${locale}`);
+    return Object.fromEntries(
+      Object.entries(all).filter(([k]) => prefixes.has(k.slice(0, k.indexOf('_review_'))))
+    );
+  };
+  await build({
+    stdin: {
+      contents:
+        "import { howToCheckFrom } from '@surea11y/core/how-to-check';\n" +
+        'const r = (window.SureA11yReview = window.SureA11yReview || { dictionaries: {} });\n' +
+        'r.howToCheckFrom = howToCheckFrom;\n' +
+        `r.dictionaries.en = ${JSON.stringify(reviewOf('en'))};`,
+      resolveDir: root,
+      sourcefile: 'review.en.js'
+    },
+    bundle: true,
+    format: 'iife',
+    target: 'es2020',
+    minify: true,
+    legalComments: 'none',
+    outfile: path.join(out, 'review.en.js'),
+    logLevel: 'warning'
+  });
+  for (const locale of ['es', 'de', 'fr', 'ja']) {
+    fs.writeFileSync(
+      path.join(out, `review.${locale}.js`),
+      `(window.SureA11yReview=window.SureA11yReview||{dictionaries:{}}).dictionaries[${JSON.stringify(locale)}]=${JSON.stringify(reviewOf(locale))};\n`
+    );
+  }
 }
 
 const coreDir = path.dirname(require.resolve('@surea11y/core/package.json'));
