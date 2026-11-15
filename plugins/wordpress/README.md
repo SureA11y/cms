@@ -15,6 +15,12 @@ On a preview or a published page, "Check accessibility" in the toolbar opens
 the same list at the side of the page, for the whole page: findings in the
 post's content are marked "Your content", the rest "Theme or template".
 
+Dashboard → Accessibility gives the site overview, from the checks people
+have run and the answers they gave (nothing is crawled): the problems found
+on the most pages, whether each is fixed in the content or once in the
+theme, the pages with the most to fix, and the latest answers. Each person
+sees only the posts they can edit.
+
 - **Where it checks:** the post's blocks, rendered as WordPress saves them,
   in a hidden frame with the editor's styles (`@surea11y/panel`'s sandbox),
   never the editor's own markup.
@@ -56,6 +62,7 @@ post's content are marked "Your content", the rest "Theme or template".
 | `includes/settings.php` | The settings page, and who may see and review. |
 | `includes/reviews.php` | Shared reviews: storage and the REST route. |
 | `includes/evidence.php` | The evidence trail: records of checks, and their CSV and EARL exports. |
+| `includes/overview.php` | The site overview (Dashboard → Accessibility), from a small summary kept per post. |
 | `includes/hidden.php` | "Hide for me" from the page checker, in the person's editor preferences. |
 | `build/` | Built by `node scripts/build.mjs` at the repository root: `panel.js` and a `panel.i18n.<locale>.js` per language, `engine.js` (core with the pack built in), the engine's message files, `rules.json`. Not committed. |
 | `readme.txt` | The WordPress.org readme. |

@@ -213,6 +213,7 @@ function surea11y_add_reviews( $request ) {
 		$reviews = array_slice( $reviews, -SUREA11Y_MAX_REVIEWS, null, true );
 	}
 	update_post_meta( $post_id, SUREA11Y_REVIEWS_META, $reviews );
+	surea11y_update_summary( $post_id );
 	return surea11y_get_reviews( $request );
 }
 
@@ -233,5 +234,6 @@ function surea11y_remove_reviews( $request ) {
 	} else {
 		delete_post_meta( $post_id, SUREA11Y_REVIEWS_META );
 	}
+	surea11y_update_summary( $post_id );
 	return surea11y_get_reviews( $request );
 }
