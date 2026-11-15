@@ -1,8 +1,8 @@
-// End-to-end tests of the site overview (Dashboard → Accessibility): it
-// lists a checked post with its counts, the problems found on it, and an
-// answer given since the check, which moves the place to "To fix"; and the
-// page passes the engine's own checks. Same set-up as
-// wordpress-editor.test.mjs.
+// End-to-end tests of the site overview (Dashboard → Accessibility) and the
+// posts list column. The overview lists a checked post with its counts, the
+// problems found on it, and an answer given since the check, which moves the
+// place to "To fix"; the posts list shows each post's counts; and both pass
+// the engine's own checks. Same set-up as wordpress-editor.test.mjs.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -154,6 +154,53 @@ test("the overview passes the engine's own checks", { skip }, async () => {
     return res.checksResults
       .filter((c) => c.outcome === 'fail')
       .map((c) => `${c.ruleId}: ${(c.occurrences || []).map((o) => o.summary).join(' | ')}`);
+  });
+  assert.deepEqual(own, []);
+  await context.close();
+});
+
+test("the posts list shows each post's counts from its last check", { skip }, async () => {
+  const { context, page } = await login();
+  // A record of the typical post, so it has counts.
+  await editor(page);
+  await page.evaluate(() => window.wp.data.dispatch('core/editor').savePost());
+  await page.waitForFunction(() => !window.wp.data.select('core/editor').isSavingPost());
+  await page.goto(`${WP_URL}/wp-admin/edit.php`);
+  const header = page.locator('#the-list').locator('xpath=..').locator('thead th#surea11y');
+  assert.equal((await header.innerText()).trim(), 'Accessibility');
+  const cells = await page.$$eval('#the-list tr', (rows) =>
+    rows.map((tr) => ({
+      id: tr.id.replace('post-', ''),
+      text: tr.querySelector('td.column-surea11y')?.innerText.trim() || ''
+    }))
+  );
+  assert.ok(cells.length > 0 && cells.every((c) => c.text), 'every row has the column');
+  const typical = cells.find((c) => c.id === POST_TYPICAL);
+  assert.match(
+    typical.text,
+    /^(\d+ to fix|\d+ likely problems?|\d+ to check)(, .+)?\nChecked .+$|^Nothing found\nChecked .+$/
+  );
+
+  // Our own checks on what the column adds: its header and its cells.
+  const engine = fs.readFileSync(
+    new URL('../../plugins/wordpress/build/engine.js', import.meta.url),
+    'utf8'
+  );
+  await page.addScriptTag({ content: engine });
+  const own = await page.evaluate(() => {
+    const res = window.a11ycore.runa11yCoreInPage(
+      location.href,
+      '.wp-list-table',
+      { profile: 'wcag22-aa' },
+      null
+    );
+    return res.checksResults
+      .filter((c) => c.outcome === 'fail')
+      .flatMap((c) =>
+        (c.occurrences || [])
+          .filter((o) => /column-surea11y|surea11y/.test(o.html || o.selector || ''))
+          .map((o) => `${c.ruleId}: ${o.summary}`)
+      );
   });
   assert.deepEqual(own, []);
   await context.close();

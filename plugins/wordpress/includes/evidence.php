@@ -5,30 +5,141 @@
  * EARL. A record is made when the post is saved in the editor and after a
  * check of its page; one that would repeat the last is not kept.
  *
- * Stored in the post meta `_surea11y_evidence`, newest last, read and
- * written through /wp-json/surea11y/v1/evidence/<post>.
+ * Each record is a hidden child post of the post it records
+ * (`surea11y_record`, private, with the record in its meta
+ * `_surea11y_record`), read and written through
+ * /wp-json/surea11y/v1/evidence/<post>. Not in the post's own meta:
+ * WordPress loads all of a post's meta whenever it lists or opens it, and
+ * twenty records can weigh megabytes.
  *
  * @package SureA11y
  */
 
 defined( 'ABSPATH' ) || exit;
 
-const SUREA11Y_EVIDENCE_META     = '_surea11y_evidence';
+const SUREA11Y_EVIDENCE_META     = '_surea11y_evidence'; // Before records were child posts.
+const SUREA11Y_RECORD_TYPE       = 'surea11y_record';
+const SUREA11Y_RECORD_META       = '_surea11y_record';
 const SUREA11Y_MAX_RECORDS       = 20;  // Per post; the oldest go first.
 const SUREA11Y_MAX_FINDINGS      = 300; // Per record.
 const SUREA11Y_EVIDENCE_SOURCES  = array( 'editor', 'page' );
 const SUREA11Y_EVIDENCE_GROUPS   = array( 'problem', 'likely', 'review', 'probably-fine' );
 
+/** The hidden post type that holds the records: never shown, never public. */
+function surea11y_register_record_type() {
+	register_post_type(
+		SUREA11Y_RECORD_TYPE,
+		array(
+			'label'               => __( 'Accessibility records', 'surea11y' ),
+			'public'              => false,
+			'show_ui'             => false,
+			'show_in_rest'        => false,
+			'exclude_from_search' => true,
+			'publicly_queryable'  => false,
+			'query_var'           => false,
+			'rewrite'             => false,
+			'can_export'          => true,
+			'supports'            => array(),
+		)
+	);
+}
+add_action( 'init', 'surea11y_register_record_type' );
+
 /**
- * A post's records, oldest first.
+ * The IDs of a post's record posts, newest first.
+ *
+ * @param int $post_id The post.
+ * @param int $limit   How many at most (-1 for all).
+ * @return int[]
+ */
+function surea11y_record_ids( $post_id, $limit = SUREA11Y_MAX_RECORDS ) {
+	return array_map(
+		'intval',
+		get_posts(
+			array(
+				'post_type'        => SUREA11Y_RECORD_TYPE,
+				'post_parent'      => (int) $post_id,
+				'post_status'      => 'private',
+				'numberposts'      => $limit,
+				'orderby'          => 'ID',
+				'order'            => 'DESC',
+				'fields'           => 'ids',
+				'no_found_rows'    => true,
+				'suppress_filters' => true,
+			)
+		)
+	);
+}
+
+/**
+ * Stores a record as a child post of the post, and removes the oldest
+ * beyond SUREA11Y_MAX_RECORDS.
+ *
+ * @param int   $post_id The post.
+ * @param array $record  The record.
+ */
+function surea11y_store_record( $post_id, $record ) {
+	$id = wp_insert_post(
+		array(
+			'post_type'     => SUREA11Y_RECORD_TYPE,
+			'post_parent'   => (int) $post_id,
+			'post_status'   => 'private',
+			'post_author'   => (int) $record['user'],
+			'post_date_gmt' => $record['date'],
+			'post_date'     => get_date_from_gmt( $record['date'] ),
+		),
+		true
+	);
+	if ( is_wp_error( $id ) || ! $id ) {
+		return;
+	}
+	add_post_meta( $id, SUREA11Y_RECORD_META, wp_slash( $record ), true );
+	foreach ( array_slice( surea11y_record_ids( $post_id, -1 ), SUREA11Y_MAX_RECORDS ) as $old ) {
+		wp_delete_post( $old, true );
+	}
+}
+
+/**
+ * A post's records, oldest first. Records kept the old way, in the post's
+ * meta, are moved to child posts the first time they are read.
  *
  * @param int $post_id The post.
  * @return array
  */
 function surea11y_records( $post_id ) {
-	$records = get_post_meta( $post_id, SUREA11Y_EVIDENCE_META, true );
-	return is_array( $records ) ? array_values( $records ) : array();
+	$legacy = get_post_meta( $post_id, SUREA11Y_EVIDENCE_META, true );
+	if ( is_array( $legacy ) ) {
+		foreach ( array_values( $legacy ) as $record ) {
+			surea11y_store_record( $post_id, $record );
+		}
+		delete_post_meta( $post_id, SUREA11Y_EVIDENCE_META );
+	}
+	$ids = surea11y_record_ids( $post_id );
+	update_meta_cache( 'post', $ids );
+	$records = array();
+	foreach ( array_reverse( $ids ) as $id ) {
+		$record = get_post_meta( $id, SUREA11Y_RECORD_META, true );
+		if ( is_array( $record ) ) {
+			$records[] = $record;
+		}
+	}
+	return $records;
 }
+
+/**
+ * Removes a post's records with it, when it is deleted for good.
+ *
+ * @param int $post_id The post being deleted.
+ */
+function surea11y_delete_records( $post_id ) {
+	if ( SUREA11Y_RECORD_TYPE === get_post_type( $post_id ) ) {
+		return;
+	}
+	foreach ( surea11y_record_ids( $post_id, -1 ) as $id ) {
+		wp_delete_post( $id, true );
+	}
+}
+add_action( 'before_delete_post', 'surea11y_delete_records' );
 
 /**
  * The findings a request sends, cleaned: each { key, rule, code, group },
@@ -226,9 +337,7 @@ function surea11y_add_record( $request ) {
 	}
 	$added = ! ( $last_of_source && $same( $last_of_source ) );
 	if ( $added ) {
-		$records[] = $record;
-		$records   = array_slice( $records, -SUREA11Y_MAX_RECORDS );
-		update_post_meta( $post_id, SUREA11Y_EVIDENCE_META, $records );
+		surea11y_store_record( $post_id, $record );
 		surea11y_update_summary( $post_id );
 	}
 	$response = surea11y_get_records( $request );

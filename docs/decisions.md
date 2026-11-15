@@ -2,6 +2,33 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Check records move out of the post's meta; the posts list column
+
+- **Why move them.** WordPress loads all of a post's meta whenever it lists
+  or opens the post. The evidence trail kept the last 20 records in the
+  post's meta (`_surea11y_evidence`): 133 KB on the typical test post, and
+  up to megabytes at the limits (20 records of 300 findings). A posts list
+  of 20 such posts would load tens of MB to draw a table; the column would
+  have made that the common case.
+- **Where they are now.** Each record is a hidden child post of the post it
+  records (post type `surea11y_record`: private, not public, not in search,
+  the REST API or the admin), with the record in that post's meta. Reading
+  the trail is one query for the IDs and one for their meta. Still in
+  WordPress's own tables, so a site's backups and exports carry them; they
+  are deleted with their post. This replaces "Where" in the evidence trail
+  entry below.
+- **Moving old records.** Records kept the old way move the first time
+  they are read (147 ms for 20 records on the typical post, once); the
+  post's own meta went from 133 KB to 1.4 KB. Nothing has been released, so
+  only development sites have old records.
+- **The column.** "Accessibility" in the lists of posts, pages and other
+  types edited in the block editor, before the date, for people who see the
+  checker. It reads the overview's summary (latest check, answers given
+  since): the counts that aren't zero ("2 to fix, 5 to check"), "Nothing
+  found" or "Not checked yet", and the date of the check. Plain text, no
+  link (the title already links to the editor). No sorting yet: the counts
+  sit inside the summary, so sorting would need its own meta per count.
+
 ## 2026-11-15: Trying it locally with wp-env and a demo site, in this repository
 
 - **wp-env, not a separate repository.** WordPress's own tool runs a
