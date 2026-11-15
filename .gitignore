@@ -1,20 +1,4 @@
-# Dependencies
 node_modules/
-vendor/
-
-# Build output
-dist/
-build/
-*.zip
-
-# Logs and caches
-*.log
-.cache/
-coverage/
-
-# Environment and editor files
-.env
-.env.*
-.DS_Store
-.idea/
-.vscode/
+node_modules
+plugins/wordpress/build/
+tests/e2e/results/
