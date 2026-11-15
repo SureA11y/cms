@@ -2,6 +2,14 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Develop against core's main branch until its next release
+
+Core was released recently, so the rules the pack names
+(`link-name-quality-link-only`, `BOLD_SHORT_PARAGRAPH`, small tables in
+`td-has-header`) stay unreleased for now. Development and CI use core's main
+branch, linked in place of the published package; the packages keep
+`^1.17.0` as their range until the release, then raise it.
+
 ## 2026-11-15: Core changes made directly, without issues
 
 No issues are opened in SureA11y/core. The Phase 0 gaps were checked against
