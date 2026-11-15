@@ -19,6 +19,23 @@ A running log, newest first. Each entry says what was decided and why.
   end-to-end tests were run with the overrides.
 - **Remove them** once Playground raises its pins.
 
+## 2026-11-15: Markers placed in one pass, after a stress test froze the editor
+
+- **Found.** On a 600-block post with 671 findings, typing with the sidebar
+  open froze the editor for up to 973 ms after a pause, and 375 ms while
+  typing; with the checker off, the editor's own pauses were under 190 ms.
+  The check itself took 81 ms, and the panel alone draws 300 cards in under
+  25 ms. The time went in the markers beside the blocks: for each one,
+  reading its block's position after moving the last marker made the
+  browser lay the whole canvas out again.
+- **Fixed.** The markers read every position first, then move every marker:
+  one layout a time. They are placed in the next animation frame, hidden
+  until then, and aren't drawn again when the cards and the place shown
+  haven't changed.
+- **Measured after.** The pause after typing went from 973 to 319 ms (the
+  check and the sidebar's 224 cards, once, after typing stops), and nothing
+  while typing beyond the editor's own.
+
 ## 2026-11-15: A lock per post, after a stress test lost answers
 
 - **Found.** 40 answers sent at the same moment by two people on one post:

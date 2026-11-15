@@ -80,37 +80,45 @@ export function createMarkers(
   let frame = 0;
   const win = doc.defaultView;
 
+  // All the reads first, then all the writes: reading a position after
+  // moving a marker would make the browser lay the page out again for each
+  // marker (with 600 blocks, close to a second of frozen editor).
   function position() {
     frame = 0;
     const width = doc.documentElement.clientWidth - reserveEnd();
+    const frameAnchor = frameBox ? anchorFor(frameBox.itemId) : null;
+    const frameRect = frameAnchor ? frameAnchor.getBoundingClientRect() : null;
+    const rects = placed.map((m) => {
+      const anchor = anchorFor(m.itemId);
+      return anchor && anchor.isConnected ? anchor.getBoundingClientRect() : null;
+    });
+    const sx = win.scrollX;
+    const sy = win.scrollY;
     if (frameBox) {
-      const anchor = anchorFor(frameBox.itemId);
-      frameBox.box.hidden = !anchor;
-      if (anchor) {
-        const r = anchor.getBoundingClientRect();
+      frameBox.box.hidden = !frameRect;
+      if (frameRect) {
         Object.assign(frameBox.box.style, {
-          left: `${r.left + win.scrollX - 4}px`,
-          top: `${r.top + win.scrollY - 4}px`,
-          width: `${r.width + 8}px`,
-          height: `${r.height + 8}px`
+          left: `${frameRect.left + sx - 4}px`,
+          top: `${frameRect.top + sy - 4}px`,
+          width: `${frameRect.width + 8}px`,
+          height: `${frameRect.height + 8}px`
         });
       }
     }
-    for (const m of placed) {
-      const anchor = anchorFor(m.itemId);
-      if (!anchor || !anchor.isConnected) {
+    placed.forEach((m, i) => {
+      const r = rects[i];
+      if (!r) {
         m.button.hidden = true;
-        continue;
+        return;
       }
-      const r = anchor.getBoundingClientRect();
       // Beside the item's end edge, or just inside it when there is no room.
       const outside = r.right + 12;
       const left =
         outside + SIZE <= width ? outside : Math.max(0, Math.min(r.right, width) - SIZE - 4);
       m.button.hidden = false;
-      m.button.style.left = `${left + win.scrollX}px`;
-      m.button.style.top = `${r.top + win.scrollY + m.slot * (SIZE + GAP)}px`;
-    }
+      m.button.style.left = `${left + sx}px`;
+      m.button.style.top = `${r.top + sy + m.slot * (SIZE + GAP)}px`;
+    });
   }
   function schedule() {
     if (!frame) frame = win.requestAnimationFrame(position);
@@ -124,6 +132,8 @@ export function createMarkers(
     const b = doc.createElement('button');
     b.type = 'button';
     b.className = 'marker';
+    b.hidden = true; // Shown once placed.
+
     b.tabIndex = -1;
     b.dataset.group = group;
     b.title = title;
@@ -143,8 +153,23 @@ export function createMarkers(
     return b;
   }
 
-  /** Draws one marker per place of each card still open. */
+  /**
+   * Draws one marker per place of each card still open. The same cards and
+   * place as last time only move the markers; nothing is drawn again.
+   */
+  let drawn = null;
   function update(cards, current) {
+    const now = { cards, cardKey: current && current.cardKey, place: current && current.place };
+    if (
+      drawn &&
+      drawn.cards === now.cards &&
+      drawn.cardKey === now.cardKey &&
+      drawn.place === now.place
+    ) {
+      schedule();
+      return;
+    }
+    drawn = now;
     layer.textContent = '';
     placed = [];
     frameBox = null;
@@ -195,7 +220,8 @@ export function createMarkers(
         placed.push({ button, itemId, slot: shown.length });
       }
     }
-    position();
+    if (frameBox) frameBox.box.hidden = true;
+    schedule();
   }
 
   function destroy() {
