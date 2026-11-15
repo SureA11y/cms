@@ -53,6 +53,8 @@ editor has finished loading.
 == Changelog ==
 
 = Unreleased =
+* The CSV export names each finding's EN 301 549 clauses beside its WCAG
+  criteria.
 * The Accessibility sidebar in the Site Editor: templates, headers and
   footers are checked as visitors get them, with each finding on its block.
 * "Check it" speaks an editor's language for nineteen more kinds of

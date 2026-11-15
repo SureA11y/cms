@@ -268,9 +268,12 @@ the author's.
       place, with the WCAG criteria and level, the answer, who and when) and
       the EARL (the latest: the checker's assertions, automatic, and each
       person's answer, manual).
-- [ ] Evidence trail: other standards through packs, such as EN 301 549
-      (`@surea11y/pack-en301549`, when core moves it out), with the law a
-      profile is assessed under where the pack gives one.
+- [x] Evidence trail: EN 301 549 through its pack. The CSV has an "EN 301
+      549 clauses" column (chapter 9, the newest version the pack knows,
+      V4.1.1 today) from `@surea11y/pack-en301549` 1.1.0's public table, at
+      build time; 113 of the 135 rules map to a clause.
+- [ ] Evidence trail: the clauses in EARL too, and the law a profile is
+      assessed under where a pack gives one.
 - [ ] Evidence trail: a record on demand ("Record this check"), and records
       kept longer, if sites ask (a candidate for the paid tier).
 - [x] **Site overview** built from editors' own page views (no crawler):

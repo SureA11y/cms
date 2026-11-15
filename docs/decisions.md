@@ -2,6 +2,24 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: EN 301 549 in the exports, from its pack
+
+- **From the pack, not core.** Core is moving EN 301 549 out to
+  `@surea11y/pack-en301549` (its built-in table goes in core 2.0.0). The
+  pack is on npm; its `public` entry has the clause table. Pinned at 1.1.0,
+  the newest version at least two weeks old; it needs core ~1.17.0.
+- **At build time only.** The build adds each rule's chapter 9 clauses to
+  `rules.json`, for the newest version the pack knows (V4.1.1 today),
+  mapped from the rule's WCAG criteria. Nothing of the pack reaches the
+  browser; the scan doesn't change.
+- **Where it shows.** A column "EN 301 549 clauses" in the CSV export,
+  after "WCAG criteria", with the version ("9.1.3.1 (V4.1.1)"). 113 of the
+  135 rules map to a clause; the others are best practices with no WCAG
+  criterion. EARL keeps WCAG only for now.
+- **Not a claim of conformance.** The column says which clause a finding
+  relates to, as the WCAG column does; it doesn't say a page meets EN 301
+  549.
+
 ## 2026-11-15: WordPress's Block Validation Framework: not yet
 
 - **What it is (checked 2026-11-15).** An experiment in the

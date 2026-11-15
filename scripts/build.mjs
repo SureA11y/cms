@@ -118,6 +118,26 @@ fs.writeFileSync(
       .filter((m) => m && (!m.standard || m.standard === 'WCAG') && !m.type && m.requirement)
       .map((m) => ({ sc: m.requirement, level: m.conformanceLevel || '', id: scSlug(m.title) }));
   const byId = Object.fromEntries(catalog.map((r) => [r.ruleId, r]));
+  // Each rule's EN 301 549 clauses (chapter 9, the web), for the newest
+  // version the EN 301 549 pack knows, from the rule's WCAG criteria: for the
+  // evidence trail's exports. The pack's table, not core's, which core is
+  // moving out to the pack.
+  const en = require('@surea11y/pack-en301549/public');
+  const enVersion = en.EN301549_VERSIONS[en.EN301549_VERSIONS.length - 1].version;
+  const en301549Of = (wcag) => {
+    const clauses = [
+      ...new Set(
+        wcag.flatMap((c) =>
+          en
+            .en301549ClausesForSc(c.sc)
+            .filter((x) => x.version === enVersion)
+            .map((x) => x.clause)
+        )
+      )
+    ];
+    return clauses.length ? { version: enVersion, clauses } : null;
+  };
+
   // Each rule's title for editors, per language (the panel's
   // rule-titles.<locale>.json); a page shows the person's language, then
   // English, then core's own title.
@@ -144,7 +164,8 @@ fs.writeFileSync(
           .map(([locale, t]) => [locale, t[id]])
       ),
       content: content.has(id),
-      wcag: wcagOf(byId[id])
+      wcag: wcagOf(byId[id]),
+      en301549: en301549Of(wcagOf(byId[id]))
     }));
   const untitled = rules.filter((r) => !r.titles.en).map((r) => r.id);
   if (untitled.length) {
