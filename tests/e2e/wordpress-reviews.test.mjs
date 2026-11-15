@@ -298,7 +298,7 @@ test('who may review is a setting, and the site enforces it', { skip }, async ()
 test('a rule turned off in Settings is not checked', { skip }, async () => {
   const admin = await login();
   await setSettings(admin.page, (p) =>
-    p.getByLabel('Text styled to look like a heading should probably be a real heading').uncheck()
+    p.getByLabel('Text that looks like a heading is a real heading').uncheck()
   );
   try {
     await editor(admin.page);

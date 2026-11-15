@@ -135,6 +135,12 @@ test(
     assert.ok(
       answered.every((l) => l.includes('"1.3.1 (A)"') && l.includes('"A lead-in, not a title."'))
     );
+    // The EN 301 549 clause the criterion maps to, with the standard's version.
+    assert.match(lines[0], /"WCAG criteria","EN 301 549 clauses"/);
+    assert.ok(
+      answered.every((l) => /"9\.1\.3\.1 \(V[\d.]+\)"/.test(l)),
+      'EN 301 549 9.1.3.1'
+    );
 
     // EARL: the checker's assertions and the person's.
     const [earlFile] = await Promise.all([

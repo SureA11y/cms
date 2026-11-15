@@ -2,6 +2,126 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Core ships inside each plugin release; sites get a new core by updating the plugin
+
+- **Bundled, not loaded.** The build puts core and the CMS pack into the
+  plugin's own `build/engine.js`. A site runs the core of the plugin
+  version it has installed. Nothing is fetched from npm or a CDN at run
+  time.
+- **A new core means a plugin release.** Update `@surea11y/core` here,
+  build, run the unit and end-to-end tests, raise the plugin's version
+  (`Version:` in `surea11y.php`, `Stable tag:` in `readme.txt`) and publish.
+  Sites receive it as an ordinary plugin update: automatically where the
+  owner turned on auto-updates for the plugin, otherwise when an admin
+  clicks Update.
+- **Why.** Each plugin version is tested with one known engine, so a core
+  release can't change what sites report before it has been checked here.
+  No outside server is involved, which keeps checks in the browser and
+  works under strict Content Security Policies. WordPress.org's plugin
+  guidelines also appear to require JavaScript to ship inside the plugin
+  rather than load from third-party servers (unverified: check the current
+  guidelines before submitting).
+- **The cost.** A core fix reaches sites only after a plugin release.
+- **Which engine ran.** Each check's record names the core version
+  (`core-version.txt`, `engineVersion`), so results can be traced to it.
+- **The release must include `build/`.** `plugins/wordpress/build/` is not
+  in git, so the release step builds it and puts it in what is uploaded.
+  Added to Phase 3 of the plan.
+
+## 2026-11-15: EN 301 549 in the exports, from its pack
+
+- **From the pack, not core.** Core is moving EN 301 549 out to
+  `@surea11y/pack-en301549` (its built-in table goes in core 2.0.0). The
+  pack is on npm; its `public` entry has the clause table. Pinned at 1.1.0,
+  the newest version at least two weeks old; it needs core ~1.17.0.
+- **At build time only.** The build adds each rule's chapter 9 clauses to
+  `rules.json`, for the newest version the pack knows (V4.1.1 today),
+  mapped from the rule's WCAG criteria. Nothing of the pack reaches the
+  browser; the scan doesn't change.
+- **Where it shows.** A column "EN 301 549 clauses" in the CSV export,
+  after "WCAG criteria", with the version ("9.1.3.1 (V4.1.1)"). 113 of the
+  135 rules map to a clause; the others are best practices with no WCAG
+  criterion. EARL keeps WCAG only for now.
+- **Not a claim of conformance.** The column says which clause a finding
+  relates to, as the WCAG column does; it doesn't say a page meets EN 301
+  549.
+
+## 2026-11-15: WordPress's Block Validation Framework: not yet
+
+- **What it is (checked 2026-11-15).** An experiment in the
+  WordPress/accessibility-lab plugin, version 0.1.0: no releases, not on
+  wordpress.org, not merged into Gutenberg. A WordPress accessibility team
+  post of 2026-08-21 says its block validation tools are "not currently
+  slated for inclusion into core"; its own readme calls experiments
+  unstable, and its changelog already has breaking changes. GPL-2.0-or-later.
+- **Why it doesn't fit yet.** Its checks are synchronous functions of a
+  block's attributes (`editor.validateBlock` and the like), run again only
+  when the block changes. Ours are found by a scan of the rendered post,
+  asynchronously. The only way to show results computed elsewhere is to
+  dispatch to its store (`setIssues` on `accessibility-lab/validation`),
+  which its documentation doesn't name: any release could break it, and an
+  issue sent as an error would lock saving.
+- **Not tested.** Its repository can't be downloaded from this machine, and
+  it needs building; code we haven't run against it won't ship.
+- **What the plan wanted, meanwhile.** Findings where editors look: our
+  sidebar, markers beside blocks, toolbar count and pre-publish line
+  already do that. Blocking publishing if a site chooses: possible on our
+  own later, as an opt-in setting, if sites ask.
+- **Revisit** when the framework documents a way to report results
+  computed elsewhere, or moves toward Gutenberg.
+
+## 2026-11-15: The Site Editor: templates rendered on the server, checked in the browser
+
+- **Why not as posts are checked.** A post is checked from each block's
+  saved markup. A template is mostly dynamic blocks (site title,
+  navigation, query loop, template parts) that have no saved markup:
+  WordPress renders them for each visitor. Checked the same way, a template
+  would show almost nothing.
+- **How.** In the Site Editor, the sidebar sends the template's blocks, as
+  being edited, to `POST /surea11y/v1/render`, which renders them with
+  WordPress's own `do_blocks()` and sends the HTML back; the check runs in
+  the sandbox in the browser, as for posts. Nothing is checked on the
+  server and nothing leaves the site. Only people who can edit templates
+  (`edit_theme_options`) and see the checker may use it; at most 200 blocks
+  and 1 MB at once.
+- **Findings name their block.** Each block goes with a class naming its
+  editor block; WordPress keeps a block's classes on its outer element, and
+  the render turns the class into the panel's item attribute. A template
+  part goes as the blocks being edited, inside a group in the element it
+  renders as, so unsaved changes are checked and its blocks are named.
+  The Site Editor keeps a part's blocks apart from the main tree; the
+  checker reads them there and watches them for changes.
+- **Which rules.** The page profile (theme and content rules: a template
+  has images, headings, links and colours too), not the theme profile the
+  plan named, which lacks those. Less the rules about the whole document,
+  which a template alone isn't: page title, language, viewport, timed
+  refresh, skip link, bypass, one main region, content in regions. The page
+  checker checks those on the page. The sandbox renders a template in a
+  `div`, not the `main` it uses for post content, since a template brings
+  its own main region.
+- **Not yet.** Reviews, "Hide for me" and the evidence trail key on a post
+  ID; a template's is its slug. They are off in the Site Editor for now.
+
+## 2026-11-15: Plain rule titles for editors, in the panel, in five languages
+
+- **Why.** The settings page and the site overview named rules by core's
+  titles, written for developers and in English only ("<img> alt text must
+  be appropriate (manual review)").
+- **What.** A title per rule saying what should be true, in an editor's
+  words ("Alternative text describes the image"), for all 135 rules a
+  check can run, in English, Spanish, German, French and Japanese. The
+  translations are ours and wait for the same native review as the rest.
+- **Where.** `packages/panel/src/messages/rule-titles.<locale>.json`: CMS-
+  neutral, so other CMS integrations use them too. The build adds them to
+  `rules.json` (`titles` per locale); the plugin shows the person's
+  language, then English, then core's title. `rules.json` grows from 22 KB
+  to 61 KB, read only on the server.
+- **Not in the exports.** CSV and EARL keep core's titles: they are
+  evidence for auditors, and core's catalog is the stable reference.
+- **Held to core.** Tests check that every language titles the same rules,
+  that every title is for a real rule, that every rule the page profile
+  runs has one, and that none names markup.
+
 ## 2026-11-15: Check records move out of the post's meta; the posts list column
 
 - **Why move them.** WordPress loads all of a post's meta whenever it lists
@@ -135,6 +255,16 @@ A running log, newest first. Each entry says what was decided and why.
 - **Scope.** Twelve sets: those on the Phase 0 test posts that named
   developer tools or markup, plus text over an image. The rest keep core's
   wording until sites show editors meet them.
+- **Second round (2026-11-15).** Nineteen more sets, those editors can
+  cause with blocks: text over images and cover blocks, faded blocks, text
+  shadows, semi-bold text, logo text; empty table headers and a title typed
+  as the table's first row; alternative text that repeats the caption;
+  embeds, icons and objects; moving images and video; and the phone-width
+  check's four cases, which now point to "Check at phone width". Contrast
+  steps name "a contrast checker with an eyedropper" rather than any
+  product. Sets about code only a theme or plugin developer writes (ARIA,
+  widgets, form internals, the engine's own errors) keep core's wording,
+  which is right for that reader.
 
 ## 2026-11-15: Phase 2 starts with questions, as answers in the shared reviews
 

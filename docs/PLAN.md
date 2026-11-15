@@ -251,7 +251,12 @@ the author's.
       images, link text that needs its sentence, text over an image), in
       five languages, and the first translations of the CMS pack rule's
       steps. Each replaces core's whole set; the others keep core's text.
-- [ ] Questions: more editor wording as sites show which steps editors meet
+- [x] Questions: more editor wording: nineteen more sets, those editors can
+      cause with blocks (contrast over images and faded blocks, tables,
+      embeds and icons, moving images, the phone-width check), in all five
+      languages. 30 of core's 289 sets are now in editors' words.
+- [ ] Questions: more editor wording as sites show which other steps
+      editors meet
       (contrast's other cases, lists, page titles).
 - [x] **Evidence trail.** A dated record of results and answers per page,
       mapped to WCAG 2.2. Export as CSV and EARL. A record is made on each
@@ -263,9 +268,12 @@ the author's.
       place, with the WCAG criteria and level, the answer, who and when) and
       the EARL (the latest: the checker's assertions, automatic, and each
       person's answer, manual).
-- [ ] Evidence trail: other standards through packs, such as EN 301 549
-      (`@surea11y/pack-en301549`, when core moves it out), with the law a
-      profile is assessed under where the pack gives one.
+- [x] Evidence trail: EN 301 549 through its pack. The CSV has an "EN 301
+      549 clauses" column (chapter 9, the newest version the pack knows,
+      V4.1.1 today) from `@surea11y/pack-en301549` 1.1.0's public table, at
+      build time; 113 of the 135 rules map to a clause.
+- [ ] Evidence trail: the clauses in EARL too, and the law a profile is
+      assessed under where a pack gives one.
 - [ ] Evidence trail: a record on demand ("Record this check"), and records
       kept longer, if sites ask (a candidate for the paid tier).
 - [x] **Site overview** built from editors' own page views (no crawler):
@@ -273,9 +281,10 @@ the author's.
       Accessibility, from a summary kept per post (`_surea11y_summary`) of
       its latest record and its answers as they are now; three queries and
       about 2 KB per post. Each person sees the posts they can edit.
-- [ ] Site overview: plain-language titles for each rule, in every
-      language. It shows core's titles today, written for developers
-      (`<img> alt text must be appropriate`), in English.
+- [x] Site overview: plain-language titles for each rule, in every
+      language. 135 rules in English, Spanish, German, French and Japanese
+      (`packages/panel/src/messages/rule-titles.<locale>.json`), on the
+      settings page and the overview; the exports keep core's titles.
 - [x] **Posts list column** with each post's counts from its last check,
       saved from the browser when the post is saved: nothing is scanned on
       the server or sent anywhere. "Accessibility" in the lists of posts,
@@ -283,11 +292,24 @@ the author's.
       counts that aren't zero, "Nothing found" or "Not checked yet", and
       the date. No query added: the list has already loaded each post's
       meta.
-- [ ] **Site Editor:** templates, template parts, headers and footers
-      checked with the theme profile, where theme problems are fixed.
-- [ ] **WordPress Block Validation Framework** integration behind a setting,
-      while it is experimental: our checks appear where WordPress shows its
-      own, and errors can block publishing if the site chooses.
+- [x] **Site Editor:** templates, template parts, headers and footers
+      checked where theme problems are fixed. Rendered on the server as
+      visitors get them (`POST /surea11y/v1/render`, for people who can
+      edit templates), checked in the browser with the page profile less
+      the rules about the whole document (title, language, skip link, one
+      main region), which the page checker covers. Findings name their
+      block, inside template parts too, and unsaved edits are checked.
+- [ ] Site Editor: reviews, "Hide for me" and the evidence trail for
+      templates (they key on a post ID; a template's is its slug).
+- [ ] **WordPress Block Validation Framework** integration: **waiting**
+      (decided 2026-11-15, see `docs/decisions.md`). The framework is a
+      0.1.0 experiment in WordPress/accessibility-lab, not slated for core,
+      and takes only synchronous per-block checks; our findings could enter
+      only through an undocumented store action. Revisit when it gets a
+      documented way to report results computed elsewhere, or a path into
+      Gutenberg.
+- [ ] Optional publish blocking of our own, behind a setting, if sites ask:
+      only "To fix" findings, drafts still saved.
 - [ ] Content checks the engine lacks today (see "Engine dependencies").
 
 **Exit:** an editor can go from "problems found" to "every item fixed or
@@ -297,6 +319,21 @@ answered" on a page, and export the evidence.
 
 - [ ] Security review and a full pass of the quality gates.
 - [ ] Confirm the `surea11y` slug; submit for review.
+- [ ] A release step: with core at a published version (not `setup:core`),
+      run `npm run build` and the tests, raise `Version:` in `surea11y.php`
+      and `Stable tag:` in `readme.txt`, and package `plugins/wordpress/`
+      with its `build/` folder (not in git) for the WordPress.org
+      repository. Each core release that sites need goes out this way; see
+      the decision "Core ships inside each plugin release".
+      - **Core must be released first.** The plugin needs rules that are on
+        core's main branch but not in 1.17.0 (the CMS pack uses
+        `link-name-quality-link-only` and others; the build stops with a
+        message naming the missing rule). The first plugin release waits
+        for a core release that has them.
+      - **The EN 301 549 pack moves with core.** `@surea11y/pack-en301549`
+        is pinned at 1.1.0, which needs `@surea11y/core ~1.17.0`. Raising
+        core to 1.18 or later needs a version of the pack that accepts it,
+        updated in the same change, or npm won't install the two together.
 - [ ] Translations through translate.wordpress.org.
 - [ ] Documentation for editors (what each message means, how to fix it) and
       a clear "this is not an overlay" statement.

@@ -433,6 +433,7 @@ function surea11y_export_records( $request ) {
 				__( 'Reason code', 'surea11y' ),
 				__( 'Result', 'surea11y' ),
 				__( 'WCAG criteria', 'surea11y' ),
+				__( 'EN 301 549 clauses', 'surea11y' ),
 				__( 'Answer', 'surea11y' ),
 				__( 'Answered by', 'surea11y' ),
 				__( 'Answered on (UTC)', 'surea11y' ),
@@ -449,6 +450,9 @@ function surea11y_export_records( $request ) {
 				foreach ( isset( $rule['wcag'] ) ? $rule['wcag'] : array() as $c ) {
 					$wcag[] = $c['sc'] . ' (' . $c['level'] . ')';
 				}
+				// The EN 301 549 clauses the rule's criteria map to, with the
+				// version of the standard (from the build: the EN 301 549 pack).
+				$en     = isset( $rule['en301549']['clauses'] ) ? implode( '; ', $rule['en301549']['clauses'] ) . ' (' . $rule['en301549']['version'] . ')' : '';
 				$answer = isset( $record['answers'][ $f['key'] ] ) ? $record['answers'][ $f['key'] ] : null;
 				$rows[] = array(
 					$record['date'],
@@ -460,6 +464,7 @@ function surea11y_export_records( $request ) {
 					$f['code'],
 					$words[ $f['group'] ],
 					implode( '; ', $wcag ),
+					$en,
 					$answer ? $words[ $answer['answer'] ] : '',
 					$answer ? $name( $answer['user'] ) : '',
 					$answer ? $answer['date'] : '',

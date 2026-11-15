@@ -65,6 +65,26 @@ function surea11y_known_rules() {
 }
 
 /**
+ * A rule's title for editors, in the person's language: the plain title
+ * from the build (the panel's rule-titles.<locale>.json), else the English
+ * one, else core's.
+ *
+ * @param array $rule A rule from surea11y_known_rules().
+ * @return string
+ */
+function surea11y_rule_title( $rule ) {
+	$locale = strtolower( substr( determine_locale(), 0, 2 ) );
+	$titles = isset( $rule['titles'] ) && is_array( $rule['titles'] ) ? $rule['titles'] : array();
+	if ( ! empty( $titles[ $locale ] ) ) {
+		return $titles[ $locale ];
+	}
+	if ( ! empty( $titles['en'] ) ) {
+		return $titles['en'];
+	}
+	return isset( $rule['title'] ) ? $rule['title'] : ( isset( $rule['id'] ) ? $rule['id'] : '' );
+}
+
+/**
  * Cleans what the settings form sends: only known capabilities and rules,
  * a selector without markup, a yes or no.
  *
@@ -195,7 +215,7 @@ function surea11y_render_settings() {
 	foreach ( $rules as $rule ) {
 		$id = 'surea11y-rule-' . sanitize_html_class( $rule['id'] );
 		echo '<li style="break-inside: avoid; margin-bottom: 10px;"><label for="' . esc_attr( $id ) . '" style="display: flex; gap: 4px; align-items: flex-start;"><input type="checkbox" id="' . esc_attr( $id ) . '" name="surea11y_settings[rules_on][]" value="' . esc_attr( $rule['id'] ) . '"' . checked( ! isset( $off[ $rule['id'] ] ), true, false ) . ' style="margin-top: 2px;"> ';
-		echo '<span>' . esc_html( $rule['title'] ) . ( empty( $rule['content'] ) ? ' (' . esc_html__( 'theme', 'surea11y' ) . ')' : '' );
+		echo '<span>' . esc_html( surea11y_rule_title( $rule ) ) . ( empty( $rule['content'] ) ? ' (' . esc_html__( 'theme', 'surea11y' ) . ')' : '' );
 		echo '<br><span class="description" style="font-size: 12px;">' . esc_html( $rule['id'] ) . '</span></span></label></li>';
 	}
 	echo '</ul></fieldset>';

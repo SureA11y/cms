@@ -53,6 +53,15 @@ editor has finished loading.
 == Changelog ==
 
 = Unreleased =
+* The CSV export names each finding's EN 301 549 clauses beside its WCAG
+  criteria.
+* The Accessibility sidebar in the Site Editor: templates, headers and
+  footers are checked as visitors get them, with each finding on its block.
+* "Check it" speaks an editor's language for nineteen more kinds of
+  finding: contrast over images, tables, embeds, moving images and the
+  phone-width check.
+* Rules are named in plain words, in your language, on the settings page
+  and in the site overview.
 * An Accessibility column in the lists of posts and pages: each post's
   counts from its last check, with your team's answers since.
 * Dashboard → Accessibility: the problems found on the most pages, the
