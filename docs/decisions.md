@@ -2,6 +2,30 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Milestone 6: views, settings, page hides, quality gates
+
+- **The heading and image views judge nothing themselves.** They list what
+  is there, and flag an entry only where the engine reported on that
+  element. A second, simpler judgement in the panel would sometimes
+  disagree with the findings, and the engine is the one source of truth.
+- **"More" is a disclosure, not a menu.** A button with `aria-expanded`
+  showing a row of ordinary buttons works the same for everyone and needs
+  no menu keyboard handling. It appears only when a card has both
+  "Reviewed, it's fine" and "Hide for me". Still to try with people.
+- **Link text is selected, not opened.** WordPress has no setting for it:
+  it is the text in the block. The action selects that text in the block,
+  so the author can type over it.
+- **"Hide for me" on the page uses the editor's own storage.** The plugin's
+  route changes only its own entry of the person's editor preferences, and
+  sets their modified time, so the editor takes it over a copy it kept in
+  the browser.
+- **The phone-width check waits for core.** It needs a reflow rule (WCAG
+  1.4.10), which core doesn't have. A check of our own would be a WCAG
+  judgement outside the engine.
+- **Quality gates from "Quality, in every phase" are now in CI:** ESLint and
+  Prettier as core uses them, size budgets on the built files, and a syntax
+  check of every PHP file. The code was formatted once, in its own commit.
+
 ## 2026-11-15: Shared reviews, who may make them, and a finding's identity
 
 - **Two ways to set a finding aside.** "Reviewed, it's fine" is shared: it

@@ -52,6 +52,16 @@ editor has finished loading.
 
 == Changelog ==
 
+= Unreleased =
+* Headings and Images views: the headings in order, and what a screen
+  reader says for each image.
+* From a finding: change a heading's level, open the text colour, or select
+  a link's text.
+* "Hide for me" on pages too, and "Edit in the editor" opens the editor on
+  that finding.
+* Fewer buttons on each finding: "Reviewed" and "Hide for me" are under
+  "More".
+
 = 0.1.0 =
 * First version: the editor sidebar, its count on the toolbar, a line in the
   checks before publishing, and the page checker on previews and published

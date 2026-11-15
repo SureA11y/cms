@@ -194,18 +194,24 @@ test("the sidebar passes the engine's own checks", { skip }, async (t) => {
     'utf8'
   );
   await page.addScriptTag({ content: engine });
-  const own = await page.evaluate(() => {
-    const res = window.a11ycore.runa11yCoreInPage(
-      location.href,
-      '.surea11y-sidebar',
-      { profile: 'wcag22-aa' },
-      null
-    );
-    return res.checksResults
-      .filter((c) => c.outcome === 'fail')
-      .map((c) => `${c.ruleId}: ${(c.occurrences || []).map((o) => o.summary).join(' | ')}`);
-  });
-  assert.deepEqual(own, [], 'no WCAG failures in the sidebar');
+  // The findings, then the headings and the images views.
+  for (const view of ['findings', 'headings', 'images']) {
+    await page.evaluate((v) => {
+      document.querySelector('surea11y-results').view = v;
+    }, view);
+    const own = await page.evaluate(() => {
+      const res = window.a11ycore.runa11yCoreInPage(
+        location.href,
+        '.surea11y-sidebar',
+        { profile: 'wcag22-aa' },
+        null
+      );
+      return res.checksResults
+        .filter((c) => c.outcome === 'fail')
+        .map((c) => `${c.ruleId}: ${(c.occurrences || []).map((o) => o.summary).join(' | ')}`);
+    });
+    assert.deepEqual(own, [], `no WCAG failures in the sidebar's ${view} view`);
+  }
 });
 
 const markerButtons = (page) =>
