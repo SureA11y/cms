@@ -5,10 +5,12 @@ Guidance for AI coding assistants working in this repository.
 ## Project
 
 SureA11y for CMS: accessibility checking for content management systems
-(WordPress and Drupal first), built on `@surea11y/core`
-(https://github.com/SureA11y/core). The project is at the research and
-planning stage; there is no code yet. Read `README.md`, `docs/ideas.md` and
-`docs/decisions.md` before starting work.
+(WordPress first, then a headless CMS, then Drupal), built on
+`@surea11y/core` (https://github.com/SureA11y/core). Read `README.md`,
+`docs/PLAN.md` and `docs/decisions.md` before starting work.
+
+What WCAG requires belongs in core; what only CMS authors need goes in the
+pack (`packages/pack-cms`). WCAG, checked at w3.org, is the source of truth.
 
 ## Git and attribution (strict)
 

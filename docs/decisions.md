@@ -2,6 +2,26 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Core changes made directly, without issues
+
+No issues are opened in SureA11y/core. The Phase 0 gaps were checked against
+WCAG at the source and handled where WCAG puts them
+([details](research/2026-11-15-content-checks.md)):
+
+- **In core**, because WCAG asks for them: small tables without headers
+  (F91 covers all data tables), bold lines used as headings at body size
+  (F2), and generic link text that only its context explains, as a 2.4.9
+  rule (F84). One branch and pull request in core.
+- **In the pack** (`packages/pack-cms`), because WCAG doesn't: links to
+  documents (not even an advisory technique of 2.4.4) and the split of
+  rules into content and theme (a matter of who can fix what). Core stays
+  WCAG's; the pack adds what CMS authors need.
+- **Not done**, because the premise was wrong: the contrast and iframe rules
+  were never slow. Per-rule timings charged them with work every rule
+  shares; scans without `contrast-computable` are slower, not faster.
+
+The pack is MPL-2.0, as decided for the shared parts.
+
 ## 2026-11-15: Phase 0 recommendations accepted
 
 From the [Phase 0 results](../prototypes/phase-0/RESULTS.md#recommendations):
@@ -19,12 +39,13 @@ From the [Phase 0 results](../prototypes/phase-0/RESULTS.md#recommendations):
 5. **Close the four content-check gaps before Phase 1 ships**, so we find at
    least what the other checkers find: "click here" inside a sentence, links
    to PDF and Office files, bold paragraphs used as headings, tables without
-   headers. Asked of core first ([drafts](drafts/core-issues-2026-11.md)); a
-   pack if core declines.
+   headers. Done directly in core, and in the pack where WCAG doesn't
+   require it (see the entry above).
 6. **Load the engine lazily**, when the checker opens or once the editor is
    idle, and never for logged-out visitors.
 7. **Ask core** for a content/theme grouping of rules and a cheaper contrast
-   check ([drafts](drafts/core-issues-2026-11.md)).
+   check. Superseded: the grouping is in the pack, and contrast was not slow
+   (see the entry above).
 
 ## 2026-11-15: Competitor names stay in this repository while it is private
 
