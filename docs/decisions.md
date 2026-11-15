@@ -2,6 +2,27 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Where the checker runs, and how its look is built
+
+**Where it runs.** Besides the editor sidebar:
+
+- Phase 1: previews and published pages for logged-in editors (already
+  planned), and one line in the pre-publish panel that never blocks
+  publishing. The preview is where the real theme is, so it is where
+  contrast, landmarks and menus can be checked; the pre-publish line
+  reaches editors who never open the sidebar, at almost no cost.
+- Phase 2: a posts list column (counts saved from checks the browser
+  already ran) and the Site Editor (templates checked with the theme
+  profile). Both are bigger and build on the reviews and evidence work.
+
+**The look.** The mock-up of the new sidebar was approved: count tiles
+that filter, "N of M" steps, cards merged by finding, markers beside the
+content, plain states. Its styles are built on design tokens (CSS custom
+properties for colour, radius, spacing, type and focus) defined in one
+place, so colours or shapes can change later without touching the
+components. A test keeps every text and background token pair at WCAG 2.2
+AA contrast, so a change of colour can't quietly break it.
+
 ## 2026-11-15: Develop against core's main branch until its next release
 
 Core was released recently, so the rules the pack names

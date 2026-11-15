@@ -126,6 +126,21 @@ Panel:
       language), in English and Spanish first.
 - [ ] The same in German, French and Japanese.
 - [x] Results list with "show me where" and "next issue".
+- [ ] The look approved from the mock-up (2026-11-15):
+  - count tiles per group (icon and word, never colour alone) that filter
+    the list; no score or percentage;
+  - "3 of 11" with previous and next, over every place a finding is in;
+  - one card per finding, merged across places ("2 places"), with the
+    block type, the quoted content, "How to fix" on request, and "Shown
+    in the content" on the one last shown;
+  - "Mark as fine" with Undo, in a "Marked fine by you" group;
+  - plain states: checking (the last results stay), nothing to check yet,
+    nothing found, and an error in plain words with the details for the
+    administrator.
+- [ ] Styles built on design tokens: colours, corner radius, spacing, type
+      and focus ring as CSS custom properties in one place, so the look can
+      change without touching the components, and a site can override
+      them. Every token pair keeps WCAG 2.2 AA contrast, checked by a test.
 - [ ] Inline markers.
 - [ ] Heading outline and alt-text views.
 - [x] Attribution: content vs. template (each finding names its block; the
@@ -137,8 +152,16 @@ WordPress plugin:
 - [x] Block editor sidebar; jump to the block.
 - [ ] Markers on the canvas; open the right setting ("Open the Alternative
       text field").
-- [ ] Front-end checker for logged-in editors on published pages and
-      previews.
+- [ ] Front-end checker for logged-in editors on previews and published
+      pages, and nothing for anyone else. It checks the whole page as
+      visitors get it: the theme's real colours, landmarks, menus, skip
+      links and a phone-width layout. Findings inside the post content say
+      "in your content" and link back to the block in the editor; the rest
+      say "in the theme or template". Same cards and tiles as the sidebar,
+      in a small floating panel, with markers beside the content.
+- [ ] Before publishing: one line in WordPress's pre-publish panel ("1 to
+      fix, 3 to confirm. Review"), which opens the sidebar. It never blocks
+      publishing.
 - [ ] Reviews: "Hide for me" and "Reviewed, it's fine" (with who, when and
       an optional note), stored in the site's database, reopenable.
 - [ ] Permissions: who can see the checker, who can mark items as reviewed.
@@ -169,6 +192,11 @@ the author's.
       assessed under where the pack gives one. Export as CSV and EARL.
 - [ ] **Site overview** built from editors' own page views (no crawler):
       top problems, pages with most problems, recent reviews.
+- [ ] **Posts list column** with each post's counts from its last check,
+      saved from the browser when the post is saved: nothing is scanned on
+      the server or sent anywhere.
+- [ ] **Site Editor:** templates, template parts, headers and footers
+      checked with the theme profile, where theme problems are fixed.
 - [ ] **WordPress Block Validation Framework** integration behind a setting,
       while it is experimental: our checks appear where WordPress shows its
       own, and errors can block publishing if the site chooses.
