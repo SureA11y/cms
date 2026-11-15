@@ -40,6 +40,11 @@ function surea11y_register_record_type() {
 			'rewrite'             => false,
 			'can_export'          => true,
 			'supports'            => array(),
+			// Capabilities nobody is given: records are written and removed
+			// only by this plugin's own code, never edited, read or deleted
+			// through WordPress's screens or the REST API.
+			'capability_type'     => SUREA11Y_RECORD_TYPE,
+			'map_meta_cap'        => true,
 		)
 	);
 }
@@ -182,7 +187,7 @@ function surea11y_clean_findings( $findings ) {
  * @return bool
  */
 function surea11y_evidence_permission( $request ) {
-	return surea11y_can_see() && current_user_can( 'edit_post', (int) $request['id'] );
+	return surea11y_can_see() && surea11y_checkable( (int) $request['id'] ) && current_user_can( 'edit_post', (int) $request['id'] );
 }
 
 /** The routes. */

@@ -25,6 +25,7 @@ require_once __DIR__ . '/includes/evidence.php';
 require_once __DIR__ . '/includes/overview.php';
 require_once __DIR__ . '/includes/columns.php';
 require_once __DIR__ . '/includes/site-editor.php';
+require_once __DIR__ . '/includes/privacy.php';
 
 /**
  * The locales the engine has messages for, besides English, each with its

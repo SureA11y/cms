@@ -19,6 +19,49 @@ A running log, newest first. Each entry says what was decided and why.
   end-to-end tests were run with the overrides.
 - **Remove them** once Playground raises its pins.
 
+## 2026-11-15: Security review before the release (Phase 3)
+
+Read every PHP file of the plugin and the browser code that handles the
+site's data. What holds, and what changed.
+
+- **Held.** Every REST route checks who may use it (the checker's own
+  capability and `edit_post`, `edit_theme_options` for rendering
+  templates, the review capability for answers); the REST API's cookie
+  nonce keeps other sites out. Input is cleaned and capped (keys 1,000
+  characters, notes 500, 50 keys a request, 300 findings a record, 20
+  records a post, 200 blocks and 1 MB a render). The one SQL query with
+  input is prepared. Output is escaped; CSV cells a spreadsheet would read
+  as a formula start with an apostrophe; the configuration is JSON in a
+  data script with `<`, `>` and `&` escaped. Content is only parsed in
+  inert templates and checked in a frame whose own policy runs no inline
+  handlers, frames or requests. WordPress sends no-cache headers to
+  logged-in people, so the page checker's configuration (with a REST nonce
+  and reviewers' names) isn't cached for others.
+- **Changed: the sandbox runs only the engine's own files.** Its policy
+  allowed scripts from the whole site's origin; it now names each script's
+  address (`scriptSources`), so no other script of the site could run in
+  it even if content smuggled one in.
+- **Changed: records can't be reached through WordPress.** The record post
+  type now has capabilities nobody is given, so no screen or API can edit,
+  read or delete a record; and the routes accept only real content (not a
+  record or a revision), through `surea11y_checkable()`.
+- **Changed: "Hide for me" is capped per person.** The editor preferences
+  it lives in go with every editor a person opens; at most 200 posts are
+  kept (those with the highest IDs, in the editor and on the server alike).
+- **Added: uninstall.** Deleting the plugin removes its settings, reviews,
+  summaries, records and each person's "Hide for me" entry, on every site
+  of a network. Deactivating keeps everything. The readme says to export
+  the records first.
+- **Added: privacy.** Suggested text for the site's privacy policy, and
+  WordPress's personal data export and erasure: the export lists a
+  person's answers and the records they made or answered in; erasure keeps
+  the answers as evidence and removes the person's account and notes.
+- **Not changed, on purpose.** Anyone who can edit a post may add records
+  of it; the last 20 are kept, and a record repeating the last isn't, so
+  the worst case is 20 records of 300 findings. Rendering templates runs
+  their blocks as WordPress does for visitors, for people who can already
+  edit them.
+
 ## 2026-11-15: Core ships inside each plugin release; sites get a new core by updating the plugin
 
 - **Bundled, not loaded.** The build puts core and the CMS pack into the

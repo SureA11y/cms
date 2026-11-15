@@ -235,6 +235,19 @@ function surea11y_can_see() {
 }
 
 /**
+ * Whether a post is content the checker checks: it exists, and isn't one of
+ * the plugin's own records or a revision. The REST routes take a post ID
+ * from the address; this keeps them to real content.
+ *
+ * @param int $post_id The post.
+ * @return bool
+ */
+function surea11y_checkable( $post_id ) {
+	$type = $post_id ? get_post_type( $post_id ) : false;
+	return $type && ! in_array( $type, array( 'surea11y_record', 'revision' ), true );
+}
+
+/**
  * Whether the current person can review findings on a post.
  *
  * @param int $post_id The post.
@@ -242,5 +255,5 @@ function surea11y_can_see() {
  */
 function surea11y_can_review( $post_id ) {
 	$settings = surea11y_settings();
-	return $post_id && current_user_can( 'edit_post', $post_id ) && current_user_can( $settings['review_cap'] );
+	return $post_id && surea11y_checkable( $post_id ) && current_user_can( 'edit_post', $post_id ) && current_user_can( $settings['review_cap'] );
 }

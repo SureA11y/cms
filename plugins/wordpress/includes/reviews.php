@@ -95,7 +95,7 @@ function surea11y_clean_keys( $keys ) {
  */
 function surea11y_reviews_read_permission( $request ) {
 	$post_id = (int) $request['id'];
-	return surea11y_can_see() && current_user_can( 'edit_post', $post_id );
+	return surea11y_can_see() && surea11y_checkable( $post_id ) && current_user_can( 'edit_post', $post_id );
 }
 
 /**
