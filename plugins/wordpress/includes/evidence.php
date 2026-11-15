@@ -229,6 +229,7 @@ function surea11y_add_record( $request ) {
 		$records[] = $record;
 		$records   = array_slice( $records, -SUREA11Y_MAX_RECORDS );
 		update_post_meta( $post_id, SUREA11Y_EVIDENCE_META, $records );
+		surea11y_update_summary( $post_id );
 	}
 	$response = surea11y_get_records( $request );
 	$response->data['added'] = $added;

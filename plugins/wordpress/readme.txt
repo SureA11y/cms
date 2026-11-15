@@ -53,6 +53,9 @@ editor has finished loading.
 == Changelog ==
 
 = Unreleased =
+* Dashboard → Accessibility: the problems found on the most pages, the
+  pages with the most to fix, and your team's latest answers, from the
+  checks people have run. Nothing is crawled.
 * A record of each check, kept with the post when you save and when you
   check the page, with your team's answers. Download it as CSV or EARL from
   the Accessibility sidebar.

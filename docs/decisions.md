@@ -2,6 +2,34 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: The site overview reads a summary per post, never the records
+
+- **Where.** Dashboard → Accessibility, for anyone who sees the checker and
+  can edit posts. Each person sees only the posts they can edit, checked
+  one by one with `edit_post`.
+- **From what.** What people already recorded: each post's latest record
+  (editor or page, whichever came last) and its answers as they are now, so
+  an answer given after the check counts ("it's fine" removes the place,
+  "it's a problem" moves it to To fix). Nothing is crawled or scanned on
+  the server. A post nobody has checked is not in it, and the page says so.
+- **How it stays cheap.** A summary per post, `_surea11y_summary` (about
+  2 KB: counts per group, per rule, the last five answers), rewritten when
+  a record is added or an answer changes. The overview reads that one meta
+  key across posts in one query, not through `WP_Query`, which would load
+  every meta of each post, the records included; then one query for the
+  posts. The 1,000 most recently checked posts at most. Measured: 3 queries
+  and 3.4 ms for the test site; aggregating 1,000 synthetic summaries takes
+  12 ms. Posts recorded before summaries existed get one on the next visit,
+  50 at a time.
+- **What it shows.** The problems found on the most pages, with WCAG
+  criteria and whether each is fixed in the content of each page or once in
+  the theme (from the pack's content and theme profiles); the pages with the
+  most to fix; the latest answers with their notes. Server-made tables in
+  WordPress's own styles, no script. One link per cell: a second link under
+  the title sat closer than 2.5.8's spacing, which our own check caught.
+- **Not yet.** Rule titles are core's, in English and written for
+  developers; plain titles per rule in every language are a plan item.
+
 ## 2026-11-15: The evidence trail: records on save and on page checks, kept with the post
 
 - **When.** A record is made when the post is saved by hand in the editor

@@ -267,8 +267,14 @@ the author's.
       profile is assessed under where the pack gives one.
 - [ ] Evidence trail: a record on demand ("Record this check"), and records
       kept longer, if sites ask (a candidate for the paid tier).
-- [ ] **Site overview** built from editors' own page views (no crawler):
-      top problems, pages with most problems, recent reviews.
+- [x] **Site overview** built from editors' own page views (no crawler):
+      top problems, pages with most problems, recent reviews. Dashboard →
+      Accessibility, from a summary kept per post (`_surea11y_summary`) of
+      its latest record and its answers as they are now; three queries and
+      about 2 KB per post. Each person sees the posts they can edit.
+- [ ] Site overview: plain-language titles for each rule, in every
+      language. It shows core's titles today, written for developers
+      (`<img> alt text must be appropriate`), in English.
 - [ ] **Posts list column** with each post's counts from its last check,
       saved from the browser when the post is saved: nothing is scanned on
       the server or sent anywhere.

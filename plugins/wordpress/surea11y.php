@@ -22,6 +22,7 @@ require_once __DIR__ . '/includes/settings.php';
 require_once __DIR__ . '/includes/reviews.php';
 require_once __DIR__ . '/includes/hidden.php';
 require_once __DIR__ . '/includes/evidence.php';
+require_once __DIR__ . '/includes/overview.php';
 
 /**
  * The locales the engine has messages for, besides English, each with its
