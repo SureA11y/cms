@@ -1,0 +1,154 @@
+// Markers beside the content: a small round button next to each content item
+// with a finding, in the group's colour and icon. Clicking one shows that
+// finding in the list.
+//
+// They are a shortcut for pointer users, not the only way in: everything a
+// marker does, the list and its arrows do from the keyboard. So markers
+// stay out of the tab order and out of the accessibility tree, and add no
+// stops to the editor's own keyboard navigation.
+//
+// The markers live in their own shadow root, positioned over the document
+// that shows the content (the editor canvas), never inside the content: they
+// change nothing the author saves.
+
+import { tokenCss } from './tokens.js';
+import { icon } from './icons.js';
+
+const SIZE = 26;
+const GAP = 4;
+const MAX_PER_ITEM = 3;
+
+const STYLE = `
+${tokenCss()}
+:host { all: initial; }
+.marker {
+  position: absolute; width: ${SIZE}px; height: ${SIZE}px; padding: 0; margin: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--sa11y-radius-round); border: 2px solid var(--sa11y-surface);
+  color: var(--sa11y-on-accent); cursor: pointer; font: 600 11px/1 system-ui, sans-serif;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .2), 0 1px 3px rgba(0, 0, 0, .2);
+}
+.marker[data-group="problem"] { background: var(--sa11y-problem); }
+.marker[data-group="likely"] { background: var(--sa11y-likely); }
+.marker[data-group="review"] { background: var(--sa11y-review); }
+.marker[data-group="probably-fine"] { background: var(--sa11y-fine); }
+.marker[data-group="more"] { background: var(--sa11y-marked); }
+.marker[data-current="true"] { border-color: var(--sa11y-text); box-shadow: 0 0 0 2px var(--sa11y-surface), 0 0 0 4px var(--sa11y-text); }
+.marker:hover { transform: scale(1.1); }
+@media (prefers-reduced-motion: reduce) { .marker:hover { transform: none; } }
+@media (forced-colors: active) { .marker { border-color: ButtonText; background: ButtonFace; color: ButtonText; forced-color-adjust: none; } }
+`;
+
+/**
+ * Creates the markers in `doc`.
+ * - anchorFor(itemId): the element that shows a content item, or null.
+ * - onPick(cardKey, place): a marker was clicked.
+ * - label(card): the marker's tooltip.
+ * Returns { update(cards, current), position(), destroy(), doc }.
+ */
+export function createMarkers(doc, { anchorFor, onPick, label = (card) => card.summary }) {
+  const host = doc.createElement('div');
+  host.setAttribute('data-surea11y-markers', '');
+  host.setAttribute('aria-hidden', 'true');
+  host.style.cssText = 'position:absolute;top:0;left:0;width:0;height:0;z-index:30;';
+  const root = host.attachShadow({ mode: 'open' });
+  const style = doc.createElement('style');
+  style.textContent = STYLE;
+  const layer = doc.createElement('div');
+  root.append(style, layer);
+  doc.body.append(host);
+
+  let placed = []; // { button, itemId, slot }
+  let frame = 0;
+  const win = doc.defaultView;
+
+  function position() {
+    frame = 0;
+    const width = doc.documentElement.clientWidth;
+    for (const m of placed) {
+      const anchor = anchorFor(m.itemId);
+      if (!anchor || !anchor.isConnected) {
+        m.button.hidden = true;
+        continue;
+      }
+      const r = anchor.getBoundingClientRect();
+      // Beside the item's end edge, or just inside it when there is no room.
+      const outside = r.right + 12;
+      const left = outside + SIZE <= width ? outside : Math.max(0, r.right - SIZE - 4);
+      m.button.hidden = false;
+      m.button.style.left = `${left + win.scrollX}px`;
+      m.button.style.top = `${r.top + win.scrollY + m.slot * (SIZE + GAP)}px`;
+    }
+  }
+  function schedule() {
+    if (!frame) frame = win.requestAnimationFrame(position);
+  }
+
+  const resize = win.ResizeObserver ? new win.ResizeObserver(schedule) : null;
+  if (resize) resize.observe(doc.body);
+  win.addEventListener('resize', schedule);
+
+  function makeButton(group, text, title, pick, current) {
+    const b = doc.createElement('button');
+    b.type = 'button';
+    b.className = 'marker';
+    b.tabIndex = -1;
+    b.dataset.group = group;
+    b.title = title;
+    if (current) b.dataset.current = 'true';
+    if (text) b.textContent = text;
+    else b.append(icon(doc, `mark-${group}`, 16, 2.6));
+    // Keep the editor from taking the click as a click on its canvas.
+    b.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    b.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      pick();
+    });
+    return b;
+  }
+
+  /** Draws one marker per place of each card still open. */
+  function update(cards, current) {
+    layer.textContent = '';
+    placed = [];
+    const perItem = new Map();
+    for (const card of cards || []) {
+      if (card.marked) continue;
+      card.places.forEach((p, place) => {
+        if (!p.itemId) return;
+        if (!perItem.has(p.itemId)) perItem.set(p.itemId, []);
+        perItem.get(p.itemId).push({ card, place });
+      });
+    }
+    for (const [itemId, list] of perItem) {
+      const shown = list.length > MAX_PER_ITEM ? list.slice(0, MAX_PER_ITEM - 1) : list;
+      shown.forEach(({ card, place }, slot) => {
+        const isCurrent = !!current && current.cardKey === card.key && current.place === place;
+        const button = makeButton(card.group, '', label(card), () => onPick(card.key, place), isCurrent);
+        layer.append(button);
+        placed.push({ button, itemId, slot });
+      });
+      if (shown.length < list.length) {
+        const rest = list.slice(shown.length);
+        const first = rest[0];
+        const button = makeButton('more', `+${rest.length}`, rest.map((r) => label(r.card)).join('\n'), () => onPick(first.card.key, first.place), false);
+        layer.append(button);
+        placed.push({ button, itemId, slot: shown.length });
+      }
+    }
+    position();
+  }
+
+  function destroy() {
+    if (frame) win.cancelAnimationFrame(frame);
+    if (resize) resize.disconnect();
+    win.removeEventListener('resize', schedule);
+    host.remove();
+  }
+
+  return { update, position: schedule, destroy, doc, host };
+}

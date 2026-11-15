@@ -3,7 +3,7 @@
 // (prototypes/phase-0/make-content.php).
 //
 //   WP_URL=http://127.0.0.1:8881 WP_USER=admin WP_PASS=... CHROMIUM=/path/to/chrome \
-//     POST_TYPICAL=9 POST_LONG=10 node --test tests/e2e/
+//     POST_TYPICAL=9 POST_LONG=10 npm run test:e2e
 //
 // Skipped when WP_URL is not set.
 import test from 'node:test';
@@ -148,6 +148,77 @@ test("the sidebar passes the engine's own checks", { skip }, async (t) => {
       .map((c) => `${c.ruleId}: ${(c.occurrences || []).map((o) => o.summary).join(' | ')}`);
   });
   assert.deepEqual(own, [], 'no WCAG failures in the sidebar');
+});
+
+const markerButtons = (page) =>
+  page.evaluate(() => {
+    const doc = document.querySelector('iframe[name="editor-canvas"]').contentDocument;
+    const host = doc.querySelector('[data-surea11y-markers]');
+    return host ? [...host.shadowRoot.querySelectorAll('button')].map((b) => ({ group: b.dataset.group, current: b.dataset.current === 'true', hidden: b.hidden })) : [];
+  });
+
+test('markers sit beside the blocks, and one picks its finding', { skip }, async (t) => {
+  const browser = await chromium.launch({ executablePath: CHROMIUM });
+  t.after(() => browser.close());
+  const { page } = await openEditor(browser, POST_TYPICAL);
+  const expected = await page.evaluate(() => document.querySelector('surea11y-results').cards
+    .filter((c) => !c.marked).reduce((n, c) => n + Math.min(c.places.filter((p) => p.itemId).length, 99), 0));
+  const markers = await markerButtons(page);
+  assert.ok(markers.length > 0 && markers.length <= expected, `${markers.length} markers for ${expected} places`);
+  assert.ok(markers.every((m) => !m.hidden), 'every marker is placed');
+  // Markers are not part of the post.
+  const saved = await page.evaluate(() => window.wp.data.select('core/editor').getEditedPostContent());
+  assert.ok(!saved.includes('surea11y'), 'nothing of ours is in the content');
+  await page.evaluate(() => {
+    const doc = document.querySelector('iframe[name="editor-canvas"]').contentDocument;
+    doc.querySelector('[data-surea11y-markers]').shadowRoot.querySelector('button').click();
+  });
+  const current = await page.evaluate(() => document.querySelector('surea11y-results').shadowRoot.querySelector('li[aria-current="true"]') !== null);
+  assert.ok(current, 'the picked finding is marked in the list');
+  assert.ok((await markerButtons(page)).some((m) => m.current), 'and its marker too');
+});
+
+test('the arrows step through the places and keep focus in the sidebar', { skip }, async (t) => {
+  const browser = await chromium.launch({ executablePath: CHROMIUM });
+  t.after(() => browser.close());
+  const { page } = await openEditor(browser, POST_TYPICAL);
+  const next = page.locator('surea11y-results').getByRole('button', { name: 'Next finding' });
+  await next.click();
+  await next.click();
+  const state = await page.evaluate(() => {
+    const el = document.querySelector('surea11y-results');
+    return {
+      label: el.shadowRoot.querySelector('.nav-label').textContent,
+      focus: el.shadowRoot.activeElement && el.shadowRoot.activeElement.getAttribute('aria-label'),
+      selected: window.wp.data.select('core/block-editor').getSelectedBlockClientId(),
+      currentItem: (() => { const c = el.cards.find((x) => x.key === el.current.cardKey); return c.places[el.current.place].itemId; })()
+    };
+  });
+  assert.match(state.label, /^2 of \d+$/);
+  assert.equal(state.focus, 'Next finding');
+  assert.equal(state.selected, state.currentItem);
+});
+
+test('"Mark as fine" is kept for the person across reloads, and Undo brings it back', { skip }, async (t) => {
+  const browser = await chromium.launch({ executablePath: CHROMIUM });
+  t.after(() => browser.close());
+  let { context, page } = await openEditor(browser, POST_TYPICAL);
+  const counts = () => page.evaluate(() => [...document.querySelector('surea11y-results').shadowRoot.querySelectorAll('.tile .count')].map((c) => Number(c.textContent)));
+  const before = await counts();
+  const fine = page.locator('surea11y-results').locator('section[data-group="review"]').getByRole('button', { name: 'Mark as fine' }).first();
+  await fine.click();
+  const after = await counts();
+  assert.ok(after[2] < before[2], `review count drops (${before[2]} to ${after[2]})`);
+  // Preferences are saved for the user, a moment after the change.
+  await page.waitForTimeout(1500);
+  await context.close();
+  ({ context, page } = await openEditor(browser, POST_TYPICAL));
+  assert.deepEqual(await counts(), after, 'still marked after a reload');
+  const marked = page.locator('surea11y-results').locator('section[data-group="marked"]');
+  await marked.getByRole('button', { expanded: false }).click();
+  await marked.getByRole('button', { name: 'Undo' }).click();
+  assert.deepEqual(await counts(), before);
+  await page.waitForTimeout(1500);
 });
 
 test.after(() => {
