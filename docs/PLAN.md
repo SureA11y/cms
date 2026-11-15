@@ -298,9 +298,15 @@ the author's.
       block, inside template parts too, and unsaved edits are checked.
 - [ ] Site Editor: reviews, "Hide for me" and the evidence trail for
       templates (they key on a post ID; a template's is its slug).
-- [ ] **WordPress Block Validation Framework** integration behind a setting,
-      while it is experimental: our checks appear where WordPress shows its
-      own, and errors can block publishing if the site chooses.
+- [ ] **WordPress Block Validation Framework** integration: **waiting**
+      (decided 2026-11-15, see `docs/decisions.md`). The framework is a
+      0.1.0 experiment in WordPress/accessibility-lab, not slated for core,
+      and takes only synchronous per-block checks; our findings could enter
+      only through an undocumented store action. Revisit when it gets a
+      documented way to report results computed elsewhere, or a path into
+      Gutenberg.
+- [ ] Optional publish blocking of our own, behind a setting, if sites ask:
+      only "To fix" findings, drafts still saved.
 - [ ] Content checks the engine lacks today (see "Engine dependencies").
 
 **Exit:** an editor can go from "problems found" to "every item fixed or

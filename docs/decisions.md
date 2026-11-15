@@ -2,6 +2,30 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: WordPress's Block Validation Framework: not yet
+
+- **What it is (checked 2026-11-15).** An experiment in the
+  WordPress/accessibility-lab plugin, version 0.1.0: no releases, not on
+  wordpress.org, not merged into Gutenberg. A WordPress accessibility team
+  post of 2026-08-21 says its block validation tools are "not currently
+  slated for inclusion into core"; its own readme calls experiments
+  unstable, and its changelog already has breaking changes. GPL-2.0-or-later.
+- **Why it doesn't fit yet.** Its checks are synchronous functions of a
+  block's attributes (`editor.validateBlock` and the like), run again only
+  when the block changes. Ours are found by a scan of the rendered post,
+  asynchronously. The only way to show results computed elsewhere is to
+  dispatch to its store (`setIssues` on `accessibility-lab/validation`),
+  which its documentation doesn't name: any release could break it, and an
+  issue sent as an error would lock saving.
+- **Not tested.** Its repository can't be downloaded from this machine, and
+  it needs building; code we haven't run against it won't ship.
+- **What the plan wanted, meanwhile.** Findings where editors look: our
+  sidebar, markers beside blocks, toolbar count and pre-publish line
+  already do that. Blocking publishing if a site chooses: possible on our
+  own later, as an opt-in setting, if sites ask.
+- **Revisit** when the framework documents a way to report results
+  computed elsewhere, or moves toward Gutenberg.
+
 ## 2026-11-15: The Site Editor: templates rendered on the server, checked in the browser
 
 - **Why not as posts are checked.** A post is checked from each block's
