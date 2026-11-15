@@ -64,3 +64,12 @@ test('markers sit outside the content, and leave nothing behind', () => {
   m.destroy();
   assert.equal(document.querySelector('[data-surea11y-markers]'), null);
 });
+
+test('with outline, the place last shown gets a frame', () => {
+  const m = createMarkers(document, { anchorFor: (id) => document.getElementById(id), onPick() {}, outline: true });
+  m.update([card('t', 'likely', ['b1', 'b2'])], { cardKey: 't', place: 1 });
+  assert.equal(m.host.shadowRoot.querySelectorAll('.outline').length, 1);
+  m.update([card('t', 'likely', ['b1', 'b2'])], null);
+  assert.equal(m.host.shadowRoot.querySelectorAll('.outline').length, 0);
+  m.destroy();
+});

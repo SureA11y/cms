@@ -1,0 +1,51 @@
+/*
+ * SureA11y in the block editor: the sidebar's padding, the count on the
+ * toolbar button and the pre-publish line. The results list styles itself
+ * (in its own shadow root, from the panel's design tokens).
+ */
+
+.surea11y-sidebar {
+	padding: 16px;
+}
+
+.surea11y-toolbar-icon {
+	position: relative;
+	display: inline-flex;
+}
+
+/* The same red as the panel's "problem" token; white on it is 6.1:1. */
+.surea11y-badge {
+	position: absolute;
+	top: -8px;
+	right: -10px;
+	min-width: 18px;
+	height: 18px;
+	padding: 0 4px;
+	box-sizing: border-box;
+	border: 2px solid #fff;
+	border-radius: 9px;
+	background: #b32d2e;
+	color: #fff;
+	font-size: 10px;
+	font-weight: 700;
+	line-height: 14px;
+	text-align: center;
+}
+
+@media (forced-colors: active) {
+	.surea11y-badge {
+		border-color: Canvas;
+		background: CanvasText;
+		color: Canvas;
+		forced-color-adjust: none;
+	}
+}
+
+.surea11y-prepublish-status {
+	margin-top: 0;
+	font-weight: 600;
+}
+
+.surea11y-prepublish-note {
+	color: #50575e;
+}

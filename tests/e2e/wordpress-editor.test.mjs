@@ -206,11 +206,22 @@ test('"Mark as fine" is kept for the person across reloads, and Undo brings it b
   const counts = () => page.evaluate(() => [...document.querySelector('surea11y-results').shadowRoot.querySelectorAll('.tile .count')].map((c) => Number(c.textContent)));
   const before = await counts();
   const fine = page.locator('surea11y-results').locator('section[data-group="review"]').getByRole('button', { name: 'Mark as fine' }).first();
+  // WordPress saves preferences to the server a few seconds after a change:
+  // wait until the server has them.
+  const serverMarks = (p, post) =>
+    p.waitForFunction(
+      async ({ post, want }) => {
+        const u = await window.wp.apiFetch({ path: '/wp/v2/users/me?context=edit' });
+        const fine = (u.meta.persisted_preferences.surea11y || {}).fine || {};
+        return want ? (fine[post] || []).length > 0 : (fine[post] || []).length === 0;
+      },
+      { post, want: true },
+      { timeout: 20000, polling: 1000 }
+    );
   await fine.click();
   const after = await counts();
+  await serverMarks(page, POST_TYPICAL);
   assert.ok(after[2] < before[2], `review count drops (${before[2]} to ${after[2]})`);
-  // Preferences are saved for the user, a moment after the change.
-  await page.waitForTimeout(1500);
   await context.close();
   ({ context, page } = await openEditor(browser, POST_TYPICAL));
   assert.deepEqual(await counts(), after, 'still marked after a reload');
@@ -218,7 +229,15 @@ test('"Mark as fine" is kept for the person across reloads, and Undo brings it b
   await marked.getByRole('button', { expanded: false }).click();
   await marked.getByRole('button', { name: 'Undo' }).click();
   assert.deepEqual(await counts(), before);
-  await page.waitForTimeout(1500);
+  await page.waitForFunction(
+    async (post) => {
+      const u = await window.wp.apiFetch({ path: '/wp/v2/users/me?context=edit' });
+      const fine = (u.meta.persisted_preferences.surea11y || {}).fine || {};
+      return (fine[post] || []).length === 0;
+    },
+    POST_TYPICAL,
+    { timeout: 20000, polling: 1000 }
+  );
 });
 
 test.after(() => {

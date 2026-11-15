@@ -25,3 +25,14 @@ test('a change during a scan schedules one more scan after it', async () => {
   assert.equal(runs, 2);
   s.cancel();
 });
+
+test('the pause can change between changes', async () => {
+  const timers = [];
+  let pause = 1000;
+  const s = createScheduler(async () => {}, { delay: () => pause, setTimer: (fn, ms) => (timers.push(ms), timers.length), clearTimer: () => {} });
+  s.changed();
+  pause = 3000;
+  s.changed();
+  assert.deepEqual(timers, [1000, 3000]);
+  s.cancel();
+});

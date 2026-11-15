@@ -69,3 +69,10 @@ test('the content and theme profiles share no rule', () => {
   const shared = ran(scan('cms-theme')).filter((id) => content.has(id) && !id.startsWith('cms-'));
   assert.deepEqual(shared, []);
 });
+
+test('the page profile runs both the content and the theme rules', () => {
+  const ids = ran(scan('cms-page'));
+  for (const id of ['img-alt-quality', 'p-as-heading', 'link-name-quality-link-only', 'cms-link-to-document', 'heading-order', 'region', 'page-title-present', 'text-spacing-content-loss']) {
+    assert.ok(ids.includes(id), `${id} runs`);
+  }
+});

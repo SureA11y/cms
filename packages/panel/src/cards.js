@@ -15,8 +15,10 @@ export function cardKey(f) {
  * marked as fine: a card is marked when all its places are.
  *
  * Each card: { key, group, ruleId, summary, hint, itemLabel, places, marked,
- * inContent }. `places` are the findings, in order; `inContent` is false when
- * none of them sits in a content item (a template or theme problem).
+ * inContent, outside }. `places` are the findings, in order. `inContent`
+ * (can be shown) is true when a place has an `itemId`; `outside` is true when
+ * every place is outside the author's content (a template or theme problem:
+ * a finding with no `itemId`, or one the host flags `outside`).
  */
 export function toCards(findings, marked = []) {
   const markedSet = marked instanceof Set ? marked : new Set(marked);
@@ -42,6 +44,7 @@ export function toCards(findings, marked = []) {
   for (const card of cards) {
     card.marked = card.places.every((p) => markedSet.has(p.key));
     card.inContent = card.places.some((p) => p.itemId);
+    card.outside = card.places.every((p) => p.outside || !p.itemId);
     const labels = new Set(card.places.map((p) => p.itemLabel).filter(Boolean));
     card.itemLabel = labels.size === 1 ? [...labels][0] : '';
   }

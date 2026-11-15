@@ -156,18 +156,26 @@ WordPress plugin:
 - [ ] Open the right setting ("Open the Alternative text field").
 - [x] "Mark as fine", kept per person and per post in their editor
       preferences (the "Hide for me" half of the reviews below).
-- [ ] Count on the toolbar button. It needs a check while the sidebar is
-      closed, so it comes with the pre-publish line.
-- [ ] Front-end checker for logged-in editors on previews and published
-      pages, and nothing for anyone else. It checks the whole page as
-      visitors get it: the theme's real colours, landmarks, menus, skip
-      links and a phone-width layout. Findings inside the post content say
-      "in your content" and link back to the block in the editor; the rest
-      say "in the theme or template". Same cards and tiles as the sidebar,
-      in a small floating panel, with markers beside the content.
-- [ ] Before publishing: one line in WordPress's pre-publish panel ("1 to
-      fix, 3 to confirm. Review"), which opens the sidebar. It never blocks
-      publishing.
+- [x] Count on the toolbar button: what to fix or confirm, from a check
+      that runs while the sidebar is closed (the first once the editor has
+      loaded and the browser is idle, then three seconds after each pause).
+- [x] Front-end checker for logged-in editors on previews and published
+      pages, and nothing for anyone else ("Check accessibility" in the
+      toolbar). It checks the whole page as visitors get it with the pack's
+      `cms-page` profile: content and theme rules together. Findings inside
+      the post content say "Your content" and link to the editor; the rest
+      say "Theme or template". Same cards and tiles as the sidebar, in a
+      panel at the side, with markers beside the elements and a frame
+      around the one shown.
+- [ ] Front-end checker: the "phone-width layout" check (a check at a
+      narrow width), and links that land on the block, not just the post.
+- [ ] Front-end checker: "Mark as fine" there too. Marks are kept in the
+      editor for now, where findings are tied to blocks; the same finding
+      on the published page has different markup (WordPress adds
+      attributes), so marks need a key that survives that first.
+- [x] Before publishing: one line in WordPress's pre-publish panel ("To
+      fix: 0. Likely problems to confirm: 1. Need a person: 3."), with a
+      button that opens the sidebar. It never blocks publishing.
 - [ ] Reviews: "Hide for me" and "Reviewed, it's fine" (with who, when and
       an optional note), stored in the site's database, reopenable.
 - [ ] Permissions: who can see the checker, who can mark items as reviewed.

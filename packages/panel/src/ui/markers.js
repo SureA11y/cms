@@ -35,6 +35,8 @@ ${tokenCss()}
 .marker[data-group="more"] { background: var(--sa11y-marked); }
 .marker[data-current="true"] { border-color: var(--sa11y-text); box-shadow: 0 0 0 2px var(--sa11y-surface), 0 0 0 4px var(--sa11y-text); }
 .marker:hover { transform: scale(1.1); }
+.outline { position: absolute; pointer-events: none; border: 2px solid var(--sa11y-focus); border-radius: var(--sa11y-radius-small); box-shadow: 0 0 0 2px var(--sa11y-surface); }
+@media (forced-colors: active) { .outline { border-color: Highlight; } }
 @media (prefers-reduced-motion: reduce) { .marker:hover { transform: none; } }
 @media (forced-colors: active) { .marker { border-color: ButtonText; background: ButtonFace; color: ButtonText; forced-color-adjust: none; } }
 `;
@@ -44,13 +46,18 @@ ${tokenCss()}
  * - anchorFor(itemId): the element that shows a content item, or null.
  * - onPick(cardKey, place): a marker was clicked.
  * - label(card): the marker's tooltip.
+ * - outline: also draw a frame around the place last shown (where the host
+ *   has no selection of its own to show it, such as a published page).
+ * - zIndex: the layer's stacking order.
+ * - reserveEnd(): the width, in px, kept clear at the window's end edge (where
+ *   a panel of the host's covers the page).
  * Returns { update(cards, current), position(), destroy(), doc }.
  */
-export function createMarkers(doc, { anchorFor, onPick, label = (card) => card.summary }) {
+export function createMarkers(doc, { anchorFor, onPick, label = (card) => card.summary, outline = false, zIndex = 30, reserveEnd = () => 0 }) {
   const host = doc.createElement('div');
   host.setAttribute('data-surea11y-markers', '');
   host.setAttribute('aria-hidden', 'true');
-  host.style.cssText = 'position:absolute;top:0;left:0;width:0;height:0;z-index:30;';
+  host.style.cssText = `position:absolute;top:0;left:0;width:0;height:0;z-index:${zIndex};`;
   const root = host.attachShadow({ mode: 'open' });
   const style = doc.createElement('style');
   style.textContent = STYLE;
@@ -59,12 +66,26 @@ export function createMarkers(doc, { anchorFor, onPick, label = (card) => card.s
   doc.body.append(host);
 
   let placed = []; // { button, itemId, slot }
+  let frameBox = null; // { box, itemId } around the place last shown
   let frame = 0;
   const win = doc.defaultView;
 
   function position() {
     frame = 0;
-    const width = doc.documentElement.clientWidth;
+    const width = doc.documentElement.clientWidth - reserveEnd();
+    if (frameBox) {
+      const anchor = anchorFor(frameBox.itemId);
+      frameBox.box.hidden = !anchor;
+      if (anchor) {
+        const r = anchor.getBoundingClientRect();
+        Object.assign(frameBox.box.style, {
+          left: `${r.left + win.scrollX - 4}px`,
+          top: `${r.top + win.scrollY - 4}px`,
+          width: `${r.width + 8}px`,
+          height: `${r.height + 8}px`
+        });
+      }
+    }
     for (const m of placed) {
       const anchor = anchorFor(m.itemId);
       if (!anchor || !anchor.isConnected) {
@@ -74,7 +95,7 @@ export function createMarkers(doc, { anchorFor, onPick, label = (card) => card.s
       const r = anchor.getBoundingClientRect();
       // Beside the item's end edge, or just inside it when there is no room.
       const outside = r.right + 12;
-      const left = outside + SIZE <= width ? outside : Math.max(0, r.right - SIZE - 4);
+      const left = outside + SIZE <= width ? outside : Math.max(0, Math.min(r.right, width) - SIZE - 4);
       m.button.hidden = false;
       m.button.style.left = `${left + win.scrollX}px`;
       m.button.style.top = `${r.top + win.scrollY + m.slot * (SIZE + GAP)}px`;
@@ -115,6 +136,17 @@ export function createMarkers(doc, { anchorFor, onPick, label = (card) => card.s
   function update(cards, current) {
     layer.textContent = '';
     placed = [];
+    frameBox = null;
+    if (outline && current) {
+      const card = (cards || []).find((c) => c.key === current.cardKey);
+      const place = card && card.places[current.place];
+      if (place && place.itemId) {
+        const box = doc.createElement('div');
+        box.className = 'outline';
+        layer.append(box);
+        frameBox = { box, itemId: place.itemId };
+      }
+    }
     const perItem = new Map();
     for (const card of cards || []) {
       if (card.marked) continue;

@@ -29,14 +29,23 @@ browser and is never sent anywhere.
 = Where is it? =
 
 In the editor, choose the accessibility icon in the top toolbar, or
-Options > Accessibility.
+Options > Accessibility. The icon shows how many things there are to fix or
+confirm, and the checks before publishing show the same in one line.
+
+On a preview or a published page, choose "Check accessibility" in the
+toolbar at the top. It checks the whole page, theme included, and tells you
+which findings are in your content and which are in the theme. Only people
+who can edit the page see it.
 
 = Does it slow the editor down? =
 
-It checks about a second after you stop typing, in a hidden frame, and only
-while its sidebar is open.
+It checks in a hidden frame a moment after you stop typing: one second while
+its sidebar is open, three seconds otherwise. The first check waits until the
+editor has finished loading.
 
 == Changelog ==
 
 = 0.1.0 =
-* First version: the editor sidebar.
+* First version: the editor sidebar, its count on the toolbar, a line in the
+  checks before publishing, and the page checker on previews and published
+  pages.
