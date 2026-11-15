@@ -1,0 +1,69 @@
+{
+  "headingOrder_review_HEADING_ORDER_SKIPPED_LEVEL_step1": "Find the heading the report names and the heading before it, and note their levels (H2, H3…). This panel's Headings view lists them in order.",
+  "headingOrder_review_HEADING_ORDER_SKIPPED_LEVEL_step2": "Read the section the heading starts, and decide whether it is part of the section above it (one level deeper) or a section of its own (the same level).",
+  "headingOrder_review_HEADING_ORDER_SKIPPED_LEVEL_step3": "Check that its level is at most one deeper than the heading before it: after an H2 comes an H2 or an H3, not an H4.",
+  "headingOrder_review_HEADING_ORDER_SKIPPED_LEVEL_pass": "The heading is at most one level deeper than the heading before it, so the outline has no gap.",
+  "headingOrder_review_HEADING_ORDER_SKIPPED_LEVEL_fail": "The heading is more than one level deeper than the heading before it, so people who move from heading to heading miss a level. This is a best practice (G141), not a WCAG failure.",
+
+  "img_altQuality_review_TEXT_ALTERNATIVE_REVIEW_step1": "Find the image the report names and read its alternative text, in the image's settings.",
+  "img_altQuality_review_TEXT_ALTERNATIVE_REVIEW_step2": "Look at the image and the text around it, and ask what the image shows that matters to a reader.",
+  "img_altQuality_review_TEXT_ALTERNATIVE_REVIEW_step3": "For a chart or a diagram, the details can be in a caption or in the text next to it; the alternative text then only needs to say what it is.",
+  "img_altQuality_review_TEXT_ALTERNATIVE_REVIEW_step4": "Decide whether the alternative text says what matters. A file name, a web address or a word like \"image\" does not.",
+  "img_altQuality_review_TEXT_ALTERNATIVE_REVIEW_pass": "The alternative text says what the image shows that a reader needs, or says what it is while a caption or the text next to it gives the rest.",
+  "img_altQuality_review_TEXT_ALTERNATIVE_REVIEW_fail": "Nothing tells a reader who can't see the image what it shows (the alternative text is a file name, for example), which fails WCAG 1.1.1 (F30).",
+
+  "img_altDecorative_review_EXCLUDED_ELEMENT_REVIEW_step1": "Find the image the report names. It is marked as decorative (its alternative text is empty), so screen readers skip it.",
+  "img_altDecorative_review_EXCLUDED_ELEMENT_REVIEW_step2": "Ask what a reader would miss if the image weren't there: information, a label, a chart's figures, or nothing.",
+  "img_altDecorative_review_EXCLUDED_ELEMENT_REVIEW_step3": "If it shows something that matters, check whether the text next to it already says the same.",
+  "img_altDecorative_review_EXCLUDED_ELEMENT_REVIEW_pass": "The image is only decoration, or the text next to it already says what it shows, so skipping it loses nothing.",
+  "img_altDecorative_review_EXCLUDED_ELEMENT_REVIEW_fail": "The image shows something nothing else on the page says, but screen readers skip it, which fails WCAG 1.1.1. Give it alternative text.",
+
+  "linkNameQualityLinkOnly_review_GENERIC_LINK_TEXT_IN_CONTEXT_step1": "Find the link the report names, \"{{name|the link}}\", and read its text on its own, without the sentence around it.",
+  "linkNameQualityLinkOnly_review_GENERIC_LINK_TEXT_IN_CONTEXT_step2": "Decide whether that text alone says where the link goes. Screen readers can list a page's links on their own, without the sentences around them.",
+  "linkNameQualityLinkOnly_review_GENERIC_LINK_TEXT_IN_CONTEXT_step3": "If it doesn't, the link text can say where it goes: \"the price list\" rather than \"click here\".",
+  "linkNameQualityLinkOnly_review_GENERIC_LINK_TEXT_IN_CONTEXT_pass": "The link text says where the link goes on its own.",
+  "linkNameQualityLinkOnly_review_GENERIC_LINK_TEXT_IN_CONTEXT_fail": "Only the sentence around the link says where it goes, which fails WCAG 2.4.9 (AAA, F84).",
+
+  "linkNameQuality_review_GENERIC_LINK_TEXT_IN_CONTEXT_step1": "Find the link the report names, \"{{name|the link}}\", and read its text on its own, without the sentence around it.",
+  "linkNameQuality_review_GENERIC_LINK_TEXT_IN_CONTEXT_step2": "Decide whether that text alone says where the link goes. Screen readers can list a page's links on their own, without the sentences around them.",
+  "linkNameQuality_review_GENERIC_LINK_TEXT_IN_CONTEXT_step3": "If it doesn't, the link text can say where it goes: \"the price list\" rather than \"click here\".",
+  "linkNameQuality_review_GENERIC_LINK_TEXT_IN_CONTEXT_pass": "The link text says where the link goes on its own.",
+  "linkNameQuality_review_GENERIC_LINK_TEXT_IN_CONTEXT_fail": "Only the sentence around the link says where it goes, which fails WCAG 2.4.9 (AAA, F84).",
+
+  "pAsHeading_review_BOLD_SHORT_PARAGRAPH_step1": "Find the bold line the report names and read it together with the text after it.",
+  "pAsHeading_review_BOLD_SHORT_PARAGRAPH_step2": "Decide whether it is a title for that text, as \"Opening hours\" is above the hours, or emphasis that belongs to the text.",
+  "pAsHeading_review_BOLD_SHORT_PARAGRAPH_step3": "If it is a title, check in the editor whether it is a heading or a paragraph made bold.",
+  "pAsHeading_review_BOLD_SHORT_PARAGRAPH_pass": "The bold line is emphasis, a label or a note that is part of the text, or it is already a heading.",
+  "pAsHeading_review_BOLD_SHORT_PARAGRAPH_fail": "The bold line is a title for the text after it but is a paragraph made bold, so screen reader users can't find it among the headings, which fails WCAG 1.3.1 (F2). Make it a heading.",
+
+  "pAsHeading_review_BOLD_LARGE_PARAGRAPH_step1": "Find the large bold text the report names and read it together with the text after it.",
+  "pAsHeading_review_BOLD_LARGE_PARAGRAPH_step2": "Decide whether it is a title for that text, or emphasis, a quotation, a price or a figure.",
+  "pAsHeading_review_BOLD_LARGE_PARAGRAPH_step3": "If it is a title, check in the editor whether it is a heading or a paragraph made large and bold.",
+  "pAsHeading_review_BOLD_LARGE_PARAGRAPH_pass": "The text is not a title (it is emphasis, a quotation, a price or a figure), or it is already a heading.",
+  "pAsHeading_review_BOLD_LARGE_PARAGRAPH_fail": "The text is a title for what follows but is a paragraph made large and bold, so screen reader users can't find it among the headings, which fails WCAG 1.3.1 (F2). Make it a heading.",
+
+  "pAsHeading_review_HEADING_LIKE_LINK_step1": "Find the large bold link the report names and read it together with the text after it.",
+  "pAsHeading_review_HEADING_LIKE_LINK_step2": "Decide whether it is a title for that text, as a post's title in a list of posts is, or just a link.",
+  "pAsHeading_review_HEADING_LIKE_LINK_step3": "If it is a title, check in the editor whether it is a heading with a link in it, or a paragraph with a large bold link.",
+  "pAsHeading_review_HEADING_LIKE_LINK_pass": "The link is not a title, or it is already inside a heading.",
+  "pAsHeading_review_HEADING_LIKE_LINK_fail": "The link is a title for what follows but is not a heading, so screen reader users can't find it among the headings, which fails WCAG 1.3.1 (F2). Put it in a heading.",
+
+  "pAsHeading_review_HEADING_LIKE_NUMBER_step1": "Find the large bold number the report names (a year, for example) and read it together with the text after it.",
+  "pAsHeading_review_HEADING_LIKE_NUMBER_step2": "Decide whether it is a title for that text, as a year is above that year's events, or a figure, such as a price or a statistic.",
+  "pAsHeading_review_HEADING_LIKE_NUMBER_step3": "If it is a title, check in the editor whether it is a heading or a paragraph made large and bold.",
+  "pAsHeading_review_HEADING_LIKE_NUMBER_pass": "The number is a figure, not a title, or it is already a heading.",
+  "pAsHeading_review_HEADING_LIKE_NUMBER_fail": "The number is a title for what follows but is a paragraph made large and bold, so screen reader users can't find it among the headings, which fails WCAG 1.3.1 (F2). Make it a heading.",
+
+  "tdHasHeader_review_TD_TABLE_NO_HEADERS_step1": "Look at the table the report names.",
+  "tdHasHeader_review_TD_TABLE_NO_HEADERS_step2": "Decide whether it holds data in rows and columns, with a top row or first column that labels the rest, or only places content side by side.",
+  "tdHasHeader_review_TD_TABLE_NO_HEADERS_step3": "If it holds data, check in the table's settings that its top row is set as a header row.",
+  "tdHasHeader_review_TD_TABLE_NO_HEADERS_pass": "The table only places content side by side, or its label row is set as a header row.",
+  "tdHasHeader_review_TD_TABLE_NO_HEADERS_fail": "The table holds data but has no header row, so screen reader users aren't told what each value means, which fails WCAG 1.3.1 (F46).",
+
+  "contrastComputable_review_BACKGROUND_IMAGE_OR_GRADIENT_step1": "Find the text the report names and look at the image or gradient behind it.",
+  "contrastComputable_review_BACKGROUND_IMAGE_OR_GRADIENT_step2": "Find the part of the background behind the letters that is closest to the text's colour: the lightest part behind dark text, the darkest behind light text.",
+  "contrastComputable_review_BACKGROUND_IMAGE_OR_GRADIENT_step3": "Compare the text's colour with it in a contrast checker: it needs 4.5:1, or 3:1 for large text (24 pixels, or 19 pixels in bold).",
+  "contrastComputable_review_BACKGROUND_IMAGE_OR_GRADIENT_step4": "If the image changes (on a narrow screen, or between slides), check each version.",
+  "contrastComputable_review_BACKGROUND_IMAGE_OR_GRADIENT_pass": "Every part of the background behind the letters gives at least that ratio, for example thanks to a dark overlay behind light text.",
+  "contrastComputable_review_BACKGROUND_IMAGE_OR_GRADIENT_fail": "Some part of the background behind the text is too close to its colour, below that ratio, which fails WCAG 1.4.3. A darker or lighter overlay, or a plain background behind the text, fixes it."
+}
