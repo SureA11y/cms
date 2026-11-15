@@ -235,6 +235,22 @@ the author's.
 
 ### Phase 2: What sets us apart
 
+**Done on 2026-11-15.** The exit test passed on the demo site's "Opening
+hours" page (local WordPress 7.1.4, core from main, reported as 1.17.0):
+four findings (a skipped heading level, a table without headers, "click
+here", a link to a PDF); the first three fixed in the blocks, the last
+answered "Yes, it's fine" with a note, leaving nothing open; a save by hand
+recorded "0 to fix, 0 likely problems, 0 needing a person", and the CSV
+held the answer, who gave it, the note, the WCAG and EN 301 549 columns and
+the engine and pack versions. Measured in the same run of the suite (36 of
+36 end-to-end tests passed): a check of the typical post takes 126 ms the
+first time and 39 ms after an edit, the long post 197 ms (render and scan;
+Phase 1's milestone measured 191, 51 and 295 ms); a whole page 327 ms; the
+Site Editor's header 132 ms after its render. Every size within budget (the
+panel 20.0 of 22 KB, the engine 515 of 540 KB, a language of questions at
+most 49.9 of 60 KB); visitors' pages load nothing of SureA11y. The items
+below still open wait for sites to ask for them, or on others (see each).
+
 - [x] **Questions instead of warnings.** Each uncertain result becomes a
       question the author answers (Yes / No / Not sure), built on core's "How
       to check" steps and what passing and failing look like (`passWhen`,
@@ -313,7 +329,7 @@ the author's.
 - [ ] Content checks the engine lacks today (see "Engine dependencies").
 
 **Exit:** an editor can go from "problems found" to "every item fixed or
-answered" on a page, and export the evidence.
+answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
 
 ### Phase 3: Public release on WordPress.org
 
