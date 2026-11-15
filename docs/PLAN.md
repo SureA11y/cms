@@ -251,7 +251,12 @@ the author's.
       images, link text that needs its sentence, text over an image), in
       five languages, and the first translations of the CMS pack rule's
       steps. Each replaces core's whole set; the others keep core's text.
-- [ ] Questions: more editor wording as sites show which steps editors meet
+- [x] Questions: more editor wording: nineteen more sets, those editors can
+      cause with blocks (contrast over images and faded blocks, tables,
+      embeds and icons, moving images, the phone-width check), in all five
+      languages. 30 of core's 289 sets are now in editors' words.
+- [ ] Questions: more editor wording as sites show which other steps
+      editors meet
       (contrast's other cases, lists, page titles).
 - [x] **Evidence trail.** A dated record of results and answers per page,
       mapped to WCAG 2.2. Export as CSV and EARL. A record is made on each

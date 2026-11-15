@@ -53,6 +53,9 @@ editor has finished loading.
 == Changelog ==
 
 = Unreleased =
+* "Check it" speaks an editor's language for nineteen more kinds of
+  finding: contrast over images, tables, embeds, moving images and the
+  phone-width check.
 * Rules are named in plain words, in your language, on the settings page
   and in the site overview.
 * An Accessibility column in the lists of posts and pages: each post's

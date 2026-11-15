@@ -155,6 +155,16 @@ A running log, newest first. Each entry says what was decided and why.
 - **Scope.** Twelve sets: those on the Phase 0 test posts that named
   developer tools or markup, plus text over an image. The rest keep core's
   wording until sites show editors meet them.
+- **Second round (2026-11-15).** Nineteen more sets, those editors can
+  cause with blocks: text over images and cover blocks, faded blocks, text
+  shadows, semi-bold text, logo text; empty table headers and a title typed
+  as the table's first row; alternative text that repeats the caption;
+  embeds, icons and objects; moving images and video; and the phone-width
+  check's four cases, which now point to "Check at phone width". Contrast
+  steps name "a contrast checker with an eyedropper" rather than any
+  product. Sets about code only a theme or plugin developer writes (ARIA,
+  widgets, form internals, the engine's own errors) keep core's wording,
+  which is right for that reader.
 
 ## 2026-11-15: Phase 2 starts with questions, as answers in the shared reviews
 
