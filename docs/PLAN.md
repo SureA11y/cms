@@ -257,7 +257,8 @@ the author's.
       mapped to WCAG 2.2. Export as CSV and EARL. A record is made on each
       save by hand in the editor and after each check of the page, with the
       answers given so far, and one that would repeat the last is not kept;
-      the last 20 per post are kept with it (`_surea11y_evidence`). The
+      the last 20 per post are kept as hidden child posts
+      (`surea11y_record`), not in the post's own meta. The
       sidebar shows the last and downloads the CSV (every record, a row per
       place, with the WCAG criteria and level, the answer, who and when) and
       the EARL (the latest: the checker's assertions, automatic, and each
@@ -275,9 +276,13 @@ the author's.
 - [ ] Site overview: plain-language titles for each rule, in every
       language. It shows core's titles today, written for developers
       (`<img> alt text must be appropriate`), in English.
-- [ ] **Posts list column** with each post's counts from its last check,
+- [x] **Posts list column** with each post's counts from its last check,
       saved from the browser when the post is saved: nothing is scanned on
-      the server or sent anywhere.
+      the server or sent anywhere. "Accessibility" in the lists of posts,
+      pages and other block-editor types, from the overview's summary: the
+      counts that aren't zero, "Nothing found" or "Not checked yet", and
+      the date. No query added: the list has already loaded each post's
+      meta.
 - [ ] **Site Editor:** templates, template parts, headers and footers
       checked with the theme profile, where theme problems are fixed.
 - [ ] **WordPress Block Validation Framework** integration behind a setting,

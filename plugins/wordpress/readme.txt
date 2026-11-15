@@ -53,6 +53,8 @@ editor has finished loading.
 == Changelog ==
 
 = Unreleased =
+* An Accessibility column in the lists of posts and pages: each post's
+  counts from its last check, with your team's answers since.
 * Dashboard → Accessibility: the problems found on the most pages, the
   pages with the most to fix, and your team's latest answers, from the
   checks people have run. Nothing is crawled.

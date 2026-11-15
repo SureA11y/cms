@@ -94,13 +94,16 @@ function surea11y_fill_missing_summaries() {
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Read once per visit to the overview; nothing to cache.
 	$ids = $wpdb->get_col(
 		$wpdb->prepare(
-			"SELECT e.post_id FROM {$wpdb->postmeta} e
-			LEFT JOIN {$wpdb->postmeta} s ON s.post_id = e.post_id AND s.meta_key = %s
-			WHERE e.meta_key IN (%s, %s) AND s.meta_id IS NULL
-			GROUP BY e.post_id LIMIT 50",
-			SUREA11Y_SUMMARY_META,
+			"SELECT t.id FROM (
+				SELECT post_parent AS id FROM {$wpdb->posts} WHERE post_type = %s
+				UNION SELECT post_id AS id FROM {$wpdb->postmeta} WHERE meta_key IN (%s, %s)
+			) t
+			LEFT JOIN {$wpdb->postmeta} s ON s.post_id = t.id AND s.meta_key = %s
+			WHERE s.meta_id IS NULL LIMIT 50",
+			SUREA11Y_RECORD_TYPE,
 			SUREA11Y_EVIDENCE_META,
-			SUREA11Y_REVIEWS_META
+			SUREA11Y_REVIEWS_META,
+			SUREA11Y_SUMMARY_META
 		)
 	);
 	foreach ( $ids as $id ) {
