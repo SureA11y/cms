@@ -360,3 +360,40 @@ test("the settings page passes the engine's own checks", { skip }, async () => {
   assert.deepEqual(own, []);
   await admin.context.close();
 });
+
+test('answers sent at the same moment by two people are all kept', { skip }, async (t) => {
+  // Each answer reads the post's answers, adds to them and writes them back;
+  // without the post's lock, two at once lost one (a stress test kept 32 of 40).
+  const admin = await login();
+  await editor(admin.page);
+  await ensureEditorUser(admin.page);
+  const eda = await login(EDITOR.username, EDITOR.password);
+  await editor(eda.page);
+  t.after(async () => {
+    await clearReviews(admin.page, POST_TYPICAL).catch(() => {});
+    await admin.context.close();
+    await eda.context.close();
+  });
+  await clearReviews(admin.page, POST_TYPICAL);
+  const send = (page, who, i) =>
+    page.evaluate(
+      ({ p, who, i }) =>
+        window.wp.apiFetch({
+          path: `/surea11y/v1/reviews/${p}`,
+          method: 'POST',
+          data: { keys: [`at-once|X|p||||${who} ${i}`], answer: 'pass', note: `${who} ${i}` }
+        }),
+      { p: POST_TYPICAL, who, i }
+    );
+  const all = [];
+  for (let i = 0; i < 10; i++) all.push(send(admin.page, 'admin', i), send(eda.page, 'eda', i));
+  await Promise.all(all);
+  const kept = await admin.page.evaluate(
+    async (p) =>
+      Object.keys((await window.wp.apiFetch({ path: `/surea11y/v1/reviews/${p}` })).reviews).filter(
+        (k) => k.startsWith('at-once|')
+      ).length,
+    POST_TYPICAL
+  );
+  assert.equal(kept, 20);
+});

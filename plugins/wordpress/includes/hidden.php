@@ -125,5 +125,12 @@ function surea11y_change_hidden( $request ) {
 	if ( ! $keys ) {
 		return new WP_Error( 'surea11y_no_keys', __( 'No finding to hide.', 'surea11y' ), array( 'status' => 400 ) );
 	}
-	return rest_ensure_response( array( 'hidden' => surea11y_set_hidden( (int) $request['id'], $keys, (bool) $request['hidden'] ) ) );
+	$hidden = surea11y_with_lock(
+		'user-' . get_current_user_id(),
+		function () use ( $request, $keys ) {
+			wp_cache_delete( get_current_user_id(), 'user_meta' );
+			return surea11y_set_hidden( (int) $request['id'], $keys, (bool) $request['hidden'] );
+		}
+	);
+	return is_wp_error( $hidden ) ? $hidden : rest_ensure_response( array( 'hidden' => $hidden ) );
 }

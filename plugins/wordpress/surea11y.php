@@ -19,6 +19,7 @@ define( 'SUREA11Y_VERSION', '0.1.0' );
 define( 'SUREA11Y_FILE', __FILE__ );
 
 require_once __DIR__ . '/includes/settings.php';
+require_once __DIR__ . '/includes/lock.php';
 require_once __DIR__ . '/includes/reviews.php';
 require_once __DIR__ . '/includes/hidden.php';
 require_once __DIR__ . '/includes/evidence.php';

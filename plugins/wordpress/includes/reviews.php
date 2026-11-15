@@ -199,41 +199,55 @@ function surea11y_add_reviews( $request ) {
 	} else {
 		$note = substr( $note, 0, SUREA11Y_MAX_NOTE );
 	}
-	$reviews = surea11y_stored_reviews( $post_id );
-	foreach ( $keys as $key ) {
-		unset( $reviews[ $key ] ); // Re-added at the end: the newest last.
-		$reviews[ $key ] = array(
-			'user'   => get_current_user_id(),
-			'date'   => gmdate( 'Y-m-d H:i:s' ),
-			'note'   => $note,
-			'answer' => surea11y_clean_answer( (string) $request['answer'] ),
-		);
-	}
-	if ( count( $reviews ) > SUREA11Y_MAX_REVIEWS ) {
-		$reviews = array_slice( $reviews, -SUREA11Y_MAX_REVIEWS, null, true );
-	}
-	update_post_meta( $post_id, SUREA11Y_REVIEWS_META, $reviews );
-	surea11y_update_summary( $post_id );
-	return surea11y_get_reviews( $request );
+	$answer = surea11y_clean_answer( (string) $request['answer'] );
+	$done   = surea11y_with_lock(
+		'post-' . $post_id,
+		function () use ( $post_id, $keys, $note, $answer ) {
+			surea11y_fresh_meta( $post_id );
+			$reviews = surea11y_stored_reviews( $post_id );
+			foreach ( $keys as $key ) {
+				unset( $reviews[ $key ] ); // Re-added at the end: the newest last.
+				$reviews[ $key ] = array(
+					'user'   => get_current_user_id(),
+					'date'   => gmdate( 'Y-m-d H:i:s' ),
+					'note'   => $note,
+					'answer' => $answer,
+				);
+			}
+			if ( count( $reviews ) > SUREA11Y_MAX_REVIEWS ) {
+				$reviews = array_slice( $reviews, -SUREA11Y_MAX_REVIEWS, null, true );
+			}
+			update_post_meta( $post_id, SUREA11Y_REVIEWS_META, $reviews );
+			surea11y_update_summary( $post_id );
+		}
+	);
+	return is_wp_error( $done ) ? $done : surea11y_get_reviews( $request );
 }
 
 /**
  * DELETE: reopens the findings.
  *
  * @param WP_REST_Request $request The request.
- * @return WP_REST_Response
+ * @return WP_REST_Response|WP_Error
  */
 function surea11y_remove_reviews( $request ) {
 	$post_id = (int) $request['id'];
-	$reviews = surea11y_stored_reviews( $post_id );
-	foreach ( surea11y_clean_keys( $request['keys'] ) as $key ) {
-		unset( $reviews[ $key ] );
-	}
-	if ( $reviews ) {
-		update_post_meta( $post_id, SUREA11Y_REVIEWS_META, $reviews );
-	} else {
-		delete_post_meta( $post_id, SUREA11Y_REVIEWS_META );
-	}
-	surea11y_update_summary( $post_id );
-	return surea11y_get_reviews( $request );
+	$keys    = surea11y_clean_keys( $request['keys'] );
+	$done    = surea11y_with_lock(
+		'post-' . $post_id,
+		function () use ( $post_id, $keys ) {
+			surea11y_fresh_meta( $post_id );
+			$reviews = surea11y_stored_reviews( $post_id );
+			foreach ( $keys as $key ) {
+				unset( $reviews[ $key ] );
+			}
+			if ( $reviews ) {
+				update_post_meta( $post_id, SUREA11Y_REVIEWS_META, $reviews );
+			} else {
+				delete_post_meta( $post_id, SUREA11Y_REVIEWS_META );
+			}
+			surea11y_update_summary( $post_id );
+		}
+	);
+	return is_wp_error( $done ) ? $done : surea11y_get_reviews( $request );
 }

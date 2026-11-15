@@ -107,7 +107,13 @@ function surea11y_fill_missing_summaries() {
 		)
 	);
 	foreach ( $ids as $id ) {
-		surea11y_update_summary( (int) $id );
+		surea11y_with_lock(
+			'post-' . (int) $id,
+			function () use ( $id ) {
+				surea11y_fresh_meta( (int) $id );
+				surea11y_update_summary( (int) $id );
+			}
+		);
 	}
 }
 

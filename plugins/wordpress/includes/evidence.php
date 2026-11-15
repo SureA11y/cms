@@ -300,10 +300,34 @@ function surea11y_get_records( $request ) {
  * source, findings and answers) is not added.
  *
  * @param WP_REST_Request $request The request.
- * @return WP_REST_Response
+ * @return WP_REST_Response|WP_Error
  */
 function surea11y_add_record( $request ) {
-	$post_id  = (int) $request['id'];
+	$post_id = (int) $request['id'];
+	$added   = surea11y_with_lock(
+		'post-' . $post_id,
+		function () use ( $post_id, $request ) {
+			surea11y_fresh_meta( $post_id );
+			return surea11y_add_record_now( $post_id, $request );
+		}
+	);
+	if ( is_wp_error( $added ) ) {
+		return $added;
+	}
+	$response                = surea11y_get_records( $request );
+	$response->data['added'] = $added;
+	return $response;
+}
+
+/**
+ * Adds the record, unless it repeats the last of its source; holding the
+ * post's lock.
+ *
+ * @param int             $post_id The post.
+ * @param WP_REST_Request $request The request.
+ * @return bool Whether it was added.
+ */
+function surea11y_add_record_now( $post_id, $request ) {
 	$findings = surea11y_clean_findings( $request['findings'] );
 	$reviews  = surea11y_stored_reviews( $post_id );
 	$answers  = array();
@@ -345,9 +369,7 @@ function surea11y_add_record( $request ) {
 		surea11y_store_record( $post_id, $record );
 		surea11y_update_summary( $post_id );
 	}
-	$response                = surea11y_get_records( $request );
-	$response->data['added'] = $added;
-	return $response;
+	return $added;
 }
 
 /**

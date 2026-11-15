@@ -19,6 +19,24 @@ A running log, newest first. Each entry says what was decided and why.
   end-to-end tests were run with the overrides.
 - **Remove them** once Playground raises its pins.
 
+## 2026-11-15: A lock per post, after a stress test lost answers
+
+- **Found.** 40 answers sent at the same moment by two people on one post:
+  32 kept. Each answer reads the post's answers, adds to them and writes
+  them back; two at once, and the later write erased the earlier. Records
+  were safe (each is its own post); summaries and "Hide for me" had the same
+  shape of risk.
+- **Fixed.** `surea11y_with_lock()` (`includes/lock.php`): a lock per post
+  around every change of its answers, records and summary, and per person
+  around "Hide for me". Taken with an `INSERT IGNORE` into the options
+  table, as WordPress's own upgrader does, so the database lets one request
+  through; reads inside start from what is stored, not a cached copy. A
+  lock older than 30 seconds is taken as left behind; a request that waits
+  more than 10 seconds gets a 409 "try again" instead of losing data.
+- **Checked.** The same stress three times: 40 of 40 kept, no lock left
+  behind. An end-to-end test now sends 20 answers from two people at once
+  and expects all 20.
+
 ## 2026-11-15: WordPress's coding standards in CI
 
 - **What.** `composer lint:php` runs PHP_CodeSniffer with WordPress-Extra,

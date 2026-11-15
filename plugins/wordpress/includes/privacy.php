@@ -200,20 +200,28 @@ function surea11y_erase_personal_data( $email, $page = 1 ) {
 	$removed = false;
 	if ( $user ) {
 		$batch = surea11y_privacy_page( $page );
-		foreach ( $batch['reviews'] as $post_id => $reviews ) {
-			$changed = false;
-			foreach ( $reviews as $key => $r ) {
-				if ( isset( $r['user'] ) && (int) $r['user'] === $user->ID ) {
-					$reviews[ $key ]['user'] = 0;
-					$reviews[ $key ]['note'] = '';
-					$changed                 = true;
+		foreach ( array_keys( $batch['reviews'] ) as $post_id ) {
+			$changed = surea11y_with_lock(
+				'post-' . $post_id,
+				function () use ( $post_id, $user ) {
+					surea11y_fresh_meta( $post_id );
+					$reviews = surea11y_stored_reviews( $post_id );
+					$changed = false;
+					foreach ( $reviews as $key => $r ) {
+						if ( isset( $r['user'] ) && (int) $r['user'] === $user->ID ) {
+							$reviews[ $key ]['user'] = 0;
+							$reviews[ $key ]['note'] = '';
+							$changed                 = true;
+						}
+					}
+					if ( $changed ) {
+						update_post_meta( $post_id, SUREA11Y_REVIEWS_META, $reviews );
+						surea11y_update_summary( $post_id );
+					}
+					return $changed;
 				}
-			}
-			if ( $changed ) {
-				update_post_meta( $post_id, SUREA11Y_REVIEWS_META, $reviews );
-				surea11y_update_summary( $post_id );
-				$removed = true;
-			}
+			);
+			$removed = $removed || true === $changed;
 		}
 		foreach ( $batch['records'] as $record_id ) {
 			$record = get_post_meta( $record_id, SUREA11Y_RECORD_META, true );
