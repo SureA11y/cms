@@ -104,6 +104,36 @@ test('a tile filters the list, and shows its state', () => {
   el.remove();
 });
 
+test('a marker shows its card from any view, filter or folded group', () => {
+  const el = make();
+  el.outline = { headings: [{ level: 2, text: 'Intro', itemId: 'b9' }], images: [] };
+  const card = (key) => el.cards.find((c) => c.places.some((p) => p.key === key));
+  const currentGroup = () => $(el, '.card[aria-current="true"]').closest('section').dataset.group;
+
+  // From the headings view: back to the findings, the card current.
+  el.view = 'headings';
+  assert.equal($(el, 'section[data-group]'), null);
+  el.showPlace(card('c').key);
+  assert.equal(el.view, 'findings');
+  assert.equal(currentGroup(), 'review');
+
+  // A filter that hides its group is cleared.
+  $$(el, '.tile')[1].click();
+  el.showPlace(card('a').key);
+  assert.deepEqual(
+    $$(el, 'section').map((s) => s.dataset.group),
+    ['problem', 'likely', 'review']
+  );
+  assert.equal(currentGroup(), 'problem');
+
+  // A folded group unfolds.
+  $(el, 'section[data-group="likely"] .group-toggle').click();
+  assert.equal($(el, 'section[data-group="likely"] ul'), null);
+  el.showPlace(card('b1').key);
+  assert.equal(currentGroup(), 'likely');
+  el.remove();
+});
+
 test('groups fold and unfold with a disclosure button', () => {
   const el = make();
   const toggle = $(el, 'section[data-group="likely"] .group-toggle');
