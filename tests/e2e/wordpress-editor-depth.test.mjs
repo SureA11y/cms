@@ -138,6 +138,51 @@ test('a finding opens the setting that fixes it, with focus on the field', { ski
   }
 });
 
+test('a heading finding opens its level, a link finding selects the link text, a contrast finding opens the text colour', { skip }, async (t) => {
+  const browser = await chromium.launch({ executablePath: CHROMIUM });
+  t.after(() => browser.close());
+  const { page } = await login(browser);
+  const cardWith = (text) => page.locator('surea11y-results').locator('li.card', { hasText: text });
+
+  // The skipped heading level: focus on the level it has now.
+  await editor(page, `/wp-admin/post.php?post=${POST_TYPICAL}&action=edit`);
+  await page.locator('surea11y-results').getByRole('button', { name: 'Change the heading level' }).first().click();
+  await page.waitForFunction(() => document.activeElement && document.activeElement.tagName === 'BUTTON' && /Heading 5/.test(document.activeElement.getAttribute('aria-label') || document.activeElement.textContent), null, { timeout: 5000 });
+  assert.equal(await page.evaluate(() => window.wp.data.select('core/block-editor').getSelectedBlock()?.name), 'core/heading');
+
+  // "click here": its text selected in the paragraph, ready to type over.
+  await editor(page, `/wp-admin/post.php?post=${POST_TYPICAL}&action=edit`);
+  await page.locator('surea11y-results').getByRole('button', { name: 'Select the link text' }).first().click();
+  await page.waitForFunction(() => {
+    const frame = document.querySelector('iframe[name="editor-canvas"]');
+    const doc = (frame && frame.contentDocument) || document;
+    return /\S/.test(String(doc.getSelection()));
+  }, null, { timeout: 5000 });
+  const selected = await page.evaluate(() => {
+    const frame = document.querySelector('iframe[name="editor-canvas"]');
+    const doc = (frame && frame.contentDocument) || document;
+    return String(doc.getSelection()).trim();
+  });
+  const linkCards = await page.evaluate(() =>
+    document.querySelector('surea11y-results').cards.filter((c) => ['link-name-quality', 'link-name-quality-link-only', 'cms-link-to-document'].includes(c.ruleId)).map((c) => c.places[0].html)
+  );
+  assert.ok(linkCards.some((html) => html.includes(`>${selected}<`)), `selected "${selected}" is a reported link`);
+
+  // Pale text the author chose: the Typography panel's Color button.
+  await editor(page, '/wp-admin/post-new.php');
+  await page.evaluate(() => {
+    const { createBlock } = window.wp.blocks;
+    window.wp.data.dispatch('core/block-editor').insertBlocks(createBlock('core/paragraph', { content: 'Pale text.', style: { color: { text: '#cccccc', background: '#ffffff' } } }));
+  });
+  await page.waitForFunction(() => document.querySelector('surea11y-results')?.findings.some((f) => f.ruleId === 'contrast-minimum'), null, { timeout: 15000 });
+  await cardWith('').getByRole('button', { name: 'Open the text colour' }).first().click();
+  await page.waitForFunction(() => {
+    const a = document.activeElement;
+    const panel = a && a.closest('.components-tools-panel');
+    return a.tagName === 'BUTTON' && a.textContent.trim() === 'Color' && panel && /Typography/.test(panel.querySelector('h2')?.textContent || '');
+  }, null, { timeout: 5000 });
+});
+
 test('"Hide for me" on a whole block survives a reload: the item id is not part of a finding', { skip }, async (t) => {
   const browser = await chromium.launch({ executablePath: CHROMIUM });
   t.after(() => browser.close());
@@ -157,6 +202,7 @@ test('"Hide for me" on a whole block survives a reload: the item id is not part 
   const before = await counts();
   // The bold-line finding is on the <p> itself, the block's own element.
   const card = page.locator('surea11y-results').locator('li.card', { hasText: 'This bold line comes before plain text' });
+  await card.getByRole('button', { name: 'More' }).click();
   await card.getByRole('button', { name: 'Hide for me' }).click();
   const after = await counts();
   assert.ok(after[2] < before[2]);

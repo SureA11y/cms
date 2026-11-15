@@ -246,6 +246,7 @@ test('"Reviewed, it\'s fine" takes an optional note, is shared, and can be reope
   el.addEventListener('surea11y-review', (e) => events.push(['review', e.detail]));
   el.addEventListener('surea11y-reopen', (e) => events.push(['reopen', e.detail]));
   const table = () => $$(el, 'li.card').find((c) => c.textContent.includes('table'));
+  [...table().querySelectorAll('button')].find((b) => b.textContent === 'More').click();
   [...table().querySelectorAll('button')].find((b) => b.textContent === "Reviewed, it's fine").click();
   // The form: a labelled note, focused, with Save and Cancel.
   const note = table().querySelector('textarea');
@@ -281,11 +282,34 @@ test('reviews set by the host show who and when; without permission there is no 
   el.remove();
 });
 
+test('with both review and hide, they sit behind "More", a disclosure', () => {
+  const el = make(null);
+  el.canReview = true;
+  el.findings = findings;
+  const table = () => $$(el, 'li.card').find((c) => c.textContent.includes('table'));
+  const names = () => [...table().querySelectorAll('button')].map((b) => b.textContent);
+  assert.deepEqual(names(), ['Show', 'How to fix', 'More']);
+  const more = () => [...table().querySelectorAll('button')].find((b) => b.textContent === 'More');
+  assert.equal(more().getAttribute('aria-expanded'), 'false');
+  more().click();
+  assert.equal(more().getAttribute('aria-expanded'), 'true');
+  assert.equal(el.shadowRoot.activeElement, more(), 'focus stays on More');
+  const row = el.shadowRoot.getElementById(more().getAttribute('aria-controls'));
+  assert.deepEqual([...row.querySelectorAll('button')].map((b) => b.textContent), ["Reviewed, it's fine", 'Hide for me']);
+  el.remove();
+  // With only one of them, it is shown at once.
+  const solo = make();
+  const card = $$(solo, 'li.card').find((c) => c.textContent.includes('table'));
+  assert.deepEqual([...card.querySelectorAll('button')].map((b) => b.textContent), ['Show', 'How to fix', 'Hide for me']);
+  solo.remove();
+});
+
 test('Escape closes the review form, and focus goes back to its button', () => {
   const el = make(null);
   el.canReview = true;
   el.findings = findings;
   const table = () => $$(el, 'li.card').find((c) => c.textContent.includes('table'));
+  [...table().querySelectorAll('button')].find((b) => b.textContent === 'More').click();
   [...table().querySelectorAll('button')].find((b) => b.textContent === "Reviewed, it's fine").click();
   table().querySelector('textarea').dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   assert.equal(table().querySelector('textarea'), null);

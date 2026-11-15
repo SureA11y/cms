@@ -109,6 +109,7 @@ test('a review with a note is shared: another person sees who, when and the note
   const userId = await ensureEditorUser(admin.page);
   // Review the bold line, with a note.
   const card = admin.page.locator('surea11y-results').locator('li.card', { hasText: 'This bold line comes before plain text' });
+  await card.getByRole('button', { name: 'More' }).click();
   await card.getByRole('button', { name: "Reviewed, it's fine" }).click();
   await admin.page.locator('surea11y-results').getByLabel('Note (optional)').fill('A styled lead-in, not a heading.');
   await admin.page.locator('surea11y-results').getByRole('button', { name: 'Save review' }).click();

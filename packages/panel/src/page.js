@@ -6,6 +6,7 @@
 // engine's selector, and no reference to the page is kept between checks.
 
 import { toFindings } from './findings.js';
+import { readOutline, pathSelector } from './outline.js';
 
 /**
  * Loads the engine into `doc` once (a <script> per URL, in order).
@@ -45,7 +46,8 @@ export function loadEngine(doc, urls) {
  * - profile, packs, locale, messages, runOnly: as for the engine.
  * - labels: { content, theme }: the tag each finding gets.
  *
- * Returns { findings, result, scanMs }. Each finding's `itemId` is its
+ * Returns { findings, outline, result, scanMs }: `outline` is the page's
+ * headings and images (readOutline). Each finding's `itemId` is its
  * selector, so a host can find the element again; `outside` is true for
  * findings outside the author's content.
  */
@@ -91,7 +93,15 @@ export function scanPage(doc, {
   });
   // The author's content first, then the theme; groups first within each.
   findings.sort((a, b) => Number(a.outside) - Number(b.outside));
-  return { findings, result, scanMs, skippedPacks: result.skippedPacks || [] };
+  // The page's headings and images, the theme's included, each marked
+  // inside or outside the author's content.
+  const outline = readOutline(doc.body, {
+    findings,
+    itemOf: (el) => pathSelector(el),
+    skip: excluded,
+    outside: (el) => !(content && content.contains(el))
+  });
+  return { findings, outline, result, scanMs, skippedPacks: result.skippedPacks || [] };
 }
 
 function isShown(doc, el) {

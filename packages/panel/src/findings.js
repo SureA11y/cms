@@ -110,6 +110,19 @@ function itemOf(doc, selector) {
   return item ? item.getAttribute(ITEM_ATTRIBUTE) : null;
 }
 
+/**
+ * A short form of a finding key, for a link that opens the editor on that
+ * finding ("Edit in the editor" on a page). The same key gives the same
+ * short form everywhere.
+ */
+export const FINDING_PARAM = 'surea11y-finding';
+export function shortKey(key) {
+  let h = 5381;
+  const text = String(key || '');
+  for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+
 /** Groups first, in GROUP_ORDER; within a group, in the content's order. */
 export function sortFindings(findings, itemOrder) {
   const order = itemOrder ? new Map(itemOrder.map((id, i) => [id, i])) : null;

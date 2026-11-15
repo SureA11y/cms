@@ -205,7 +205,9 @@ test('"Hide for me" is kept for the person across reloads, and Undo brings it ba
   let { context, page } = await openEditor(browser, POST_TYPICAL);
   const counts = () => page.evaluate(() => [...document.querySelector('surea11y-results').shadowRoot.querySelectorAll('.tile .count')].map((c) => Number(c.textContent)));
   const before = await counts();
-  const fine = page.locator('surea11y-results').locator('section[data-group="review"]').getByRole('button', { name: 'Hide for me' }).first();
+  // With "Reviewed, it's fine" also offered, both sit behind "More".
+  const firstCard = page.locator('surea11y-results').locator('section[data-group="review"] li.card').first();
+  const fine = firstCard.getByRole('button', { name: 'Hide for me' });
   // WordPress saves preferences to the server a few seconds after a change:
   // wait until the server has them.
   const serverMarks = (p, post) =>
@@ -218,6 +220,7 @@ test('"Hide for me" is kept for the person across reloads, and Undo brings it ba
       { post, want: true },
       { timeout: 20000, polling: 1000 }
     );
+  await firstCard.getByRole('button', { name: 'More' }).click();
   await fine.click();
   const after = await counts();
   await serverMarks(page, POST_TYPICAL);

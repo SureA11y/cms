@@ -19,8 +19,12 @@
 // - surea11y-review { keys, note }      reviewed and found fine, for everyone;
 // - surea11y-reopen { keys }            a review taken back;
 // - surea11y-retry {}                   the person asked to check again.
+//
+// With an `outline` (the content's headings and images), a row of toggle
+// buttons switches between the findings and two views: the headings in
+// order, and each image with what a screen reader says for it.
 
-import { GROUP_ORDER } from '../findings.js';
+import { GROUP_ORDER, shortKey, FINDING_PARAM } from '../findings.js';
 import { toCards, countPlaces } from '../cards.js';
 import { uiStrings, fill } from '../messages/ui.js';
 import { tokenCss } from './tokens.js';
@@ -83,7 +87,7 @@ h2, h3, h4, h5 { margin: 0; font-size: 1em; }
 .group-toggle[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 @media (prefers-reduced-motion: reduce) { .chevron { transition: none; } }
 .help { color: var(--sa11y-text-muted); margin-top: calc(-1 * var(--sa11y-space-1)); }
-ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sa11y-space-2); }
+ul, ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sa11y-space-2); }
 
 .card { padding: var(--sa11y-space-3); border-radius: var(--sa11y-radius); border: 1px solid var(--sa11y-border); background: var(--sa11y-surface); }
 .card[aria-current="true"] { border-width: 2px; }
@@ -94,6 +98,7 @@ ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: col
 .hint { margin-top: var(--sa11y-space-2); }
 .where { margin-top: var(--sa11y-space-2); font-style: italic; color: var(--sa11y-text-muted); }
 .actions { display: flex; flex-wrap: wrap; gap: var(--sa11y-space-2); margin-top: var(--sa11y-space-3); }
+.more-actions { margin-top: var(--sa11y-space-2); padding-top: var(--sa11y-space-2); border-top: 1px solid var(--sa11y-border); }
 
 ${GROUP_ORDER.concat('reviewed', 'marked')
   .map((g) => [g, g === 'probably-fine' || g === 'reviewed' ? 'fine' : g])
@@ -102,6 +107,19 @@ ${GROUP_ORDER.concat('reviewed', 'marked')
 .tile[data-group="${g}"][aria-pressed="true"], .card[data-group="${g}"][aria-current="true"] { border-color: var(--sa11y-${token}); background: var(--sa11y-${token}-tint); }`
   )
   .join('\n')}
+
+.views { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sa11y-space-1); }
+.view { min-height: var(--sa11y-button-height); padding: 2px var(--sa11y-space-1); line-height: 1.25; border-radius: var(--sa11y-radius-small); border: 1px solid var(--sa11y-border-strong); background: var(--sa11y-surface); }
+.view[aria-pressed="true"] { border: 2px solid var(--sa11y-accent); color: var(--sa11y-accent); font-weight: 600; }
+.entry { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sa11y-space-1) var(--sa11y-space-2); padding: var(--sa11y-space-2) var(--sa11y-space-3); border-radius: var(--sa11y-radius); border: 1px solid var(--sa11y-border); background: var(--sa11y-surface); }
+.entry-text { flex: 1 1 0; min-width: 6em; overflow-wrap: anywhere; }
+.entry-text em { color: var(--sa11y-text-muted); }
+.level { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: var(--sa11y-font-size-small); font-weight: 600; padding: 1px 6px; border-radius: var(--sa11y-radius-small); background: var(--sa11y-surface-tag); color: var(--sa11y-text-muted); }
+.flag { display: inline-flex; align-items: center; gap: 4px; font-size: var(--sa11y-font-size-small); font-weight: 600; }
+.entry .tags { margin: 0; flex-basis: 100%; }
+@media (forced-colors: active) {
+  .view[aria-pressed="true"] { border-color: Highlight; }
+}
 
 .review-meta { margin-top: var(--sa11y-space-2); color: var(--sa11y-text-muted); }
 .note { margin-top: var(--sa11y-space-1); padding: var(--sa11y-space-1) var(--sa11y-space-2); border-inline-start: 3px solid var(--sa11y-border); white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -137,7 +155,10 @@ export class ResultsElement extends HTMLElement {
     this._reviewer = '';
     this._reviewing = null; // the card whose review form is open
     this._howOpen = new Set();
+    this._moreOpen = new Set(); // cards whose "More" actions are shown
     this._current = null; // { cardKey, place }
+    this._outline = null; // { headings, images }, from the host
+    this._view = 'findings';
     const root = this.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = STYLE;
@@ -272,6 +293,28 @@ export class ResultsElement extends HTMLElement {
     return this._reviewer;
   }
 
+  /**
+   * The content's headings and images ({ headings, images }, as
+   * readOutline makes them). When set, the list offers a view of each.
+   */
+  set outline(value) {
+    this._outline = value && Array.isArray(value.headings) && Array.isArray(value.images) ? value : null;
+    if (!this._outline) this._view = 'findings';
+    this._render();
+  }
+  get outline() {
+    return this._outline;
+  }
+
+  /** 'findings', 'headings' or 'images'. */
+  set view(value) {
+    this._view = ['headings', 'images'].includes(value) && this._outline ? value : 'findings';
+    this._render();
+  }
+  get view() {
+    return this._view;
+  }
+
   /** The cards as shown, for hosts that draw markers. */
   get cards() {
     return this._cards || [];
@@ -337,7 +380,9 @@ export class ResultsElement extends HTMLElement {
     // its live region, read but not seen (the tiles show the counts).
     const kind =
       this._state === 'error' ? 'error' : this._state !== 'done' ? null : this._empty ? 'empty' : open.length ? 'found' : 'nothing';
-    const visible = kind && kind !== 'found';
+    const views = !!this._outline && (kind === 'found' || kind === 'nothing');
+    const listing = !views || this._view === 'findings';
+    const visible = kind && kind !== 'found' && (listing || !views);
     this._stateIcon.hidden = !visible;
     this._stateText.hidden = !visible;
     this._status.className = visible ? 'status' : 'status sr-only';
@@ -371,7 +416,9 @@ export class ResultsElement extends HTMLElement {
     }
 
     this._list.textContent = '';
-    if (kind === 'found' || (kind === 'nothing' && cards.length)) this._renderList(doc, t, cards, counts);
+    if (views) this._list.append(this._renderViews(doc, t));
+    if (!listing) this._list.append(this._renderOutline(doc, t, this._view));
+    else if (kind === 'found' || (kind === 'nothing' && cards.length)) this._renderList(doc, t, cards, counts);
     this._restoreFocus(focusId);
   }
 
@@ -441,6 +488,97 @@ export class ResultsElement extends HTMLElement {
       if (!group.cards.length) continue;
       this._list.append(this._renderGroup(doc, t, group, level));
     }
+  }
+
+  /** Findings, Headings, Images: toggle buttons, one pressed. */
+  _renderViews(doc, t) {
+    const bar = el(doc, 'div', 'views');
+    bar.setAttribute('role', 'group');
+    bar.setAttribute('aria-label', t.viewLabel);
+    const names = {
+      findings: t.viewFindings,
+      headings: fill(t.viewHeadings, { n: this._outline.headings.length }),
+      images: fill(t.viewImages, { n: this._outline.images.length })
+    };
+    for (const v of ['findings', 'headings', 'images']) {
+      const b = el(doc, 'button', 'view', names[v]);
+      b.type = 'button';
+      b.dataset.focus = `view:${v}`;
+      b.setAttribute('aria-pressed', String(this._view === v));
+      b.addEventListener('click', () => {
+        this._view = v;
+        this._render();
+        this._restoreFocus(`view:${v}`);
+      });
+      bar.append(b);
+    }
+    return bar;
+  }
+
+  /** The headings in order, or each image and what it says. */
+  _renderOutline(doc, t, view) {
+    const section = el(doc, 'section');
+    section.dataset.view = view;
+    const level = this._headingLevel;
+    const h = el(doc, `h${level}`, '', view === 'headings' ? t.headingsTitle : t.imagesTitle);
+    h.id = `${this._id}-${view}`;
+    section.setAttribute('aria-labelledby', h.id);
+    section.append(h, el(doc, 'p', 'help', view === 'headings' ? t.headingsHelp : t.imagesHelp));
+    const entries = view === 'headings' ? this._outline.headings : this._outline.images;
+    if (!entries.length) {
+      section.append(el(doc, 'p', 'state-text', view === 'headings' ? t.noHeadings : t.noImages));
+      return section;
+    }
+    const list = el(doc, view === 'headings' ? 'ol' : 'ul');
+    entries.forEach((entry, i) => {
+      const li = el(doc, 'li', 'entry');
+      const textId = `${this._id}-${view}-${i}`;
+      const text = el(doc, 'span', 'entry-text');
+      text.id = textId;
+      if (view === 'headings') {
+        li.style.marginInlineStart = `${Math.min(Math.max(entry.level - 1, 0), 5) * 12}px`;
+        const tag = el(doc, 'span', 'level', `H${entry.level}`);
+        tag.setAttribute('aria-hidden', 'true');
+        li.append(tag);
+        text.append(el(doc, 'span', 'sr-only', `${fill(t.level, { n: entry.level })}: `));
+        if (entry.text) text.append(doc.createTextNode(entry.text));
+        else text.append(el(doc, 'em', '', t.emptyHeading));
+      } else if (entry.alt === null) {
+        text.append(el(doc, 'strong', '', t.noAlt));
+      } else if (entry.decorative) {
+        text.append(el(doc, 'em', '', t.decorative));
+      } else {
+        text.append(doc.createTextNode(fill(t.quoted, { text: entry.alt })));
+      }
+      li.append(text);
+      // A finding reviewed or hidden no longer flags its entry.
+      const open = (entry.keys || []).some((k) => !this._reviews[k] && !this._marked.has(k));
+      if (entry.group && open) {
+        const flag = el(doc, 'span', 'flag');
+        flag.dataset.group = entry.group;
+        const ic = el(doc, 'span', 'group-icon');
+        ic.append(icon(doc, entry.group, 16));
+        flag.append(ic, el(doc, 'span', '', t.groups[entry.group]));
+        li.append(flag);
+      }
+      if (entry.itemId) {
+        const b = el(doc, 'button', 'button', t.show);
+        b.type = 'button';
+        b.dataset.focus = `outline:${view}:${i}`;
+        b.setAttribute('aria-describedby', textId);
+        b.addEventListener('click', () => this._emit('surea11y-show', { itemId: entry.itemId, finding: null, card: null, via: 'show' }));
+        li.append(b);
+      }
+      const tags = [view === 'images' && entry.src ? entry.src : '', entry.outside ? t.themeOrTemplate : ''].filter(Boolean);
+      if (tags.length) {
+        const box = el(doc, 'p', 'tags');
+        for (const tag of tags) box.append(el(doc, 'span', 'tag', tag));
+        li.append(box);
+      }
+      list.append(li);
+    });
+    section.append(list);
+    return section;
   }
 
   _navButton(doc, name, label, action) {
@@ -557,19 +695,53 @@ export class ResultsElement extends HTMLElement {
       }
       if (this._editUrl && !card.outside) {
         const a = el(doc, 'a', 'link edit', t.editInEditor);
-        a.href = this._editUrl;
+        // The editor opens on this finding.
+        const first = card.places.find((p) => p.key) || {};
+        a.href = first.key ? `${this._editUrl}${this._editUrl.includes('?') ? '&' : '?'}${FINDING_PARAM}=${shortKey(first.key)}` : this._editUrl;
         a.setAttribute('aria-describedby', id);
         a.dataset.focus = `card:${hash(card.key)}:edit`;
         actions.append(a);
       }
+      // Setting a finding aside: shown at once when it is the only such
+      // action, behind "More" when there are two, so a card shows at most
+      // four buttons and what fixes it comes first.
+      const later = [];
       if (this._canReview && card.group !== 'problem' && this._reviewing !== card.key) {
-        add(t.reviewedFine, 'button', 'review', () => {
+        later.push([t.reviewedFine, 'button', 'review', () => {
           this._reviewing = card.key;
           this._render();
           this._restoreFocus(`card:${hash(card.key)}:note`);
-        });
+        }]);
       }
-      if (this._canMark && card.group !== 'problem') add(t.hideForMe, 'link', 'fine', () => this._mark(card, true));
+      if (this._canMark && card.group !== 'problem') later.push([t.hideForMe, 'link', 'fine', () => this._mark(card, true)]);
+      if (later.length > 1) {
+        const open = this._moreOpen.has(card.key);
+        const moreId = `${id}-more`;
+        add(t.more, 'button more', 'more', () => {
+          if (this._moreOpen.has(card.key)) this._moreOpen.delete(card.key);
+          else this._moreOpen.add(card.key);
+          this._render();
+          this._restoreFocus(`card:${hash(card.key)}:more`);
+        });
+        const more = actions.lastChild;
+        more.setAttribute('aria-expanded', String(open));
+        if (open) {
+          more.setAttribute('aria-controls', moreId);
+          li.append(actions);
+          const row = el(doc, 'div', 'actions more-actions');
+          row.id = moreId;
+          const target = actions;
+          for (const a of later) {
+            add(...a);
+            row.append(target.lastChild);
+          }
+          li.append(row);
+          if (this._reviewing === card.key && !card.settled) li.append(this._reviewForm(doc, t, card, id));
+          return li;
+        }
+      } else {
+        for (const a of later) add(...a);
+      }
     }
     li.append(actions);
     if (this._reviewing === card.key && !card.settled) li.append(this._reviewForm(doc, t, card, id));

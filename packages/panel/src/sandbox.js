@@ -4,6 +4,7 @@
 // the first scan needs it.
 
 import { ITEM_ATTRIBUTE, toFindings, sortFindings } from './findings.js';
+import { readOutline } from './outline.js';
 
 const CONTENT_ID = 'surea11y-content';
 
@@ -122,8 +123,9 @@ export function createSandbox(hostDocument, options) {
      * the raw result and how long each step took, in milliseconds.
      * `runOnly` narrows the rules (core's runOnly: `excludeRuleIds` keeps the
      * profile and leaves rules out, `includeRuleIds` runs only those).
+     * `withOutline` adds the content's headings and images (readOutline).
      */
-    async scan(items, { profile = 'cms-content', packs = [], locale = 'en', messages, runOnly = null } = {}) {
+    async scan(items, { profile = 'cms-content', packs = [], locale = 'en', messages, runOnly = null, withOutline = false } = {}) {
       const win = await ready;
       const doc = win.document;
       const t0 = win.performance.now();
@@ -135,8 +137,10 @@ export function createSandbox(hostDocument, options) {
       const result = win.a11ycore.runa11yCoreInPage(win.location.href, `#${CONTENT_ID}`, engineOptions, runOnly);
       const t2 = win.performance.now();
       const findings = sortFindings(toFindings(result, doc), items.map((i) => i.id));
+      const outline = withOutline ? readOutline(main, { findings }) : null;
       return {
         findings,
+        outline,
         result,
         skippedPacks: result.skippedPacks || (result.engine && result.engine.skippedPacks) || [],
         timing: { renderMs: t1 - t0, scanMs: t2 - t1 }
