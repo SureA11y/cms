@@ -2,7 +2,8 @@
 
 How SureA11y for CMS gets from research to a first release, and beyond.
 Written from the [research report](research/2026-10-04-cms-checkers.md) and
-the [decisions](decisions.md) made so far. Last updated 2026-11-15, against `@surea11y/core` 1.17.0.
+the [decisions](decisions.md) made so far. Last updated 2026-11-15, against `@surea11y/core` 1.17.0, with the Phase 0
+results.
 
 ## Goal
 
@@ -61,6 +62,7 @@ Rules for the split:
 packages/panel/        @surea11y/panel            LICENSE: MPL-2.0
 plugins/wordpress/     WordPress plugin "SureA11y" LICENSE: GPL-2.0-or-later
 docs/                  plan, decisions, research
+prototypes/            throwaway experiments, such as Phase 0
 ```
 
 ## Phases
@@ -70,34 +72,41 @@ previous one passes, unless noted.
 
 ### Phase 0: Prototype (measure before building)
 
-Answer the questions the research could not, in a real browser:
+**Done on 2026-11-15.** Code and findings in
+[`prototypes/phase-0/`](../prototypes/phase-0/RESULTS.md). In short:
 
-- [ ] Load the browser bundle inside the WordPress block editor's canvas
-      (an iframe) using a local WordPress (wp-env or WordPress Playground).
-- [ ] Time a scan on short, typical and long posts; with and without the
-      contrast rules.
-- [ ] Time loading the bundle itself: 1.87 MB, or 0.49 MB compressed, in
-      core 1.17.0, more than twice the October size. Measure download, parse
-      and first-scan cost in the editor, and whether it should load only when
-      the checker is opened.
-- [ ] Load the "How to check" steps in the browser
-      (`@surea11y/core/how-to-check`): the bundle does not add them itself.
-- [ ] Confirm scoping to the post content works, and what the template adds
-      when the whole page is scanned.
-- [ ] Try mapping a finding's element back to its block (block client ID).
-- [ ] Check the front-end view for logged-in users: same engine, published
-      page.
+- [x] Load the engine inside the block editor's canvas: it works, but the
+      editor's own markup buries the author's content in findings and hides
+      a skipped heading level. **Scan a sandbox instead**: the blocks
+      rendered as WordPress saves them, in a hidden frame with the canvas's
+      styles. Same findings as the published page, every content finding
+      mapped to its block, no focus taken from the author.
+- [x] Time scans on short, typical and long posts, at full speed and with
+      the CPU slowed 4×: a typical post takes 22 ms with content-only rules
+      and contrast run apart (106 ms at 4×); the long post 74 ms (277 ms).
+- [x] Time loading the bundle: 26 to 43 ms to evaluate (141 to 153 ms at
+      4×); 1.87 MB, the heaviest asset of any checker tested.
+- [x] Scoping: the content area works; the whole page adds about 60 theme
+      findings per post.
+- [x] Map findings to blocks: all content findings mapped to top-level
+      blocks.
+- [x] "How to check" in the browser: 14 KB helper plus a 279 KB dictionary;
+      every uncertain finding got steps.
+- [x] Compare with three other checkers on the same posts: we match them on
+      3 of the 7 kinds of planted mistake and miss 4.
 
-**Exit:** real timings that set the performance budgets (see "Quality, in
-every phase"), and a decision on checking while typing (live, after
-a pause in typing, or on demand). If a typical post scans in under about
-200 ms, live checking after a pause is the default.
+**Decision needed:** the recommendations in
+[`RESULTS.md`](../prototypes/phase-0/RESULTS.md#recommendations): sandbox
+scanning, content and theme rule sets, contrast apart, scanning after a
+pause in typing, and closing the four content-check gaps before Phase 1
+ships.
 
 ### Phase 1: Panel and WordPress plugin, first usable version
 
 Panel:
 
-- [ ] Runner: scope, debounce, compact results for storage
+- [ ] Runner: render the blocks into a sandbox frame and scan that (see
+      Phase 0), after a pause in typing; compact results for storage
       (`output.detail: 'findings'`), treat a scope that matched nothing as an
       error, exclude rules that touch the live page (`.focus()`, injected
       styles).
@@ -123,7 +132,13 @@ WordPress plugin:
 - [ ] Settings: content area selector, rules on/off, severity.
 - [ ] No front-end changes for visitors. No external requests.
 
-**Exit:** installed on at least three real sites with different themes;
+- [ ] Content checks at least on par with the other checkers: "click here"
+      links inside paragraphs, links to PDF and Office files, bold
+      paragraphs used as headings, tables without headers (see "Engine
+      dependencies").
+
+**Exit:** finds at least what the other checkers find on the Phase 0 test
+posts; installed on at least three real sites with different themes;
 within the performance budgets; the panel passes its own accessibility
 checks and a manual screen-reader test; template problems never shown as
 the author's.
@@ -270,7 +285,10 @@ on 2026-11-15.
 | Compact results for storage | Phase 1 | Done: `output.detail: 'findings'` |
 | Other standards and laws | Phase 2 | Done, as packs (experimental until 1.18.0 for parts of the standard API) |
 | Option to skip rules that touch the live page | Phase 1 | Not found. Until then, exclude them by ID |
-| Content checks: PDF and Office links, ALL CAPS, fake lists, adjacent duplicate links, readability | Phase 2 | Not found in 1.17.0 (web address as link text: to check). Until then, custom rules in the panel, or a pack |
+| Content checks the others have: "click here" inside a paragraph, PDF and Office links, bold paragraphs used as headings, tables without headers | **Phase 1** (parity, found in Phase 0) | Missing in 1.17.0. A pack, or core |
+| More content checks: ALL CAPS, fake lists, adjacent duplicate links, readability, web address as link text | Phase 2 | Not found in 1.17.0. A pack, or core |
+| An official grouping of rules into content-level and theme-level | Phase 1 | Not in core. The prototype excludes 11 theme-level rules by ID |
+| Cheaper contrast for a few elements (the most expensive rule: 108 of 259 ms on the long post) | Phase 1 | Run contrast apart, less often |
 | Scan a given element or document | Only if Phase 0 shows it is needed | Not found. Load the bundle inside the iframe |
 | Yield to the browser during a scan | Only if Phase 0 shows it is needed | Not found. Scan after a pause in typing |
 
