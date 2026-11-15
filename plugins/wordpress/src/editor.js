@@ -248,11 +248,49 @@
 			}
 			return this.marked;
 		},
-		/** Places per group, leaving out what the person marked as fine. */
+		// The post's shared reviews: key -> { by, when, note }.
+		reviews: {},
+		/** Places per group, leaving out what was reviewed or hidden. */
 		counts() {
-			return Panel.countPlaces( Panel.toCards( this.findings, this.markedKeys() ) );
+			return Panel.countPlaces( Panel.toCards( this.findings, this.markedKeys(), this.reviews ) );
 		},
 	};
+
+	/*
+	 * Shared reviews ("Reviewed, it's fine"), kept with the post on the site
+	 * and read and written through the plugin's REST route. The list shows a
+	 * review at once; the answer from the site, with who and when, replaces
+	 * it, and an error takes it back.
+	 */
+	function setReviews( reviews ) {
+		checker.reviews = reviews && typeof reviews === 'object' && ! Array.isArray( reviews ) ? reviews : {};
+		checker.notify();
+	}
+	function loadReviews() {
+		if ( ! config.reviewsPath ) {
+			return;
+		}
+		wp.apiFetch( { path: config.reviewsPath } )
+			.then( ( r ) => setReviews( r.reviews ) )
+			.catch( ( error ) => window.console.error( '[SureA11y]', error ) ); // eslint-disable-line no-console
+	}
+	function sendReview( method, keys, note ) {
+		if ( ! config.reviewsPath ) {
+			return Promise.resolve();
+		}
+		const body = method === 'POST' ? { keys, note } : { keys };
+		return wp
+			.apiFetch( { path: config.reviewsPath, method, data: body } )
+			.then( ( r ) => setReviews( r.reviews ) )
+			.catch( ( error ) => {
+				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+				setReviews( Object.assign( {}, checker.reviews ) ); // takes back what the list showed
+			} );
+	}
+	loadReviews();
+
+	// Rules the site turned off, in Settings.
+	const DISABLED = Array.isArray( config.disabledRules ) ? config.disabledRules : [];
 
 	let sandbox = null;
 	function sandboxFor() {
@@ -285,7 +323,9 @@
 	 */
 	// Only rules the content profile runs: naming rules replaces the profile, so
 	// an AAA rule such as contrast-enhanced would otherwise join in.
-	const CONTRAST_RULES = [ 'contrast-minimum', 'contrast-computable', 'link-in-text-block' ];
+	const CONTRAST_RULES = [ 'contrast-minimum', 'contrast-computable', 'link-in-text-block' ].filter(
+		( id ) => ! ( Array.isArray( config.disabledRules ) && config.disabledRules.includes( id ) )
+	);
 	// WordPress marks the colours an author picks with has-…-color and
 	// has-…-background-color classes (and has-inline-color in text), or
 	// writes them in a style attribute.
@@ -310,7 +350,10 @@
 				locale: config.locale,
 				messages: Panel.messagesFor( config.locale ),
 			};
-			const out = await sandboxFor().scan( items, Object.assign( {}, options, { runOnly: { excludeRuleIds: CONTRAST_RULES } } ) );
+			const out = await sandboxFor().scan(
+				items,
+				Object.assign( {}, options, { runOnly: { excludeRuleIds: CONTRAST_RULES.concat( DISABLED ) } } )
+			);
 			if ( out.skippedPacks && out.skippedPacks.length ) {
 				throw new Error( out.skippedPacks.map( ( p ) => p.reason || p.name ).join( '; ' ) );
 			}
@@ -321,7 +364,7 @@
 			if ( key !== contrast.key ) {
 				contrast.findings = [];
 				contrast.ms = 0;
-				if ( coloured.length ) {
+				if ( coloured.length && CONTRAST_RULES.length ) {
 					const c = await sandboxFor().scan( coloured, Object.assign( {}, options, { runOnly: { includeRuleIds: CONTRAST_RULES } } ) );
 					contrast.findings = c.findings;
 					contrast.ms = c.timing.renderMs + c.timing.scanMs;
@@ -356,7 +399,11 @@
 		const blocks = data.select( 'core/block-editor' ).getBlocks();
 		if ( lastBlocks !== null && blocks !== lastBlocks ) {
 			dirty = true;
-			scheduler.changed();
+			// Without the background check (Settings), nothing runs while
+			// nobody looks: the next view to open checks at once.
+			if ( config.background !== false || checker.watching ) {
+				scheduler.changed();
+			}
 		}
 		lastBlocks = blocks;
 	} );
@@ -388,7 +435,9 @@
 	// The first check, for the toolbar count, once the browser is idle after
 	// the editor has loaded: it never competes with the editor starting up.
 	const idle = window.requestIdleCallback || ( ( fn ) => setTimeout( fn, 2000 ) );
-	setTimeout( () => idle( () => checker.state === 'idle' && scheduler.now(), { timeout: 5000 } ), 3000 );
+	if ( config.background !== false ) {
+		setTimeout( () => idle( () => checker.state === 'idle' && scheduler.now(), { timeout: 5000 } ), 3000 );
+	}
 
 	/** Re-renders a component when the checker changes. */
 	function useChecker() {
@@ -409,6 +458,10 @@
 		results.locale = config.locale;
 		results.marked = checker.markedKeys();
 		results.actionsFor = settingsFor;
+		results.canReview = !! config.canReview;
+		results.reviews = checker.reviews;
+		const me = data.select( 'core' ) && data.select( 'core' ).getCurrentUser ? data.select( 'core' ).getCurrentUser() : null;
+		results.reviewer = ( me && me.name ) || '';
 		host.appendChild( results );
 
 		// Markers beside the blocks, in the canvas. The canvas can be replaced
@@ -431,7 +484,13 @@
 		}
 
 		let shown = null;
+		let shownReviews = checker.reviews;
 		function sync() {
+			if ( shownReviews !== checker.reviews ) {
+				shownReviews = checker.reviews;
+				results.reviews = checker.reviews;
+				drawMarkers();
+			}
 			if ( checker.state === 'scanning' ) {
 				results.state = 'scanning';
 				return;
@@ -462,8 +521,18 @@
 			drawMarkers();
 			checker.notify();
 		};
+		const onReview = ( event ) => {
+			drawMarkers();
+			sendReview( 'POST', event.detail.keys, event.detail.note );
+		};
+		const onReopen = ( event ) => {
+			drawMarkers();
+			sendReview( 'DELETE', event.detail.keys );
+		};
 		results.addEventListener( 'surea11y-show', onShow );
 		results.addEventListener( 'surea11y-mark', onMark );
+		results.addEventListener( 'surea11y-review', onReview );
+		results.addEventListener( 'surea11y-reopen', onReopen );
 		results.addEventListener( 'surea11y-retry', retry );
 		const unsubscribe = checker.subscribe( sync );
 		const unwatch = watch();
@@ -474,6 +543,8 @@
 			unsubscribe();
 			results.removeEventListener( 'surea11y-show', onShow );
 			results.removeEventListener( 'surea11y-mark', onMark );
+			results.removeEventListener( 'surea11y-review', onReview );
+			results.removeEventListener( 'surea11y-reopen', onReopen );
 			results.removeEventListener( 'surea11y-retry', retry );
 			if ( markers ) {
 				markers.destroy();

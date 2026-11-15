@@ -33,6 +33,13 @@ post's content are marked "Your content", the rest "Theme or template".
 - **Where the content is on a page:** `.wp-block-post-content`,
   `.entry-content` or `.post-content`; a theme with its own can name it with
   the `surea11y_content_selector` filter.
+- **Reviews:** "Reviewed, it's fine", with who, when and a note, is kept
+  with the post and shared with everyone who edits it, in the editor and on
+  the page (`/wp-json/surea11y/v1/reviews/<post>`). "Hide for me" is one
+  person's.
+- **Settings:** Settings → Accessibility checker: who sees the checker, who
+  can review, where the content is on a page, the background check, and
+  rules turned off.
 - **Nothing for visitors:** it loads only for people who can edit the post,
   and the engine only when a check runs. It sends nothing anywhere.
 
@@ -44,7 +51,9 @@ post's content are marked "Your content", the rest "Theme or template".
 | `src/editor.js` | The sidebar, the toolbar count and the pre-publish line, on WordPress's globals, with no build step. |
 | `src/editor.css` | The count on the toolbar button and the pre-publish line. |
 | `src/page.js` | The page checker on previews and published pages. |
-| `build/` | Built by `node scripts/build.mjs` at the repository root: `panel.js`, `engine.js` (core with the pack built in), the engine's message files. Not committed. |
+| `includes/settings.php` | The settings page, and who may see and review. |
+| `includes/reviews.php` | Shared reviews: storage and the REST route. |
+| `build/` | Built by `node scripts/build.mjs` at the repository root: `panel.js` and a `panel.i18n.<locale>.js` per language, `engine.js` (core with the pack built in), the engine's message files, `rules.json`. Not committed. |
 | `readme.txt` | The WordPress.org readme. |
 
 ## Trying it

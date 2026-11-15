@@ -164,8 +164,8 @@ WordPress plugin:
       (image) and "Open the header setting" (table) select the block, open
       its settings and put focus on the field.
 - [ ] More settings to open: heading level, link text, colours.
-- [x] "Mark as fine", kept per person and per post in their editor
-      preferences (the "Hide for me" half of the reviews below).
+- [x] "Hide for me" (first called "Mark as fine"), kept per person and
+      per post in their editor preferences.
 - [x] Count on the toolbar button: what to fix or confirm, from a check
       that runs while the sidebar is closed (the first once the editor has
       loaded and the browser is idle, then three seconds after each pause).
@@ -179,17 +179,27 @@ WordPress plugin:
       around the one shown.
 - [ ] Front-end checker: the "phone-width layout" check (a check at a
       narrow width), and links that land on the block, not just the post.
-- [ ] Front-end checker: "Mark as fine" there too. Marks are kept in the
-      editor for now, where findings are tied to blocks; the same finding
-      on the published page has different markup (WordPress adds
-      attributes), so marks need a key that survives that first.
+- [x] Front-end checker: shared reviews there too. A finding is now
+      identified by its rule, reason and what the element is and says (tag,
+      link, image source, alternative text, text), not its markup, so it
+      is the same in the editor and on the page.
+- [ ] Front-end checker: "Hide for me" there too (the editor's
+      preferences are not loaded on the page).
 - [x] Before publishing: one line in WordPress's pre-publish panel ("To
       fix: 0. Likely problems to confirm: 1. Need a person: 3."), with a
       button that opens the sidebar. It never blocks publishing.
-- [ ] Reviews: "Hide for me" and "Reviewed, it's fine" (with who, when and
-      an optional note), stored in the site's database, reopenable.
-- [ ] Permissions: who can see the checker, who can mark items as reviewed.
-- [ ] Settings: content area selector, rules on/off, severity.
+- [x] Reviews: "Reviewed, it's fine", with who, when and an optional note,
+      kept with the post (`_surea11y_reviews`) and seen by everyone who
+      edits it, in the editor and on the page; reopenable. Beside it,
+      "Hide for me", for one person.
+- [x] Permissions: who sees the checker and who can review (a capability
+      each; by default Contributors and Authors), checked by the REST route
+      as well as the interface.
+- [x] Settings (Settings → Accessibility checker): who, the content area
+      selector, the background check on or off, rules on or off.
+- [ ] Settings: severity, if sites ask for it.
+- [ ] Fewer buttons per card: five actions at most today (Show, How to fix,
+      a setting, Reviewed, Hide for me); try a "More" menu with people.
 - [x] No front-end changes for visitors. No external requests.
 
 - [x] Content checks at least on par with the other checkers: "click here"

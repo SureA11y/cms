@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import './locales.js';
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -44,4 +45,11 @@ test('messages name what an author edits, not HTML', () => {
   for (const [key, text] of Object.entries(MESSAGES.en)) {
     assert.doesNotMatch(text, /<\w+>|attribute|aria-|role=/i, key);
   }
+});
+
+test('a language added later is used once added, and English stays the fallback', async () => {
+  const { uiStrings } = await import('../src/messages/ui.js');
+  assert.equal(uiStrings('it').show, 'Show');
+  assert.equal(uiStrings('de').show, 'Zeigen');
+  assert.equal(uiStrings('ja-JP').show, '表示');
 });

@@ -37,6 +37,13 @@ toolbar at the top. It checks the whole page, theme included, and tells you
 which findings are in your content and which are in the theme. Only people
 who can edit the page see it.
 
+= Can my team share what they checked? =
+
+Yes. "Reviewed, it's fine" records who checked a finding, when, and an
+optional note, and everyone who edits the post sees it, in the editor and on
+the page. "Hide for me" only hides it for you. Settings → Accessibility
+checker sets who sees the checker and who can review.
+
 = Does it slow the editor down? =
 
 It checks in a hidden frame a moment after you stop typing: one second while

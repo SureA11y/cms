@@ -107,7 +107,8 @@ test('the page checker: in the toolbar on a published page, content and theme to
       findings: el.findings.map((f) => ({ ruleId: f.ruleId, outside: f.outside, label: f.itemLabel })),
       scanMs: window.surea11yLastPageScan.scanMs,
       edit: !!el.shadowRoot.querySelector('a.edit'),
-      fine: [...el.shadowRoot.querySelectorAll('button')].some((b) => b.textContent === 'Mark as fine')
+      hide: [...el.shadowRoot.querySelectorAll('button')].some((b) => b.textContent === 'Hide for me'),
+      review: [...el.shadowRoot.querySelectorAll('button')].some((b) => b.textContent === "Reviewed, it's fine")
     };
   });
   assert.equal(r.state, 'done');
@@ -115,7 +116,8 @@ test('the page checker: in the toolbar on a published page, content and theme to
   assert.ok(r.findings.some((f) => !f.outside && f.ruleId === 'p-as-heading'), 'content findings are found');
   assert.ok(r.findings.every((f) => f.label === (f.outside ? 'Theme or template' : 'Your content')));
   assert.ok(r.edit, 'content cards link to the editor');
-  assert.equal(r.fine, false, 'marks are made in the editor');
+  assert.equal(r.hide, false, 'personal hides are kept in the editor');
+  assert.equal(r.review, true, 'shared reviews can be made on the page');
   // Show scrolls to the element and frames it.
   await page.evaluate(() => document.querySelector('[data-surea11y-panel]').shadowRoot.querySelector('surea11y-results').shadowRoot.querySelector('.show').click());
   const framed = await page.evaluate(() => !!document.querySelector('[data-surea11y-markers]').shadowRoot.querySelector('.outline:not([hidden])'));

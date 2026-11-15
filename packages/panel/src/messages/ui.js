@@ -1,6 +1,7 @@
-// The panel's own words: headings, buttons and status messages.
+// The panel's own words: headings, buttons and status messages. English is
+// built in; other languages are added with addLocale (../locales.js), each
+// from its own file, loaded only where that language is used.
 
-import { MORE } from './ui-more.js';
 
 export const UI = {
   en: {
@@ -12,7 +13,8 @@ export const UI = {
       likely: 'Likely problems',
       review: 'Needs a person',
       'probably-fine': 'Probably fine',
-      marked: 'Marked fine by you'
+      reviewed: 'Reviewed, fine',
+      marked: 'Hidden by you'
     },
     tiles: {
       problem: 'To fix',
@@ -25,7 +27,8 @@ export const UI = {
       likely: "The checker can't be sure, but the evidence points to a problem. Confirm each one.",
       review: 'Only a person can tell whether these are right.',
       'probably-fine': 'The evidence says these are fine. A quick look confirms it.',
-      marked: 'Left out of the counts. Undo brings one back.'
+      reviewed: 'Someone checked these and found them fine. Everyone who edits this content sees them here.',
+      marked: 'Hidden only for you, and left out of your counts. Undo brings one back.'
     },
     showingOnly: 'Showing only:',
     showAll: 'Show all',
@@ -39,7 +42,14 @@ export const UI = {
     shown: 'Shown in the content',
     shownPlace: 'Shown in the content, place {{n}} of {{total}}',
     howToFix: 'How to fix',
-    markFine: 'Mark as fine',
+    reviewedFine: "Reviewed, it's fine",
+    hideForMe: 'Hide for me',
+    reviewedBy: '{{by}} reviewed it on {{when}}.',
+    reviewedOn: 'Reviewed on {{when}}.',
+    noteLabel: 'Note (optional)',
+    saveReview: 'Save review',
+    cancel: 'Cancel',
+    reopen: 'Reopen',
     undo: 'Undo',
     outsideContent: 'Not in the content: the template or theme.',
     inTheme: 'In the theme or template, not in your content: whoever looks after the theme can fix it.',
@@ -64,72 +74,8 @@ export const UI = {
     tryAgain: 'Try again',
     errorDetails: 'Details for your administrator',
     marker: '{{group}}: {{summary}}'
-  },
-  es: {
-    heading: 'Accesibilidad',
-    checking: 'Comprobando…',
-    summary: '{{problem}} por corregir, {{likely}} probables, {{review}} por revisar, {{probably}} probablemente bien.',
-    groups: {
-      problem: 'Por corregir',
-      likely: 'Problemas probables',
-      review: 'Necesita una persona',
-      'probably-fine': 'Probablemente bien',
-      marked: 'Marcados como correctos por ti'
-    },
-    tiles: {
-      problem: 'Por corregir',
-      likely: 'Problemas probables',
-      review: 'Necesitan una persona',
-      'probably-fine': 'Probablemente bien'
-    },
-    groupHelp: {
-      problem: 'No cumplen un requisito de accesibilidad.',
-      likely: 'El comprobador no puede estar seguro, pero los indicios apuntan a un problema. Confirma cada uno.',
-      review: 'Solo una persona puede saber si están bien.',
-      'probably-fine': 'Los indicios apuntan a que están bien. Basta un vistazo para confirmarlo.',
-      marked: 'No cuentan en los totales. «Deshacer» devuelve uno a la lista.'
-    },
-    showingOnly: 'Solo se muestra:',
-    showAll: 'Mostrar todo',
-    previous: 'Hallazgo anterior',
-    next: 'Hallazgo siguiente',
-    position: '{{n}} de {{total}}',
-    toLookAt: '{{total}} por mirar',
-    places: '{{n}} sitios',
-    show: 'Mostrar',
-    showNextPlace: 'Mostrar el siguiente sitio',
-    shown: 'Mostrado en el contenido',
-    shownPlace: 'Mostrado en el contenido, sitio {{n}} de {{total}}',
-    howToFix: 'Cómo corregirlo',
-    markFine: 'Marcar como correcto',
-    undo: 'Deshacer',
-    outsideContent: 'Fuera del contenido: en la plantilla o el tema.',
-    inTheme: 'En el tema o la plantilla, no en tu contenido: puede corregirlo quien se ocupa del tema.',
-    editInEditor: 'Editar en el editor',
-    yourContent: 'Tu contenido',
-    themeOrTemplate: 'Tema o plantilla',
-    close: 'Cerrar',
-    panelLabel: 'Comprobador de accesibilidad',
-    prepublish: 'Por corregir: {{problem}}. Problemas probables por confirmar: {{likely}}. Necesitan una persona: {{review}}.',
-    prepublishNothing: 'No hay nada que corregir ni revisar.',
-    prepublishReview: 'Revisar en el panel de Accesibilidad',
-    prepublishNote: 'Esto no te impide publicar.',
-    toolbarCount: '{{n}} por corregir o confirmar',
-    openAltText: 'Editar el texto alternativo',
-    openTableHeaders: 'Abrir el ajuste de encabezado',
-    emptyTitle: 'Aún no hay nada que comprobar',
-    empty: 'Añade contenido y se comprobará aquí mientras escribes.',
-    nothingTitle: 'No hay nada que corregir ni revisar en este contenido.',
-    nothing: 'Las comprobaciones automáticas no han encontrado nada. Algunas cosas solo puede juzgarlas una persona, como si el texto se entiende bien.',
-    errorTitle: 'La comprobación no terminó.',
-    error: 'Vuelve a intentarlo. Si sigue pasando, avisa a quien administra el sitio.',
-    tryAgain: 'Volver a intentarlo',
-    errorDetails: 'Detalles para quien administra el sitio',
-    marker: '{{group}}: {{summary}}'
   }
 };
-
-Object.assign(UI, MORE);
 
 /** The panel's words in `locale`, falling back to English. */
 export function uiStrings(locale) {
