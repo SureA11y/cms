@@ -91,11 +91,33 @@ fs.writeFileSync(
       .map((r) => ((r.i18n && r.i18n.titleKey) || '').replace(/_title$/, ''))
       .filter(Boolean)
   );
+  // Three layers, each over the one before: core's steps; the pack's own
+  // rules' steps (in English, from their meta.review); and the panel's
+  // wording for editors (packages/panel/src/messages/review.<locale>.json),
+  // which replaces a reason code's whole set, so no step of core's is left
+  // in among ours.
+  const packReview = {};
+  for (const rule of pack.rules || []) {
+    const prefix = ((rule.meta.i18n && rule.meta.i18n.titleKey) || '').replace(/_title$/, '');
+    for (const [code, r] of Object.entries((prefix && rule.meta.review) || {})) {
+      r.steps.forEach((step, i) => (packReview[`${prefix}_review_${code}_step${i + 1}`] = step));
+      packReview[`${prefix}_review_${code}_pass`] = r.passWhen;
+      packReview[`${prefix}_review_${code}_fail`] = r.failWhen;
+    }
+  }
+  const setOf = (key) => key.replace(/_(step\d+|pass|fail)$/, '');
   const reviewOf = (locale) => {
     const all = require(`@surea11y/core/review/${locale}`);
-    return Object.fromEntries(
+    const out = Object.fromEntries(
       Object.entries(all).filter(([k]) => prefixes.has(k.slice(0, k.indexOf('_review_'))))
     );
+    if (locale === 'en') Object.assign(out, packReview);
+    const ours = JSON.parse(
+      fs.readFileSync(path.join(root, `packages/panel/src/messages/review.${locale}.json`), 'utf8')
+    );
+    const replaced = new Set(Object.keys(ours).map(setOf));
+    for (const k of Object.keys(out)) if (replaced.has(setOf(k))) delete out[k];
+    return Object.assign(out, ours);
   };
   await build({
     stdin: {

@@ -53,6 +53,8 @@ editor has finished loading.
 == Changelog ==
 
 = Unreleased =
+* "Check it" speaks an editor's language for the findings met most: no
+  developer tools or HTML in its steps.
 * "Check it" on findings the checker can't decide: the steps to check it,
   what fine and a problem look like, and your answer, shared with your
   team: it's fine, it's a problem, or not sure.

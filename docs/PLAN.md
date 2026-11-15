@@ -244,9 +244,15 @@ the author's.
       a shared review, "No" makes it one to fix, saying who confirmed it, and
       "Not sure" leaves it open, saying so. The steps load on the first
       question (about 48 KB compressed per language), never with the panel.
-- [ ] Questions: steps reworded for editors where core's assume developer
-      tools (the Accessibility pane, the Styles pane): a pack of editor
-      wording, by rule and reason code, ahead of core's.
+- [x] Questions: steps reworded for editors where core's assume developer
+      tools or markup, in `packages/panel/src/messages/review.<locale>.json`,
+      by core's own keys: twelve sets (bold or large text as headings, tables
+      without headers, skipped heading levels, alternative text, decorative
+      images, link text that needs its sentence, text over an image), in
+      five languages, and the first translations of the CMS pack rule's
+      steps. Each replaces core's whole set; the others keep core's text.
+- [ ] Questions: more editor wording as sites show which steps editors meet
+      (contrast's other cases, lists, page titles).
 - [ ] **Evidence trail.** A dated record of results and answers per page,
       mapped to WCAG 2.2 and, through packs, to other standards such as
       EN 301 549 (`@surea11y/pack-en301549`), with the law a profile is

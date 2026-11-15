@@ -2,6 +2,29 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Editor wording for "Check it" lives in the panel, keyed by core
+
+- **Where.** `packages/panel/src/messages/review.<locale>.json`, beside the
+  panel's plain-language messages, by core's own keys
+  (`<prefix>_review_<CODE>_step<n>`, `_pass`, `_fail`). Core's steps are
+  written for auditors with developer tools, which is right for core; the
+  wording for CMS authors is ours. The pack holds what is checked, the panel
+  how it is put to editors.
+- **How.** The build puts three layers together for each language: core's
+  steps, the pack rule's own (English, from its `meta.review`), then ours.
+  Ours replaces a reason code's whole set, so no step of core's is left in
+  among ours; a set we don't reword keeps core's text, and its improvements.
+- **Held to core.** Tests check that every set we reword exists in core (or
+  is the pack rule's), that each is whole, that every language has the same
+  keys and placeholders, and that no step names the developer tools or
+  markup. A step core renames or drops shows up as a failing test.
+- **CMS-neutral.** The steps say "in the editor" and "the table's settings",
+  not WordPress's own names. A WordPress-only layer can come later in the
+  plugin if a step needs one.
+- **Scope.** Twelve sets: those on the Phase 0 test posts that named
+  developer tools or markup, plus text over an image. The rest keep core's
+  wording until sites show editors meet them.
+
 ## 2026-11-15: Phase 2 starts with questions, as answers in the shared reviews
 
 - **An answer is a review.** "Reviewed, it's fine" was already an answer:
