@@ -188,11 +188,15 @@ function surea11y_render_settings() {
 	echo '<fieldset><legend class="screen-reader-text">' . esc_html__( 'Rules to check', 'surea11y' ) . '</legend>';
 	echo '<p id="surea11y-rules-help">' . esc_html__( 'Untick a rule to stop checking it, in the editor and on pages. Rules marked "theme" only run on pages.', 'surea11y' ) . '</p>';
 	echo '<input type="hidden" name="surea11y_settings[rules_listed]" value="1">';
-	echo '<ul class="surea11y-rules" aria-describedby="surea11y-rules-help" style="columns: 2 26em;">';
+	// Each rule by its title, and its id on a second line in smaller text,
+	// for whoever needs to look it up. Both are the label, so either ticks
+	// the box.
+	echo '<ul class="surea11y-rules" aria-describedby="surea11y-rules-help" style="columns: 2 26em; column-gap: 32px;">';
 	foreach ( $rules as $rule ) {
 		$id = 'surea11y-rule-' . sanitize_html_class( $rule['id'] );
-		echo '<li><label for="' . esc_attr( $id ) . '"><input type="checkbox" id="' . esc_attr( $id ) . '" name="surea11y_settings[rules_on][]" value="' . esc_attr( $rule['id'] ) . '"' . checked( ! isset( $off[ $rule['id'] ] ), true, false ) . '> ';
-		echo esc_html( $rule['title'] ) . ' <code>' . esc_html( $rule['id'] ) . '</code>' . ( empty( $rule['content'] ) ? ' (' . esc_html__( 'theme', 'surea11y' ) . ')' : '' ) . '</label></li>';
+		echo '<li style="break-inside: avoid; margin-bottom: 10px;"><label for="' . esc_attr( $id ) . '" style="display: flex; gap: 4px; align-items: flex-start;"><input type="checkbox" id="' . esc_attr( $id ) . '" name="surea11y_settings[rules_on][]" value="' . esc_attr( $rule['id'] ) . '"' . checked( ! isset( $off[ $rule['id'] ] ), true, false ) . ' style="margin-top: 2px;"> ';
+		echo '<span>' . esc_html( $rule['title'] ) . ( empty( $rule['content'] ) ? ' (' . esc_html__( 'theme', 'surea11y' ) . ')' : '' );
+		echo '<br><span class="description" style="font-size: 12px;">' . esc_html( $rule['id'] ) . '</span></span></label></li>';
 	}
 	echo '</ul></fieldset>';
 

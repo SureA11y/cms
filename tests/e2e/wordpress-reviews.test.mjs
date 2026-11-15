@@ -183,7 +183,7 @@ test('who may review is a setting, and the site enforces it', { skip }, async ()
 
 test('a rule turned off in Settings is not checked', { skip }, async () => {
   const admin = await login();
-  await setSettings(admin.page, (p) => p.getByLabel(/p-as-heading/).uncheck());
+  await setSettings(admin.page, (p) => p.getByLabel('Text styled to look like a heading should probably be a real heading').uncheck());
   try {
     await editor(admin.page);
     const ids = await admin.page.evaluate(() => document.querySelector('surea11y-results').findings.map((f) => f.ruleId));
