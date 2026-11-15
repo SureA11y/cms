@@ -29,6 +29,9 @@
 	let panel = null;
 	let results = null;
 	let markers = null;
+	// The page's findings, and those of the check at phone width, shown together.
+	let pageFindings = [];
+	let phoneFindings = [];
 
 	function elementFor( selector ) {
 		try {
@@ -129,7 +132,8 @@
 					throw new Error( out.skippedPacks.map( ( p ) => p.reason || p.name ).join( '; ' ) );
 				}
 				results.outline = out.outline;
-				results.findings = out.findings;
+				pageFindings = out.findings;
+				results.findings = pageFindings.concat( phoneFindings );
 				window.surea11yLastPageScan = { scanMs: out.scanMs }; // read by the end-to-end tests
 				drawMarkers();
 			} )
@@ -137,6 +141,62 @@
 				window.console.error( '[SureA11y]', error );  
 				results.error = error && error.message ? error.message : String( error );
 			} );
+	}
+
+	/*
+	 * "Check at phone width": the page loaded again in a hidden frame 320
+	 * pixels wide, for WCAG 1.4.10 (Reflow). It loads the page a second time,
+	 * so it runs only when asked. Its findings join the list.
+	 */
+	const REFLOW_RULE = 'reflow-horizontal-scroll';
+	function phoneCheck( footer ) {
+		if ( config.disabledRules && config.disabledRules.indexOf( REFLOW_RULE ) !== -1 ) {
+			return;
+		}
+		const doc = footer.ownerDocument;
+		const help = doc.createElement( 'p' );
+		help.textContent = words.phoneHelp;
+		const button = doc.createElement( 'button' );
+		button.type = 'button';
+		button.textContent = words.phoneCheck;
+		const status = doc.createElement( 'p' );
+		status.setAttribute( 'role', 'status' );
+		let busy = false;
+		button.addEventListener( 'click', () => {
+			if ( busy ) {
+				return;
+			}
+			busy = true;
+			button.setAttribute( 'aria-disabled', 'true' );
+			status.textContent = words.phoneChecking;
+			Panel.scanPageAtWidth( document, {
+				url: window.location.href,
+				engineUrls: [ config.engineUrl ].concat( Object.values( config.localeUrls || {} ) ),
+				contentSelector: config.contentSelector,
+				excludeSelectors: EXCLUDE,
+				profile: config.profile,
+				packs: config.packs,
+				locale: config.locale,
+				messages: Panel.messagesFor( config.locale ),
+				labels: { content: words.yourContent, theme: words.themeOrTemplate },
+			} )
+				.then( ( out ) => {
+					phoneFindings = out.findings;
+					results.findings = pageFindings.concat( phoneFindings );
+					drawMarkers();
+					status.textContent = Panel.fill( words.phoneDone, { n: out.findings.length } );
+					window.surea11yLastPhoneScan = { findings: out.findings.length }; // read by the end-to-end tests
+				} )
+				.catch( ( error ) => {
+					window.console.error( '[SureA11y]', error );
+					status.textContent = words.phoneError;
+				} )
+				.then( () => {
+					busy = false;
+					button.removeAttribute( 'aria-disabled' );
+				} );
+		} );
+		footer.append( help, button, status );
 	}
 
 	function open( opener ) {
@@ -163,6 +223,7 @@
 			results.reviews = config.reviews && ! Array.isArray( config.reviews ) ? config.reviews : {};
 			results.editUrl = config.editUrl || '';
 			panel.body.appendChild( results );
+			phoneCheck( panel.footer );
 			results.addEventListener( 'surea11y-show', ( event ) => {
 				const el = elementFor( event.detail.itemId );
 				if ( el ) {

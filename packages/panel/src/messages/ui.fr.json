@@ -86,5 +86,10 @@
   "emptyHeading": "(titre vide)",
   "noAlt": "Aucune alternative textuelle",
   "decorative": "Décorative : les lecteurs d’écran l’ignorent",
-  "quoted": "« {{text}} »"
+  "quoted": "« {{text}} »",
+  "phoneHelp": "Rechargez cette page à 320 pixels de large, comme l’affiche un téléphone, et vérifiez que rien ne doit défiler horizontalement.",
+  "phoneCheck": "Vérifier en largeur de téléphone",
+  "phoneChecking": "Vérification en largeur de téléphone…",
+  "phoneDone": "Vérifié en largeur de téléphone (320 pixels) : {{n}} trouvé(s).",
+  "phoneError": "La vérification en largeur de téléphone n’a pas abouti."
 }

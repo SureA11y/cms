@@ -98,6 +98,12 @@ export const UI = {
     noAlt: 'No text alternative',
     decorative: 'Decorative: screen readers skip it',
     quoted: '“{{text}}”',
+    phoneHelp:
+      'Load this page again at 320 pixels wide, as a phone shows it, and check that nothing needs scrolling sideways.',
+    phoneCheck: 'Check at phone width',
+    phoneChecking: 'Checking at phone width…',
+    phoneDone: 'Checked at phone width (320 pixels): {{n}} found.',
+    phoneError: "The check at phone width didn't finish.",
     marker: '{{group}}: {{summary}}'
   }
 };

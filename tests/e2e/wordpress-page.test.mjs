@@ -347,6 +347,49 @@ test('"Edit in the editor" opens the editor on that finding', { skip }, async (t
   assert.doesNotMatch(shown.url, /surea11y-finding/, 'a reload does not do it again');
 });
 
+test(
+  '"Check at phone width" checks the page at 320 pixels wide, on demand',
+  { skip },
+  async (t) => {
+    const browser = await chromium.launch({ executablePath: CHROMIUM });
+    t.after(() => browser.close());
+    const { page } = await login(browser);
+    const results = await pageChecker(page, POST_TYPICAL, { clear: true });
+    const panel = page.locator('[data-surea11y-panel]');
+    // Nothing runs at phone width until asked: it loads the page again.
+    assert.equal(await page.evaluate(() => window.surea11yLastPhoneScan === undefined), true);
+    const before = await results.evaluate((el) => el.findings.length);
+    await panel.getByRole('button', { name: 'Check at phone width' }).click();
+    await page.waitForFunction(() => window.surea11yLastPhoneScan, null, { timeout: 60000 });
+    assert.match(
+      await panel.locator('.footer [role="status"]').textContent(),
+      /^Checked at phone width \(320 pixels\): \d+ found\.$/
+    );
+    const reflow = await results.evaluate((el) =>
+      el.findings
+        .filter((f) => f.ruleId === 'reflow-horizontal-scroll')
+        .map((f) => ({ code: f.reasonCode, label: f.itemLabel, itemId: f.itemId }))
+    );
+    // The typical post has a long address that can't wrap: the author's content.
+    assert.ok(
+      reflow.some((f) => f.code === 'HORIZONTAL_SCROLL' && f.label === 'Your content'),
+      JSON.stringify(reflow)
+    );
+    assert.equal(
+      await results.evaluate((el) => el.findings.length),
+      before + reflow.length,
+      'added to the page findings'
+    );
+    // Show finds the same element in the page as shown.
+    assert.ok(await page.evaluate((sel) => !!document.querySelector(sel), reflow[0].itemId));
+    assert.equal(
+      await page.locator('iframe[data-surea11y-frame]').count(),
+      0,
+      'the frame is removed'
+    );
+  }
+);
+
 test('the page checker works on a preview of a draft', { skip }, async (t) => {
   const browser = await chromium.launch({ executablePath: CHROMIUM });
   const { page } = await login(browser);

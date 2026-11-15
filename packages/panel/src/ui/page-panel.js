@@ -27,13 +27,20 @@ h2:focus-visible { outline: var(--sa11y-focus-width) solid var(--sa11y-focus); o
 .close { width: var(--sa11y-button-height); height: var(--sa11y-button-height); display: flex; align-items: center; justify-content: center; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; border-radius: var(--sa11y-radius-small); }
 .close:focus-visible { outline: var(--sa11y-focus-width) solid var(--sa11y-focus); }
 .body { flex-grow: 1; overflow-y: auto; padding: var(--sa11y-space-4); }
+.footer { display: flex; flex-direction: column; gap: var(--sa11y-space-2); padding: var(--sa11y-space-3) var(--sa11y-space-4); border-top: 1px solid var(--sa11y-border); }
+.footer[hidden] { display: none; }
+.footer p { margin: 0; color: var(--sa11y-text-muted); }
+.footer button { align-self: flex-start; min-height: var(--sa11y-button-height); padding: 0 var(--sa11y-space-3); border-radius: var(--sa11y-radius-small); border: 1px solid var(--sa11y-accent); background: var(--sa11y-surface); color: var(--sa11y-accent); font: inherit; cursor: pointer; }
+.footer button:focus-visible { outline: var(--sa11y-focus-width) solid var(--sa11y-focus); outline-offset: 2px; }
+.footer button[aria-disabled="true"] { cursor: default; opacity: .7; }
 @media (forced-colors: active) { .panel { border-left-color: CanvasText; } }
 `;
 
 /**
  * Creates the panel in `doc` (hidden). `title` is its heading; the returned
- * `body` is where the results go.
- * Returns { host, body, open(opener), close(), isOpen() }.
+ * `body` is where the results go, and `footer`, below them, where the host
+ * can add its own controls (hidden until it has some).
+ * Returns { host, body, footer, open(opener), close(), isOpen() }.
  */
 export function createPagePanel(doc, { title, locale = 'en', onClose = () => {} } = {}) {
   const t = uiStrings(locale);
@@ -62,7 +69,13 @@ export function createPagePanel(doc, { title, locale = 'en', onClose = () => {} 
   header.append(heading, close);
   const body = doc.createElement('div');
   body.className = 'body';
-  panel.append(header, body);
+  const footer = doc.createElement('div');
+  footer.className = 'footer';
+  footer.hidden = true;
+  new doc.defaultView.MutationObserver(() => {
+    footer.hidden = !footer.childElementCount;
+  }).observe(footer, { childList: true });
+  panel.append(header, body, footer);
   root.append(style, panel);
   doc.body.append(host);
 
@@ -92,7 +105,7 @@ export function createPagePanel(doc, { title, locale = 'en', onClose = () => {} 
     }
   });
 
-  return { host, body, open, close: hide, isOpen: () => !panel.hidden };
+  return { host, body, footer, open, close: hide, isOpen: () => !panel.hidden };
 }
 
 function closeIcon(doc) {

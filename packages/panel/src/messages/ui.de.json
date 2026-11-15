@@ -86,5 +86,10 @@
   "emptyHeading": "(leere Überschrift)",
   "noAlt": "Kein Alternativtext",
   "decorative": "Dekorativ: Screenreader überspringen es",
-  "quoted": "„{{text}}“"
+  "quoted": "„{{text}}“",
+  "phoneHelp": "Laden Sie diese Seite erneut mit 320 Pixeln Breite, wie ein Smartphone sie zeigt, und prüfen Sie, dass nichts seitlich gescrollt werden muss.",
+  "phoneCheck": "In Smartphone-Breite prüfen",
+  "phoneChecking": "Prüfung in Smartphone-Breite…",
+  "phoneDone": "In Smartphone-Breite geprüft (320 Pixel): {{n}} gefunden.",
+  "phoneError": "Die Prüfung in Smartphone-Breite wurde nicht abgeschlossen."
 }
