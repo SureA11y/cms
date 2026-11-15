@@ -2,6 +2,23 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Overrides for the vulnerable packages under wp-env
+
+- **What.** Dependabot and `npm audit` reported four advisories, all under
+  `@wordpress/env` (dev only): isomorphic-git (high: file writes outside
+  the checkout on clone), qs, minimatch and glob (denial of service).
+  WordPress Playground pins isomorphic-git 1.37.6 and express 4.22.2
+  exactly, and the latest wp-env (12.1.0) and Playground (3.1.64) still do.
+  `npm audit fix --force` would downgrade wp-env to 10.13.0.
+- **Fix.** `overrides` in `package.json`: `isomorphic-git ~1.38.10`,
+  `qs ~6.16.2`, and `glob 14.0.3` under rimraf (which brings a fixed
+  minimatch). Each is the nearest patched version, at least two weeks old.
+  `npm audit` then finds no vulnerabilities.
+- **Risk.** None of these reach the plugin's build or a site. Playground
+  was built against the older versions; wp-env start, reset and the
+  end-to-end tests were run with the overrides.
+- **Remove them** once Playground raises its pins.
+
 ## 2026-11-15: Core ships inside each plugin release; sites get a new core by updating the plugin
 
 - **Bundled, not loaded.** The build puts core and the CMS pack into the
