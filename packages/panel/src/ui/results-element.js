@@ -16,7 +16,8 @@
 // - surea11y-show  { itemId, finding, card, via }  bring a place into view
 //   (via 'show': a Show button or marker; 'step': the arrows);
 // - surea11y-mark  { keys, fine }       finding keys hidden for the person, or undone;
-// - surea11y-review { keys, note }      reviewed and found fine, for everyone;
+// - surea11y-review { keys, note, answer }  a person's answer, for everyone:
+//   'pass' (it's fine), 'fail' (it's a problem) or 'unsure';
 // - surea11y-reopen { keys }            a review taken back;
 // - surea11y-retry {}                   the person asked to check again.
 //
@@ -121,6 +122,12 @@ ${GROUP_ORDER.concat('reviewed', 'marked')
   .view[aria-pressed="true"] { border-color: Highlight; }
 }
 
+.question { display: flex; flex-direction: column; gap: var(--sa11y-space-2); margin-top: var(--sa11y-space-3); padding-top: var(--sa11y-space-3); border-top: 1px solid var(--sa11y-border); }
+.question .hint { margin-top: 0; }
+.question-head { font-weight: 600; }
+ol.steps { list-style: decimal; display: block; padding-inline-start: 1.4em; }
+ol.steps li + li { margin-top: var(--sa11y-space-1); }
+.when { color: var(--sa11y-text-muted); }
 .review-meta { margin-top: var(--sa11y-space-2); color: var(--sa11y-text-muted); }
 .note { margin-top: var(--sa11y-space-1); padding: var(--sa11y-space-1) var(--sa11y-space-2); border-inline-start: 3px solid var(--sa11y-border); white-space: pre-wrap; overflow-wrap: anywhere; }
 .review-form { display: flex; flex-direction: column; gap: var(--sa11y-space-1); margin-top: var(--sa11y-space-3); }
@@ -153,7 +160,9 @@ export class ResultsElement extends HTMLElement {
     this._reviews = {};
     this._canReview = false;
     this._reviewer = '';
-    this._reviewing = null; // the card whose review form is open
+    this._asking = null; // the card whose question is open
+    this._questions = new Map(); // card key -> { state, question }
+    this._questionFor = null;
     this._howOpen = new Set();
     this._moreOpen = new Set(); // cards whose "More" actions are shown
     this._current = null; // { cardKey, place }
@@ -274,6 +283,20 @@ export class ResultsElement extends HTMLElement {
   }
   get reviews() {
     return { ...this._reviews };
+  }
+
+  /**
+   * How to check a finding by hand: a function (card) returning a promise
+   * of { steps, passWhen, failWhen } or null, such as core's steps loaded
+   * when first asked for. Without it, a finding's own `howToCheck` is used.
+   */
+  set questionFor(fn) {
+    this._questionFor = typeof fn === 'function' ? fn : null;
+    this._questions.clear();
+    this._render();
+  }
+  get questionFor() {
+    return this._questionFor;
   }
 
   /** Whether this person may review findings, and reopen reviews. */
@@ -711,6 +734,25 @@ export class ResultsElement extends HTMLElement {
     }
     if (card.outside)
       li.append(el(doc, 'p', 'where', card.inContent ? t.inTheme : t.outsideContent));
+    // A person's answer that leaves the card open: a confirmed problem, or
+    // not sure.
+    const open = card.confirmed || card.unsure;
+    if (open) {
+      const [byKey, onKey] = card.confirmed
+        ? ['confirmedBy', 'confirmedOn']
+        : ['unsureBy', 'unsureOn'];
+      li.append(
+        el(
+          doc,
+          'p',
+          'review-meta',
+          open.by
+            ? fill(t[byKey], { by: open.by, when: open.when || '' })
+            : fill(t[onKey], { when: open.when || '' })
+        )
+      );
+      if (open.note) li.append(el(doc, 'p', 'note', open.note));
+    }
 
     const actions = el(doc, 'div', 'actions');
     const add = (label, cls, focus, action, expanded) => {
@@ -748,7 +790,24 @@ export class ResultsElement extends HTMLElement {
           this._showCard(card)
         );
       }
-      if (card.hint) {
+      const uncertain = card.group !== 'problem';
+      const asking = this._asking === card.key;
+      if (uncertain) {
+        add(
+          t.checkIt,
+          'button',
+          'check',
+          () => {
+            this._asking = asking ? null : card.key;
+            this._render();
+            this._restoreFocus(`card:${hash(card.key)}:check`);
+            if (!asking) this._loadQuestion(card);
+          },
+          asking
+        );
+        actions.lastChild.removeAttribute('aria-controls');
+        if (asking) actions.lastChild.setAttribute('aria-controls', `${id}-question`);
+      } else if (card.hint) {
         add(
           t.howToFix,
           'button',
@@ -784,17 +843,8 @@ export class ResultsElement extends HTMLElement {
       // action, behind "More" when there are two, so a card shows at most
       // four buttons and what fixes it comes first.
       const later = [];
-      if (this._canReview && card.group !== 'problem' && this._reviewing !== card.key) {
-        later.push([
-          t.reviewedFine,
-          'button',
-          'review',
-          () => {
-            this._reviewing = card.key;
-            this._render();
-            this._restoreFocus(`card:${hash(card.key)}:note`);
-          }
-        ]);
+      if (this._canReview && (card.confirmed || card.unsure)) {
+        later.push([t.reopen, 'button', 'reopen', () => this._reopen(card)]);
       }
       if (this._canMark && card.group !== 'problem')
         later.push([t.hideForMe, 'link', 'fine', () => this._mark(card, true)]);
@@ -820,8 +870,8 @@ export class ResultsElement extends HTMLElement {
             row.append(target.lastChild);
           }
           li.append(row);
-          if (this._reviewing === card.key && !card.settled)
-            li.append(this._reviewForm(doc, t, card, id));
+          if (this._asking === card.key && !card.settled)
+            li.append(this._questionPanel(doc, t, card, id));
           return li;
         }
       } else {
@@ -829,45 +879,113 @@ export class ResultsElement extends HTMLElement {
       }
     }
     li.append(actions);
-    if (this._reviewing === card.key && !card.settled)
-      li.append(this._reviewForm(doc, t, card, id));
+    if (this._asking === card.key && !card.settled)
+      li.append(this._questionPanel(doc, t, card, id));
     return li;
   }
 
-  /** The note a review can carry, and Save or Cancel. Escape cancels. */
-  _reviewForm(doc, t, card, summaryId) {
-    const form = el(doc, 'div', 'review-form');
-    form.setAttribute('role', 'group');
-    form.setAttribute('aria-labelledby', summaryId);
-    const noteId = `${summaryId}-note`;
-    const label = el(doc, 'label', '', t.noteLabel);
-    label.htmlFor = noteId;
-    const note = el(doc, 'textarea');
-    note.id = noteId;
-    note.maxLength = 500;
-    note.dataset.focus = `card:${hash(card.key)}:note`;
-    const row = el(doc, 'div', 'actions');
-    const save = el(doc, 'button', 'button primary', t.saveReview);
-    save.type = 'button';
-    save.dataset.focus = `card:${hash(card.key)}:save`;
-    save.addEventListener('click', () => this._review(card, note.value.trim()));
-    const cancel = el(doc, 'button', 'button', t.cancel);
-    cancel.type = 'button';
-    const close = () => {
-      this._reviewing = null;
-      this._render();
-      this._restoreFocus(`card:${hash(card.key)}:review`);
-    };
-    cancel.addEventListener('click', close);
-    form.addEventListener('keydown', (e) => {
+  /**
+   * How to check a finding, and the person's answer: what to do about it,
+   * core's steps, what it looks like when it is fine and when it is a
+   * problem, then Yes, No or Not sure with an optional note. Escape closes it.
+   */
+  _questionPanel(doc, t, card, summaryId) {
+    const k = hash(card.key);
+    const panel = el(doc, 'div', 'question');
+    panel.id = `${summaryId}-question`;
+    if (card.hint) {
+      const hint = el(doc, 'p', 'hint');
+      hint.append(el(doc, 'strong', '', `${t.howToFix}: `), doc.createTextNode(card.hint));
+      panel.append(hint);
+    }
+    const entry = this._questions.get(card.key);
+    const q = entry && entry.question;
+    if (!entry || entry.state === 'loading') {
+      panel.append(el(doc, 'p', 'state-text', t.loadingSteps));
+    } else if (q && q.steps && q.steps.length) {
+      const headId = `${summaryId}-how`;
+      const head = el(doc, 'p', 'question-head', t.howToCheck);
+      head.id = headId;
+      const list = el(doc, 'ol', 'steps');
+      list.setAttribute('aria-labelledby', headId);
+      for (const step of q.steps) list.append(el(doc, 'li', '', step));
+      panel.append(head, list);
+    }
+    if (this._canReview) {
+      const group = el(doc, 'div', 'review-form');
+      group.setAttribute('role', 'group');
+      const askId = `${summaryId}-ask`;
+      group.setAttribute('aria-labelledby', askId);
+      const ask = el(doc, 'p', 'question-head', t.isItFine);
+      ask.id = askId;
+      group.append(ask);
+      const fineId = `${summaryId}-fine`;
+      const problemId = `${summaryId}-problem`;
+      if (q && q.passWhen) {
+        const p = el(doc, 'p', 'when', fill(t.fineWhen, { text: q.passWhen }));
+        p.id = fineId;
+        group.append(p);
+      }
+      if (q && q.failWhen) {
+        const p = el(doc, 'p', 'when', fill(t.problemWhen, { text: q.failWhen }));
+        p.id = problemId;
+        group.append(p);
+      }
+      const noteId = `${summaryId}-note`;
+      const label = el(doc, 'label', '', t.noteLabel);
+      label.htmlFor = noteId;
+      const note = el(doc, 'textarea');
+      note.id = noteId;
+      note.maxLength = 500;
+      note.dataset.focus = `card:${k}:note`;
+      group.append(label, note);
+      const row = el(doc, 'div', 'actions');
+      const answer = (label2, cls, kind, describedBy) => {
+        const b = el(doc, 'button', cls, label2);
+        b.type = 'button';
+        b.dataset.focus = `card:${k}:answer-${kind}`;
+        if (describedBy && q) b.setAttribute('aria-describedby', describedBy);
+        b.addEventListener('click', () => this._review(card, note.value.trim(), kind));
+        row.append(b);
+      };
+      answer(t.answerYes, 'button primary', 'pass', q && q.passWhen ? fineId : '');
+      answer(t.answerNo, 'button', 'fail', q && q.failWhen ? problemId : '');
+      answer(t.answerUnsure, 'button', 'unsure', '');
+      group.append(row);
+      panel.append(group);
+    }
+    panel.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        close();
+        this._asking = null;
+        this._render();
+        this._restoreFocus(`card:${k}:check`);
       }
     });
-    row.append(save, cancel);
-    form.append(label, note, row);
-    return form;
+    return panel;
+  }
+
+  /** Gets a card's steps once, from the host or from its findings. */
+  _loadQuestion(card) {
+    if (this._questions.has(card.key)) return;
+    const own = (card.places.find((p) => p.howToCheck) || {}).howToCheck || null;
+    if (!this._questionFor) {
+      this._questions.set(card.key, { state: 'done', question: own });
+      this._render();
+      return;
+    }
+    this._questions.set(card.key, { state: 'loading', question: null });
+    Promise.resolve()
+      .then(() => this._questionFor(card))
+      .catch(() => null)
+      .then((question) => {
+        this._questions.set(card.key, { state: 'done', question: question || own });
+        if (this._asking === card.key) {
+          const focus = this._focusedId();
+          this._render();
+          this._restoreFocus(focus);
+        }
+      });
   }
 
   /* ---------- behaviour ---------- */
@@ -961,20 +1079,25 @@ export class ResultsElement extends HTMLElement {
   }
 
   /** Records a review here at once; the host saves it and confirms who and when. */
-  _review(card, note) {
+  _review(card, note, answer = 'pass') {
     const keys = card.places.map((p) => p.key);
     const when = new Date().toLocaleDateString(this._locale);
-    for (const k of keys) this._reviews[k] = { by: this._reviewer, when, note };
-    this._reviewing = null;
-    if (this._current && this._current.cardKey === card.key) this._current = null;
-    this._settle(card.group, 'reviewed');
-    this._emit('surea11y-review', { keys, note });
+    for (const k of keys) this._reviews[k] = { by: this._reviewer, when, note, answer };
+    this._asking = null;
+    if (answer === 'pass' && this._current && this._current.cardKey === card.key)
+      this._current = null;
+    const to = answer === 'pass' ? 'reviewed' : answer === 'fail' ? 'problem' : card.group;
+    this._settle(card.group, to);
+    if (answer === 'unsure') this._restoreFocus(`card:${hash(card.key)}:check`);
+    this._emit('surea11y-review', { keys, note, answer });
   }
 
   _reopen(card) {
     const keys = card.places.map((p) => p.key);
+    // A confirmed problem goes back to the group the engine gave it.
+    const was = card.places[0] ? card.places[0].group : card.group;
     for (const k of keys) delete this._reviews[k];
-    this._settle('reviewed', card.group);
+    this._settle(card.review ? 'reviewed' : card.group, was);
     this._emit('surea11y-reopen', { keys });
   }
 

@@ -167,7 +167,12 @@ test(
         })),
         scanMs: window.surea11yLastPageScan.scanMs,
         edit: !!el.shadowRoot.querySelector('a.edit'),
-        more: [...el.shadowRoot.querySelectorAll('button')].some((b) => b.textContent === 'More')
+        checkIt: [...el.shadowRoot.querySelectorAll('button')].some(
+          (b) => b.textContent === 'Check it'
+        ),
+        hide: [...el.shadowRoot.querySelectorAll('button')].some(
+          (b) => b.textContent === 'Hide for me'
+        )
       };
     });
     assert.equal(r.state, 'done');
@@ -180,7 +185,8 @@ test(
       r.findings.every((f) => f.label === (f.outside ? 'Theme or template' : 'Your content'))
     );
     assert.ok(r.edit, 'content cards link to the editor');
-    assert.equal(r.more, true, 'reviews and hides can be made on the page (behind More)');
+    assert.equal(r.checkIt, true, 'questions can be answered on the page');
+    assert.equal(r.hide, true, 'and findings hidden for oneself');
     // Show scrolls to the element and frames it.
     await page.evaluate(() =>
       document
@@ -265,7 +271,6 @@ test('"Hide for me" on the page is the same as in the editor', { skip }, async (
   const { page } = await login(browser);
   const results = await pageChecker(page, POST_TYPICAL, { clear: true });
   const card = results.locator('li.card', { hasText: 'This bold line comes before plain text' });
-  await card.getByRole('button', { name: 'More' }).click();
   await card.getByRole('button', { name: 'Hide for me' }).click();
   await page.waitForFunction(
     async (p) => {

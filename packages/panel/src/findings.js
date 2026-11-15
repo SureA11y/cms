@@ -98,6 +98,10 @@ export function toFindings(result, doc) {
         hint: occ.hint || '',
         lean: occ.lean || null,
         howToCheck: occ.howToCheck || null,
+        // What finds the steps for checking it by hand: its rule's message
+        // prefix and reason code, and the values its steps can name.
+        reviewPrefix: reviewPrefixOf(check),
+        values: { ...((occ.i18n && occ.i18n.params) || {}), ...details },
         selector: occ.selector || null,
         html,
         itemId: itemOf(doc, occ.selector)
@@ -105,6 +109,12 @@ export function toFindings(result, doc) {
     }
   }
   return sortFindings(findings);
+}
+
+/** A rule's message prefix: its title key without `_title`. */
+function reviewPrefixOf(check) {
+  const key = (check.i18n && check.i18n.titleKey) || '';
+  return key.endsWith('_title') ? key.slice(0, -'_title'.length) : null;
 }
 
 /**

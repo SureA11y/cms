@@ -1,8 +1,9 @@
 <?php
 /**
- * Shared reviews: "Reviewed, it's fine", by who, when and with an optional
- * note, kept with the post and seen by everyone who edits it, in the editor
- * and on the page. Stored in the post's meta `_surea11y_reviews`, by finding
+ * Shared reviews: a person's answer to an undecided finding ("it's fine",
+ * "it's a problem" or "not sure"), by who, when and with an optional note,
+ * kept with the post and seen by everyone who edits it, in the editor and on
+ * the page. Stored in the post's meta `_surea11y_reviews`, by finding
  * identity (the panel's findingKey), and read and written through
  * /wp-json/surea11y/v1/reviews/<post>.
  *
@@ -17,7 +18,8 @@ const SUREA11Y_MAX_KEY      = 1000; // Characters of a finding's identity.
 const SUREA11Y_MAX_NOTE     = 500;
 
 /**
- * The stored reviews of a post: key => { user, date (GMT), note }.
+ * The stored reviews of a post: key => { user, date (GMT), note, answer }.
+ * A review stored before answers has no `answer`: it was "it's fine".
  *
  * @param int $post_id The post.
  * @return array
@@ -28,7 +30,8 @@ function surea11y_stored_reviews( $post_id ) {
 }
 
 /**
- * The reviews of a post as the panel shows them: key => { by, when, note },
+ * The reviews of a post as the panel shows them: key => { by, when, note,
+ * answer },
  * the reviewer's display name and the date in the site's format and locale.
  *
  * @param int $post_id The post.
@@ -47,10 +50,21 @@ function surea11y_reviews_for_display( $post_id ) {
 		$out[ $key ] = array(
 			'by'   => $names[ $user_id ],
 			'when' => $time ? wp_date( get_option( 'date_format' ), $time ) : '',
-			'note' => isset( $review['note'] ) ? (string) $review['note'] : '',
+			'note'   => isset( $review['note'] ) ? (string) $review['note'] : '',
+			'answer' => surea11y_clean_answer( isset( $review['answer'] ) ? $review['answer'] : 'pass' ),
 		);
 	}
 	return $out;
+}
+
+/**
+ * An answer: 'pass' (it's fine), 'fail' (it's a problem) or 'unsure'.
+ *
+ * @param mixed $answer The submitted answer.
+ * @return string
+ */
+function surea11y_clean_answer( $answer ) {
+	return in_array( $answer, array( 'pass', 'fail', 'unsure' ), true ) ? $answer : 'pass';
 }
 
 /**
@@ -128,9 +142,14 @@ function surea11y_register_review_routes() {
 						'required' => true,
 						'items'    => array( 'type' => 'string' ),
 					),
-					'note' => array(
+					'note'   => array(
 						'type'    => 'string',
 						'default' => '',
+					),
+					'answer' => array(
+						'type'    => 'string',
+						'enum'    => array( 'pass', 'fail', 'unsure' ),
+						'default' => 'pass',
 					),
 				),
 			),
@@ -162,7 +181,7 @@ function surea11y_get_reviews( $request ) {
 }
 
 /**
- * POST: records the findings as reviewed by the current person, now, with
+ * POST: records the current person's answer about the findings, now, with
  * the note.
  *
  * @param WP_REST_Request $request The request.
@@ -184,9 +203,10 @@ function surea11y_add_reviews( $request ) {
 	foreach ( $keys as $key ) {
 		unset( $reviews[ $key ] ); // Re-added at the end: the newest last.
 		$reviews[ $key ] = array(
-			'user' => get_current_user_id(),
-			'date' => gmdate( 'Y-m-d H:i:s' ),
-			'note' => $note,
+			'user'   => get_current_user_id(),
+			'date'   => gmdate( 'Y-m-d H:i:s' ),
+			'note'   => $note,
+			'answer' => surea11y_clean_answer( (string) $request['answer'] ),
 		);
 	}
 	if ( count( $reviews ) > SUREA11Y_MAX_REVIEWS ) {

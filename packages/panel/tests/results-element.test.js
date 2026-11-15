@@ -314,31 +314,94 @@ test("the host's own actions become buttons on the card, named by their label an
   el.remove();
 });
 
-test('"Reviewed, it\'s fine" takes an optional note, is shared, and can be reopened', () => {
+const tableCard = (el) => $$(el, 'li.card').find((c) => c.textContent.includes('table'));
+const buttonIn = (node, text) =>
+  [...node.querySelectorAll('button')].find((b) => b.textContent === text);
+const QUESTION = {
+  steps: ['Find the table.', 'Read its first row.'],
+  passWhen: 'The first row labels the columns.',
+  failWhen: 'Nothing labels the columns.'
+};
+
+test('an uncertain card offers Show, Check it and Hide for me; a problem card How to fix', () => {
+  const el = make(null);
+  el.canReview = true;
+  el.findings = findings;
+  assert.deepEqual(
+    [...tableCard(el).querySelectorAll('button')].map((b) => b.textContent),
+    ['Show', 'Check it', 'Hide for me']
+  );
+  const problem = $(el, 'section[data-group="problem"] li.card');
+  assert.deepEqual(
+    [...problem.querySelectorAll('button')].map((b) => b.textContent),
+    ['Show', 'How to fix']
+  );
+  el.remove();
+});
+
+test('"Check it" shows what to do, the steps and what fine and a problem look like, from the host', async () => {
+  const el = make(null);
+  el.canReview = true;
+  const asked = [];
+  el.questionFor = (card) => {
+    asked.push(card.ruleId);
+    return Promise.resolve(QUESTION);
+  };
+  el.findings = findings;
+  const check = buttonIn(tableCard(el), 'Check it');
+  assert.equal(check.getAttribute('aria-expanded'), 'false');
+  check.click();
+  assert.equal(buttonIn(tableCard(el), 'Check it').getAttribute('aria-expanded'), 'true');
+  assert.match(tableCard(el).textContent, /Loading the steps…/);
+  await new Promise((r) => setTimeout(r, 0));
+  const card = tableCard(el);
+  assert.deepEqual(asked, ['td-has-header'], 'asked once');
+  assert.match(card.querySelector('.hint').textContent, /Turn on its header row/);
+  assert.deepEqual(
+    [...card.querySelectorAll('ol.steps li')].map((li) => li.textContent),
+    QUESTION.steps
+  );
+  const yes = buttonIn(card, "Yes, it's fine");
+  const no = buttonIn(card, "No, it's a problem");
+  assert.equal(
+    el.shadowRoot.getElementById(yes.getAttribute('aria-describedby')).textContent,
+    "It's fine when: The first row labels the columns."
+  );
+  assert.equal(
+    el.shadowRoot.getElementById(no.getAttribute('aria-describedby')).textContent,
+    "It's a problem when: Nothing labels the columns."
+  );
+  assert.ok(buttonIn(card, 'Not sure'));
+  // Escape closes it, and focus goes back to Check it.
+  card
+    .querySelector('.question')
+    .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  assert.equal(tableCard(el).querySelector('.question'), null);
+  assert.equal(el.shadowRoot.activeElement.textContent, 'Check it');
+  el.remove();
+});
+
+test('"Yes" is a shared review with the note, and can be reopened', async () => {
   const el = make(null);
   el.canReview = true;
   el.reviewer = 'Ana';
+  el.questionFor = () => Promise.resolve(QUESTION);
   el.findings = findings;
   const events = [];
   el.addEventListener('surea11y-review', (e) => events.push(['review', e.detail]));
   el.addEventListener('surea11y-reopen', (e) => events.push(['reopen', e.detail]));
-  const table = () => $$(el, 'li.card').find((c) => c.textContent.includes('table'));
-  [...table().querySelectorAll('button')].find((b) => b.textContent === 'More').click();
-  [...table().querySelectorAll('button')]
-    .find((b) => b.textContent === "Reviewed, it's fine")
-    .click();
-  // The form: a labelled note, focused, with Save and Cancel.
-  const note = table().querySelector('textarea');
-  assert.equal(el.shadowRoot.activeElement, note);
+  buttonIn(tableCard(el), 'Check it').click();
+  await new Promise((r) => setTimeout(r, 0));
+  const note = tableCard(el).querySelector('textarea');
   assert.equal(
     el.shadowRoot.querySelector(`label[for="${note.id}"]`).textContent,
     'Note (optional)'
   );
   note.value = 'Layout table for the price list.';
-  [...table().querySelectorAll('button')].find((b) => b.textContent === 'Save review').click();
+  buttonIn(tableCard(el), "Yes, it's fine").click();
   assert.deepEqual(events[0], [
     'review',
-    { keys: ['b1', 'b2'], note: 'Layout table for the price list.' }
+    { keys: ['b1', 'b2'], note: 'Layout table for the price list.', answer: 'pass' }
   ]);
   assert.equal($$(el, '.tile')[1].textContent, '0Likely problems', 'out of the counts');
   const reviewed = $(el, 'section[data-group="reviewed"] .group-toggle');
@@ -347,13 +410,63 @@ test('"Reviewed, it\'s fine" takes an optional note, is shared, and can be reope
   const card = $(el, 'section[data-group="reviewed"] li.card');
   assert.match(card.querySelector('.review-meta').textContent, /^Ana reviewed it on /);
   assert.equal(card.querySelector('.note').textContent, 'Layout table for the price list.');
-  [...card.querySelectorAll('button')].find((b) => b.textContent === 'Reopen').click();
+  buttonIn(card, 'Reopen').click();
   assert.deepEqual(events[1], ['reopen', { keys: ['b1', 'b2'] }]);
   assert.equal($$(el, '.tile')[1].textContent, '2Likely problems');
   el.remove();
 });
 
-test('reviews set by the host show who and when; without permission there is no review or reopen', () => {
+test('"No" makes it one to fix, saying who confirmed it; Reopen puts it back', async () => {
+  const el = make(null);
+  el.canReview = true;
+  el.reviewer = 'Ana';
+  el.questionFor = () => Promise.resolve(QUESTION);
+  el.findings = findings;
+  buttonIn(tableCard(el), 'Check it').click();
+  await new Promise((r) => setTimeout(r, 0));
+  buttonIn(tableCard(el), "No, it's a problem").click();
+  assert.equal($$(el, '.tile')[0].textContent, '3To fix', 'counted with the problems');
+  assert.equal($$(el, '.tile')[1].textContent, '0Likely problems');
+  const card = $$(el, 'section[data-group="problem"] li.card').find((c) =>
+    c.textContent.includes('table')
+  );
+  assert.match(
+    card.querySelector('.review-meta').textContent,
+    /^Ana confirmed it is a problem on /
+  );
+  assert.ok(buttonIn(card, 'How to fix'), 'a problem to fix');
+  buttonIn(card, 'Reopen').click();
+  assert.equal($$(el, '.tile')[1].textContent, '2Likely problems', 'back in its own group');
+  el.remove();
+});
+
+test('"Not sure" leaves it open and says so; a host can set answers', async () => {
+  const el = make(null);
+  el.canReview = true;
+  el.reviewer = 'Ana';
+  el.findings = findings;
+  buttonIn(tableCard(el), 'Check it').click();
+  await new Promise((r) => setTimeout(r, 0));
+  buttonIn(tableCard(el), 'Not sure').click();
+  assert.equal($$(el, '.tile')[1].textContent, '2Likely problems', 'still to look at');
+  assert.match(tableCard(el).querySelector('.review-meta').textContent, /^Ana wasn't sure, on /);
+  assert.equal(el.shadowRoot.activeElement.textContent, 'Check it');
+  el.remove();
+
+  const set = make(null);
+  set.reviews = { c: { by: 'Ben', when: '14 Nov 2026', note: '', answer: 'fail' } };
+  set.findings = findings;
+  const confirmed = $$(set, 'section[data-group="problem"] li.card').find((c) =>
+    c.textContent.includes('onerror')
+  );
+  assert.equal(
+    confirmed.querySelector('.review-meta').textContent,
+    'Ben confirmed it is a problem on 14 Nov 2026.'
+  );
+  set.remove();
+});
+
+test('reviews set by the host show who and when; without permission there is no answer or reopen', () => {
   const el = make(null);
   el.reviews = { c: { by: 'Ben', when: '14 Nov 2026', note: '' } };
   el.findings = findings;
@@ -362,52 +475,10 @@ test('reviews set by the host show who and when; without permission there is no 
   const card = $(el, 'section[data-group="reviewed"] li.card');
   assert.equal(card.querySelector('.review-meta').textContent, 'Ben reviewed it on 14 Nov 2026.');
   assert.equal(card.querySelector('.note'), null);
-  assert.ok(![...card.querySelectorAll('button')].some((b) => b.textContent === 'Reopen'));
-  assert.ok(!$$(el, 'button').some((b) => b.textContent === "Reviewed, it's fine"));
-  el.remove();
-});
-
-test('with both review and hide, they sit behind "More", a disclosure', () => {
-  const el = make(null);
-  el.canReview = true;
-  el.findings = findings;
-  const table = () => $$(el, 'li.card').find((c) => c.textContent.includes('table'));
-  const names = () => [...table().querySelectorAll('button')].map((b) => b.textContent);
-  assert.deepEqual(names(), ['Show', 'How to fix', 'More']);
-  const more = () => [...table().querySelectorAll('button')].find((b) => b.textContent === 'More');
-  assert.equal(more().getAttribute('aria-expanded'), 'false');
-  more().click();
-  assert.equal(more().getAttribute('aria-expanded'), 'true');
-  assert.equal(el.shadowRoot.activeElement, more(), 'focus stays on More');
-  const row = el.shadowRoot.getElementById(more().getAttribute('aria-controls'));
-  assert.deepEqual(
-    [...row.querySelectorAll('button')].map((b) => b.textContent),
-    ["Reviewed, it's fine", 'Hide for me']
-  );
-  el.remove();
-  // With only one of them, it is shown at once.
-  const solo = make();
-  const card = $$(solo, 'li.card').find((c) => c.textContent.includes('table'));
-  assert.deepEqual(
-    [...card.querySelectorAll('button')].map((b) => b.textContent),
-    ['Show', 'How to fix', 'Hide for me']
-  );
-  solo.remove();
-});
-
-test('Escape closes the review form, and focus goes back to its button', () => {
-  const el = make(null);
-  el.canReview = true;
-  el.findings = findings;
-  const table = () => $$(el, 'li.card').find((c) => c.textContent.includes('table'));
-  [...table().querySelectorAll('button')].find((b) => b.textContent === 'More').click();
-  [...table().querySelectorAll('button')]
-    .find((b) => b.textContent === "Reviewed, it's fine")
-    .click();
-  table()
-    .querySelector('textarea')
-    .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-  assert.equal(table().querySelector('textarea'), null);
-  assert.equal(el.shadowRoot.activeElement.textContent, "Reviewed, it's fine");
+  assert.ok(!buttonIn(card, 'Reopen'));
+  // The steps still show, without the answers.
+  buttonIn(tableCard(el), 'Check it').click();
+  assert.ok(tableCard(el).querySelector('.question'));
+  assert.ok(!buttonIn(tableCard(el), "Yes, it's fine"));
   el.remove();
 });

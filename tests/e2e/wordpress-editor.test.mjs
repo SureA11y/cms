@@ -212,6 +212,27 @@ test("the sidebar passes the engine's own checks", { skip }, async (t) => {
     });
     assert.deepEqual(own, [], `no WCAG failures in the sidebar's ${view} view`);
   }
+  // And with a question open: the steps, and the answers.
+  await page.evaluate(() => {
+    document.querySelector('surea11y-results').view = 'findings';
+  });
+  const card = page
+    .locator('surea11y-results')
+    .locator('li.card', { hasText: 'This bold line comes before plain text' });
+  await card.getByRole('button', { name: 'Check it' }).click();
+  await card.locator('ol.steps li').first().waitFor();
+  const asked = await page.evaluate(() => {
+    const res = window.a11ycore.runa11yCoreInPage(
+      location.href,
+      '.surea11y-sidebar',
+      { profile: 'wcag22-aa' },
+      null
+    );
+    return res.checksResults
+      .filter((c) => c.outcome === 'fail')
+      .map((c) => `${c.ruleId}: ${(c.occurrences || []).map((o) => o.summary).join(' | ')}`);
+  });
+  assert.deepEqual(asked, [], 'no WCAG failures with a question open');
 });
 
 const markerButtons = (page) =>
@@ -306,7 +327,6 @@ test(
         ].map((c) => Number(c.textContent))
       );
     const before = await counts();
-    // With "Reviewed, it's fine" also offered, both sit behind "More".
     const firstCard = page
       .locator('surea11y-results')
       .locator('section[data-group="review"] li.card')
@@ -324,7 +344,6 @@ test(
         { post, want: true },
         { timeout: 20000, polling: 1000 }
       );
-    await firstCard.getByRole('button', { name: 'More' }).click();
     await fine.click();
     const after = await counts();
     await serverMarks(page, POST_TYPICAL);

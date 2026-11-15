@@ -2,6 +2,29 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Phase 2 starts with questions, as answers in the shared reviews
+
+- **An answer is a review.** "Reviewed, it's fine" was already an answer:
+  "it's fine". Answers extend it, in the same post meta and REST route, with
+  `answer`: `pass`, `fail` or `unsure`. Reviews stored before have none and
+  read as `pass`. So the shared reviews, who may make them, and a finding's
+  identity (which drops an answer when the content changes) all carry over.
+- **"No" is a problem to fix, not a dismissal.** The card moves to "To fix",
+  counts there (in the toolbar too), and says who confirmed it. "Not sure"
+  changes no count: the finding is still to look at, and the card says who
+  wasn't sure.
+- **"Check it" replaces "How to fix" on uncertain cards**, with the advice
+  inside it above the steps, so a card keeps four actions at most. Problem
+  cards keep "How to fix". "Reviewed, it's fine" and "More" go: the answers
+  are inside "Check it", and "Hide for me" is shown directly again.
+- **The steps are core's, loaded on demand.** Core's review dictionaries,
+  cut to the rules the plugin runs, are 45 to 50 KB compressed per language:
+  too big for the panel (20 KB). They load on the first "Check it", with
+  core's own helper (`howToCheckFrom`), and are cached for the page.
+- **Wording for editors is still to do.** Core's steps assume a browser's
+  developer tools; some will need editor wording, kept in this repository by
+  rule and reason code, ahead of core's.
+
 ## 2026-11-15: Milestone 6: views, settings, page hides, quality gates
 
 - **The heading and image views judge nothing themselves.** They list what

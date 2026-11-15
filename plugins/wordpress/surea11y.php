@@ -55,8 +55,12 @@ function surea11y_config( $profile, $post_id = 0 ) {
 	$version = (string) filemtime( $dir . 'engine.js' );
 	$locale  = strtolower( substr( determine_locale(), 0, 2 ) );
 	$locales = array();
+	// How to check a finding by hand: English, which brings the helper that
+	// reads them, then the person's language. Loaded on the first question.
+	$review = array( $build . 'review.en.js?ver=' . $version );
 	if ( in_array( $locale, surea11y_engine_locales(), true ) ) {
 		$locales[ $locale ] = $build . 'engine.i18n.' . $locale . '.js?ver=' . $version;
+		$review[]           = $build . 'review.' . $locale . '.js?ver=' . $version;
 	}
 	return array(
 		'engineUrl'  => $build . 'engine.js?ver=' . $version,
@@ -69,6 +73,7 @@ function surea11y_config( $profile, $post_id = 0 ) {
 		'postId'        => (int) $post_id,
 		'canReview'     => surea11y_can_review( $post_id ),
 		'reviewsPath'   => $post_id ? '/surea11y/v1/reviews/' . (int) $post_id : '',
+		'reviewUrls'    => $review,
 	);
 }
 

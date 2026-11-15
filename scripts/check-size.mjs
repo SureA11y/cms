@@ -16,6 +16,11 @@ const BUDGETS = [
   { match: /^panel\.i18n\.[\w-]+\.js$/, max: 6 * KB, what: 'one language of the panel' },
   { match: /^engine\.js$/, max: 540 * KB, what: 'the engine with the CMS pack' },
   {
+    match: /^review\.[\w-]+\.js$/,
+    max: 60 * KB,
+    what: 'how to check, in one language, loaded on the first question'
+  },
+  {
     match: /^engine\.i18n\.[\w-]+\.js$/,
     max: 75 * KB,
     what: "one language of the engine's messages"
