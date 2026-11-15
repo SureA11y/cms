@@ -3,7 +3,8 @@
 Accessibility checking for content management systems (WordPress, Drupal and
 more), built on [`@surea11y/core`](https://github.com/SureA11y/core).
 
-> **Status: planning.** There is no code yet. This repository
+> **Status: Phase 1 starting.** The first package is the CMS pack; the panel
+> and the WordPress plugin follow. This repository
 > currently holds the ideas, decisions and research that will shape the
 > project.
 
@@ -30,6 +31,8 @@ does not change what visitors see, and does not claim legal compliance.
 | [`docs/ideas.md`](docs/ideas.md) | The idea as first discussed: where checks can run, what makes it different, open risks |
 | [`docs/decisions.md`](docs/decisions.md) | Decisions made so far, with the reasoning |
 | [`docs/research/`](docs/research/) | Analysis of our engine and of existing CMS accessibility checkers |
+| [`packages/pack-cms/`](packages/pack-cms/) | `@surea11y/pack-cms`: core's rules sorted into content and theme profiles, and checks authors need |
+| [`prototypes/`](prototypes/) | Throwaway experiments, such as Phase 0 |
 
 The plan is in [`docs/PLAN.md`](docs/PLAN.md).
 

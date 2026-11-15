@@ -1,0 +1,8 @@
+{
+  "cmsLinkToDocument_title": "Links to documents say what they open",
+  "cmsLinkToDocument_description": "Lists links to PDF, Office and other document files, asking that the link say what kind of file it opens and that the document be checked on its own.",
+  "cmsLinkToDocument_summary_unstated": "This link opens a {{format}} document, but nothing says so.",
+  "cmsLinkToDocument_hint_unstated": "Say the file type next to the link text, such as \"Annual report (PDF, 2 MB)\", and check that the document is accessible on its own.",
+  "cmsLinkToDocument_summary_document": "This link opens a {{format}} document.",
+  "cmsLinkToDocument_hint_document": "Check that the document is accessible on its own, as the page is."
+}
