@@ -352,7 +352,26 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
         is pinned at 1.1.0, which needs `@surea11y/core ~1.17.0`. Raising
         core to 1.18 or later needs a version of the pack that accepts it,
         updated in the same change, or npm won't install the two together.
-- [ ] Translations through translate.wordpress.org.
+- [x] Security review (2026-11-15, see `docs/decisions.md`): sandbox limited
+      to the engine's own files, records out of reach of WordPress's screens
+      and API, capped preferences, uninstall, privacy export, erasure and
+      policy text.
+- [x] WordPress's coding standards and Plugin Check's static rules: clean,
+      and in CI (`composer lint:php`).
+- [x] `npm run package`: the zip for WordPress.org, checked.
+- [x] readme.txt for WordPress.org: description, installation, FAQ (not an
+      overlay, nothing sent, what is stored, deleting), screenshots list,
+      source and third-party code.
+- [ ] Before submitting (needs the maintainer): the WordPress.org username(s)
+      for `Contributors:`; the four screenshots in the plugin's SVN `assets/`;
+      a public link to the source of `build/` (WordPress.org requires
+      readable source for compressed code, and this repository is private);
+      running the full Plugin Check in a WordPress once.
+- [ ] Translations through translate.wordpress.org. The plugin's PHP and
+      editor strings use WordPress's functions and will be translated there;
+      the panel's words (cards, questions, rule titles) come from the panel's
+      own files in five languages and won't. Decide whether WordPress's
+      translations feed the panel too.
 - [ ] Documentation for editors (what each message means, how to fix it) and
       a clear "this is not an overlay" statement.
 - [ ] Decide whether the repository becomes public.
