@@ -95,11 +95,10 @@ previous one passes, unless noted.
 - [x] Compare with three other checkers on the same posts: we match them on
       3 of the 7 kinds of planted mistake and miss 4.
 
-**Decision needed:** the recommendations in
-[`RESULTS.md`](../prototypes/phase-0/RESULTS.md#recommendations): sandbox
-scanning, content and theme rule sets, contrast apart, scanning after a
-pause in typing, and closing the four content-check gaps before Phase 1
-ships.
+**Accepted on 2026-11-15:** all seven recommendations in
+[`RESULTS.md`](../prototypes/phase-0/RESULTS.md#recommendations) (see
+[`decisions.md`](decisions.md)). Core issues for the engine changes are
+drafted in [`drafts/core-issues-2026-11.md`](drafts/core-issues-2026-11.md).
 
 ### Phase 1: Panel and WordPress plugin, first usable version
 
@@ -285,10 +284,10 @@ on 2026-11-15.
 | Compact results for storage | Phase 1 | Done: `output.detail: 'findings'` |
 | Other standards and laws | Phase 2 | Done, as packs (experimental until 1.18.0 for parts of the standard API) |
 | Option to skip rules that touch the live page | Phase 1 | Not found. Until then, exclude them by ID |
-| Content checks the others have: "click here" inside a paragraph, PDF and Office links, bold paragraphs used as headings, tables without headers | **Phase 1** (parity, found in Phase 0) | Missing in 1.17.0. A pack, or core |
+| Content checks the others have: "click here" inside a paragraph, PDF and Office links, bold paragraphs used as headings, tables without headers | **Phase 1** (parity, found in Phase 0) | Missing in 1.17.0. Core issues drafted; a pack if core declines |
 | More content checks: ALL CAPS, fake lists, adjacent duplicate links, readability, web address as link text | Phase 2 | Not found in 1.17.0. A pack, or core |
-| An official grouping of rules into content-level and theme-level | Phase 1 | Not in core. The prototype excludes 11 theme-level rules by ID |
-| Cheaper contrast for a few elements (the most expensive rule: 108 of 259 ms on the long post) | Phase 1 | Run contrast apart, less often |
+| An official grouping of rules into content-level and theme-level | Phase 1 | Not in core; issue drafted. The prototype excludes 11 theme-level rules by ID |
+| Cheaper contrast for a few elements (the most expensive rule: 108 of 259 ms on the long post) | Phase 1 | Issue drafted. Run contrast apart, less often |
 | Scan a given element or document | Only if Phase 0 shows it is needed | Not found. Load the bundle inside the iframe |
 | Yield to the browser during a scan | Only if Phase 0 shows it is needed | Not found. Scan after a pause in typing |
 

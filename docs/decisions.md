@@ -2,6 +2,30 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Phase 0 recommendations accepted
+
+From the [Phase 0 results](../prototypes/phase-0/RESULTS.md#recommendations):
+
+1. **Scan a sandbox rendering of the blocks**, never the editor's own page.
+   The editor's markup buried the author's content in findings and hid a
+   skipped heading level. The published-page scan stays as a second view
+   for logged-in editors.
+2. **Two rule sets:** content rules for authors (the default in the
+   editor), and theme rules (CSS, layout, focus, target size) for people who
+   can change the theme.
+3. **Contrast runs apart**, only for blocks where the author chose colours
+   or after a longer pause. It is the most expensive rule.
+4. **Scan after a pause in typing** (about one second), never per keystroke.
+5. **Close the four content-check gaps before Phase 1 ships**, so we find at
+   least what the other checkers find: "click here" inside a sentence, links
+   to PDF and Office files, bold paragraphs used as headings, tables without
+   headers. Asked of core first ([drafts](drafts/core-issues-2026-11.md)); a
+   pack if core declines.
+6. **Load the engine lazily**, when the checker opens or once the editor is
+   idle, and never for logged-out visitors.
+7. **Ask core** for a content/theme grouping of rules and a cheaper contrast
+   check ([drafts](drafts/core-issues-2026-11.md)).
+
 ## 2026-11-15: Competitor names stay in this repository while it is private
 
 The research report, README and ideas name other checkers and engines
