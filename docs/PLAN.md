@@ -126,7 +126,7 @@ Panel:
       language), in English and Spanish first.
 - [ ] The same in German, French and Japanese.
 - [x] Results list with "show me where" and "next issue".
-- [ ] The look approved from the mock-up (2026-11-15):
+- [x] The look approved from the mock-up (2026-11-15):
   - count tiles per group (icon and word, never colour alone) that filter
     the list; no score or percentage;
   - "3 of 11" with previous and next, over every place a finding is in;
@@ -137,11 +137,13 @@ Panel:
   - plain states: checking (the last results stay), nothing to check yet,
     nothing found, and an error in plain words with the details for the
     administrator.
-- [ ] Styles built on design tokens: colours, corner radius, spacing, type
+- [x] Styles built on design tokens: colours, corner radius, spacing, type
       and focus ring as CSS custom properties in one place, so the look can
       change without touching the components, and a site can override
       them. Every token pair keeps WCAG 2.2 AA contrast, checked by a test.
-- [ ] Inline markers.
+- [x] Inline markers: beside each block with a finding, in its group's
+      colour and icon; a shortcut for pointer users, kept out of the tab
+      order because the list and its arrows do the same from the keyboard.
 - [ ] Heading outline and alt-text views.
 - [x] Attribution: content vs. template (each finding names its block; the
       `cms-content` profile runs no theme rule).
@@ -150,8 +152,12 @@ Panel:
 WordPress plugin:
 
 - [x] Block editor sidebar; jump to the block.
-- [ ] Markers on the canvas; open the right setting ("Open the Alternative
-      text field").
+- [x] Markers on the canvas.
+- [ ] Open the right setting ("Open the Alternative text field").
+- [x] "Mark as fine", kept per person and per post in their editor
+      preferences (the "Hide for me" half of the reviews below).
+- [ ] Count on the toolbar button. It needs a check while the sidebar is
+      closed, so it comes with the pre-publish line.
 - [ ] Front-end checker for logged-in editors on previews and published
       pages, and nothing for anyone else. It checks the whole page as
       visitors get it: the theme's real colours, landmarks, menus, skip

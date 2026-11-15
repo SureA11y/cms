@@ -40,16 +40,52 @@
 		return data
 			.select( 'core/block-editor' )
 			.getBlocks()
-			.map( ( block ) => ( { id: block.clientId, html: wp.blocks.getBlockContent( block ) } ) );
+			.map( ( block ) => {
+				const type = wp.blocks.getBlockType( block.name );
+				return {
+					id: block.clientId,
+					html: wp.blocks.getBlockContent( block ),
+					label: type && type.title ? type.title : '',
+				};
+			} );
 	}
 
-	/** Brings a block into view and selects it, which moves focus to it. */
-	function showBlock( clientId ) {
-		const node = canvasDocument().querySelector( '[data-block="' + clientId + '"]' );
+	/** The element that shows a block on the canvas. */
+	function blockNode( clientId ) {
+		return canvasDocument().querySelector( '[data-block="' + clientId + '"]' );
+	}
+
+	/**
+	 * Brings a block into view and selects it. "Show" lets the editor move
+	 * focus to the block, to edit it; the arrows keep focus in the sidebar,
+	 * so a keyboard user can keep stepping.
+	 */
+	function showBlock( clientId, keepFocus ) {
+		const node = blockNode( clientId );
 		if ( node ) {
 			node.scrollIntoView( { block: 'center' } );
 		}
-		data.dispatch( 'core/block-editor' ).selectBlock( clientId );
+		data.dispatch( 'core/block-editor' ).selectBlock( clientId, keepFocus ? null : 0 );
+	}
+
+	/**
+	 * What the person marked as fine, kept per post in their own editor
+	 * preferences (saved for their account, not shared with others).
+	 */
+	const PREFS = 'surea11y';
+	const MAX_MARKED = 500;
+	function postKey() {
+		const editor = data.select( 'core/editor' );
+		return String( editor && editor.getCurrentPostId ? editor.getCurrentPostId() : '' );
+	}
+	function markedKeys() {
+		const all = data.select( 'core/preferences' ).get( PREFS, 'fine' ) || {};
+		return all[ postKey() ] || [];
+	}
+	function saveMarked( keys ) {
+		const all = Object.assign( {}, data.select( 'core/preferences' ).get( PREFS, 'fine' ) || {} );
+		all[ postKey() ] = keys.slice( -MAX_MARKED );
+		data.dispatch( 'core/preferences' ).set( PREFS, 'fine', all );
 	}
 
 	/**
@@ -60,7 +96,28 @@
 		const results = document.createElement( 'surea11y-results' );
 		results.setAttribute( 'heading-level', '3' );
 		results.locale = config.locale;
+		results.marked = markedKeys();
 		host.appendChild( results );
+		const words = Panel.uiStrings( config.locale );
+
+		// Markers beside the blocks, in the canvas. The canvas can be replaced
+		// (a device preview, a template switch), so they follow it.
+		let markers = null;
+		function drawMarkers() {
+			const doc = canvasDocument();
+			if ( markers && markers.doc !== doc ) {
+				markers.destroy();
+				markers = null;
+			}
+			if ( ! markers ) {
+				markers = Panel.createMarkers( doc, {
+					anchorFor: blockNode,
+					onPick: ( cardKey, place ) => results.showPlace( cardKey, place ),
+					label: ( card ) => Panel.fill( words.marker, { group: words.groups[ card.group ], summary: card.summary } ),
+				} );
+			}
+			markers.update( results.cards, results.current );
+		}
 
 		let sandbox = null;
 		function sandboxFor() {
@@ -85,6 +142,7 @@
 				// Nothing to check: say so, and don't load the engine for it.
 				results.empty = true;
 				results.findings = [];
+				drawMarkers();
 				return;
 			}
 			results.empty = false;
@@ -99,7 +157,12 @@
 				if ( out.skippedPacks && out.skippedPacks.length ) {
 					throw new Error( out.skippedPacks.map( ( p ) => p.reason || p.name ).join( '; ' ) );
 				}
-				results.findings = out.findings;
+				const labels = {};
+				items.forEach( ( item ) => {
+					labels[ item.id ] = item.label;
+				} );
+				results.findings = out.findings.map( ( f ) => Object.assign( {}, f, { itemLabel: labels[ f.itemId ] || '' } ) );
+				drawMarkers();
 				window.surea11yLastScan = out.timing; // read by the end-to-end tests
 			} catch ( error ) {
 				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
@@ -116,16 +179,38 @@
 				scheduler.changed();
 			}
 		} );
-		const onShow = ( event ) => showBlock( event.detail.itemId );
+		const onShow = ( event ) => {
+			showBlock( event.detail.itemId, event.detail.via === 'step' );
+			drawMarkers();
+		};
+		const onMark = () => {
+			saveMarked( results.marked );
+			drawMarkers();
+		};
+		const onRetry = () => {
+			// Start again from a fresh frame: the last one may be what failed.
+			if ( sandbox ) {
+				sandbox.destroy();
+				sandbox = null;
+			}
+			scheduler.now();
+		};
 		results.addEventListener( 'surea11y-show', onShow );
+		results.addEventListener( 'surea11y-mark', onMark );
+		results.addEventListener( 'surea11y-retry', onRetry );
 		scheduler.now();
 
 		return function unmount() {
 			unsubscribe();
 			scheduler.cancel();
 			results.removeEventListener( 'surea11y-show', onShow );
+			results.removeEventListener( 'surea11y-mark', onMark );
+			results.removeEventListener( 'surea11y-retry', onRetry );
 			if ( sandbox ) {
 				sandbox.destroy();
+			}
+			if ( markers ) {
+				markers.destroy();
 			}
 			results.remove();
 		};

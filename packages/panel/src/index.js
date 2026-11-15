@@ -8,4 +8,7 @@ export { toFindings, groupOf, sortFindings, countByGroup, findingKey, GROUP_ORDE
 export { MESSAGES, messagesFor } from './messages/index.js';
 export { UI, uiStrings, fill } from './messages/ui.js';
 export { ResultsElement, defineResultsElement } from './ui/results-element.js';
+export { createMarkers } from './ui/markers.js';
 export { createScheduler } from './scheduler.js';
+export { toCards, countPlaces, cardKey } from './cards.js';
+export { TOKENS, CONTRAST_PAIRS, tokenCss } from './ui/tokens.js';
