@@ -2,6 +2,32 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Core ships inside each plugin release; sites get a new core by updating the plugin
+
+- **Bundled, not loaded.** The build puts core and the CMS pack into the
+  plugin's own `build/engine.js`. A site runs the core of the plugin
+  version it has installed. Nothing is fetched from npm or a CDN at run
+  time.
+- **A new core means a plugin release.** Update `@surea11y/core` here,
+  build, run the unit and end-to-end tests, raise the plugin's version
+  (`Version:` in `surea11y.php`, `Stable tag:` in `readme.txt`) and publish.
+  Sites receive it as an ordinary plugin update: automatically where the
+  owner turned on auto-updates for the plugin, otherwise when an admin
+  clicks Update.
+- **Why.** Each plugin version is tested with one known engine, so a core
+  release can't change what sites report before it has been checked here.
+  No outside server is involved, which keeps checks in the browser and
+  works under strict Content Security Policies. WordPress.org's plugin
+  guidelines also appear to require JavaScript to ship inside the plugin
+  rather than load from third-party servers (unverified: check the current
+  guidelines before submitting).
+- **The cost.** A core fix reaches sites only after a plugin release.
+- **Which engine ran.** Each check's record names the core version
+  (`core-version.txt`, `engineVersion`), so results can be traced to it.
+- **The release must include `build/`.** `plugins/wordpress/build/` is not
+  in git, so the release step builds it and puts it in what is uploaded.
+  Added to Phase 3 of the plan.
+
 ## 2026-11-15: EN 301 549 in the exports, from its pack
 
 - **From the pack, not core.** Core is moving EN 301 549 out to

@@ -319,6 +319,12 @@ answered" on a page, and export the evidence.
 
 - [ ] Security review and a full pass of the quality gates.
 - [ ] Confirm the `surea11y` slug; submit for review.
+- [ ] A release step: with core at a published version (not `setup:core`),
+      run `npm run build` and the tests, raise `Version:` in `surea11y.php`
+      and `Stable tag:` in `readme.txt`, and package `plugins/wordpress/`
+      with its `build/` folder (not in git) for the WordPress.org
+      repository. Each core release that sites need goes out this way; see
+      the decision "Core ships inside each plugin release".
 - [ ] Translations through translate.wordpress.org.
 - [ ] Documentation for editors (what each message means, how to fix it) and
       a clear "this is not an overlay" statement.
