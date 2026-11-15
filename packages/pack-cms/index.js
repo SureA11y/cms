@@ -12,6 +12,9 @@
  *   judge the theme's style sheets and layout are left out.
  * - `cms-theme`: what the theme or template decides (style sheets, layout,
  *   page structure), for the people who can change it.
+ * - `cms-page`: both, for checking a whole page as visitors get it (a
+ *   preview or a published page); the tool then says which findings are in
+ *   the author's content and which in the theme.
  *
  *   runDomRulesInPage(url, '.entry-content', { packs: [pack], profile: 'cms-content' })
  */
@@ -80,6 +83,10 @@ module.exports = definePack({
     'cms-theme': {
       tags: [],
       rules: THEME_RULES
+    },
+    'cms-page': {
+      tags: wcagTags('2.2', ['A', 'AA']),
+      rules: [...CONTENT_BEST_PRACTICE, 'link-name-quality-link-only', ...THEME_RULES]
     }
   },
 

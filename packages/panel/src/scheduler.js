@@ -4,7 +4,8 @@
 // one more after it.
 
 /**
- * `run` is an async function doing one scan. `delay` is the pause, in ms.
+ * `run` is an async function doing one scan. `delay` is the pause, in ms, or
+ * a function returning it (a longer pause while nobody is looking).
  * Returns { changed(), now(), cancel() }.
  */
 export function createScheduler(run, { delay = 1000, setTimer = setTimeout, clearTimer = clearTimeout } = {}) {
@@ -12,6 +13,7 @@ export function createScheduler(run, { delay = 1000, setTimer = setTimeout, clea
   let running = false;
   let again = false;
   let cancelled = false;
+  const wait = () => (typeof delay === 'function' ? delay() : delay);
 
   async function fire() {
     timer = null;
@@ -30,7 +32,7 @@ export function createScheduler(run, { delay = 1000, setTimer = setTimeout, clea
         // A change after the one that set `again` may have armed a timer
         // already: one scan follows, not two.
         if (timer) clearTimer(timer);
-        timer = setTimer(fire, delay);
+        timer = setTimer(fire, wait());
       }
     }
   }
@@ -40,7 +42,7 @@ export function createScheduler(run, { delay = 1000, setTimer = setTimeout, clea
     changed() {
       if (cancelled) return;
       if (timer) clearTimer(timer);
-      timer = setTimer(fire, delay);
+      timer = setTimer(fire, wait());
     },
     /** Scan now (the panel was opened). */
     now() {

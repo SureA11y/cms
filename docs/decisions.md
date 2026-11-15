@@ -2,6 +2,31 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: How the checks outside the sidebar behave
+
+- **The toolbar count and the pre-publish line need a check while the
+  sidebar is closed.** It starts once the editor has loaded and the browser
+  is idle, at least three seconds after the page opens, and then runs three
+  seconds after each pause in editing (one second while the sidebar is
+  open). Measured on the test posts: about 0.07 to 0.16 s of main-thread
+  work for the typical post and 0.15 to 0.2 s for the long one, after the
+  editor has started. A setting to turn it off belongs with the other
+  settings.
+- **The page checker loads nothing until asked**, then checks the whole
+  page with a new profile in the pack, `cms-page` (content and theme rules
+  together), and tells the author's content from the theme by where each
+  finding is (`.wp-block-post-content`, `.entry-content`, `.post-content`,
+  or the `surea11y_content_selector` filter). Findings about the page as a
+  whole (its title, its language) have nothing on screen to show.
+- **"Mark as fine" stays in the editor for now.** WordPress adds attributes
+  to the published markup, so the same finding has a different identity
+  there; sharing marks needs a key that survives that.
+- **Settings reach the scripts as JSON data, not as an inline script**, so
+  sites with a strict Content Security Policy work (plan: "No inline
+  scripts").
+- **The end-to-end test files run one at a time**: they share one WordPress
+  user, whose preferences each saves whole.
+
 ## 2026-11-15: Where the checker runs, and how its look is built
 
 **Where it runs.** Besides the editor sidebar:

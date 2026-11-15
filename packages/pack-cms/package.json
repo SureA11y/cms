@@ -1,6 +1,6 @@
 {
   "name": "@surea11y/pack-cms",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Sorts @surea11y/core's rules by who can fix what they find, for content management systems, and adds checks authors need",
   "main": "index.js",

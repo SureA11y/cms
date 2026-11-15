@@ -33,4 +33,4 @@ jobs:
       - name: PHP syntax
         run: php -l plugins/wordpress/surea11y.php
       - name: Editor script syntax
-        run: node --check plugins/wordpress/src/editor.js
+        run: node --check plugins/wordpress/src/editor.js && node --check plugins/wordpress/src/page.js

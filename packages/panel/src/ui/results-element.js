@@ -39,6 +39,8 @@ button:focus-visible, summary:focus-visible { outline: var(--sa11y-focus-width) 
 .button { min-height: var(--sa11y-button-height); padding: 0 var(--sa11y-space-3); border-radius: var(--sa11y-radius-small); border: 1px solid var(--sa11y-accent); background: var(--sa11y-surface); color: var(--sa11y-accent); }
 .button.primary { background: var(--sa11y-accent); color: var(--sa11y-on-accent); }
 .link { border: 0; background: transparent; color: var(--sa11y-accent); text-decoration: underline; padding: 0 var(--sa11y-space-1); }
+a.link { display: inline-flex; align-items: center; min-height: var(--sa11y-button-height); }
+a.link:focus-visible { outline: var(--sa11y-focus-width) solid var(--sa11y-focus); outline-offset: 2px; }
 
 .busy { display: flex; align-items: center; gap: var(--sa11y-space-2); color: var(--sa11y-text-muted); }
 .busy[hidden] { display: none; }
@@ -114,6 +116,8 @@ export class ResultsElement extends HTMLElement {
     this._state = 'idle';
     this._error = '';
     this._empty = false;
+    this._canMark = true;
+    this._editUrl = '';
     this._locale = 'en';
     this._only = null; // the group the tiles filter to
     this._closed = new Set(['marked']);
@@ -188,6 +192,27 @@ export class ResultsElement extends HTMLElement {
   }
   get marked() {
     return [...this._marked];
+  }
+
+  /** Whether "Mark as fine" is offered (the host must keep the marks). */
+  set canMark(value) {
+    this._canMark = !!value;
+    this._render();
+  }
+  get canMark() {
+    return this._canMark;
+  }
+
+  /**
+   * Where the author edits this content: when set, cards in the content get
+   * an "Edit in the editor" link (used where the list is not in the editor).
+   */
+  set editUrl(value) {
+    this._editUrl = value || '';
+    this._render();
+  }
+  get editUrl() {
+    return this._editUrl;
   }
 
   /** The cards as shown, for hosts that draw markers. */
@@ -430,7 +455,7 @@ export class ResultsElement extends HTMLElement {
       hint.append(el(doc, 'strong', '', `${t.howToFix}: `), doc.createTextNode(card.hint));
       li.append(hint);
     }
-    if (!card.inContent) li.append(el(doc, 'p', 'where', t.outsideContent));
+    if (card.outside) li.append(el(doc, 'p', 'where', card.inContent ? t.inTheme : t.outsideContent));
 
     const actions = el(doc, 'div', 'actions');
     const add = (label, cls, focus, action, expanded) => {
@@ -459,7 +484,14 @@ export class ResultsElement extends HTMLElement {
           this._render();
         }, howOpen);
       }
-      if (card.group !== 'problem') add(t.markFine, 'link', 'fine', () => this._mark(card, true));
+      if (this._editUrl && !card.outside) {
+        const a = el(doc, 'a', 'link edit', t.editInEditor);
+        a.href = this._editUrl;
+        a.setAttribute('aria-describedby', id);
+        a.dataset.focus = `card:${hash(card.key)}:edit`;
+        actions.append(a);
+      }
+      if (this._canMark && card.group !== 'problem') add(t.markFine, 'link', 'fine', () => this._mark(card, true));
     }
     li.append(actions);
     return li;
