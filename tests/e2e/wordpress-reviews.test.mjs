@@ -8,7 +8,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
-import { siteContext } from './site.mjs';
+import { siteContext, logIn } from './site.mjs';
 
 const { WP_URL, WP_USER = 'admin', WP_PASS = '', CHROMIUM, POST_TYPICAL = '9' } = process.env;
 const skip = !WP_URL && 'WP_URL is not set';
@@ -30,13 +30,7 @@ test.after(async () => {
 async function login(user = WP_USER, pass = WP_PASS) {
   const context = await siteContext(browser, { viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
-  await page.goto(`${WP_URL}/wp-login.php`);
-  await page.fill('#user_login', user);
-  await page.fill('#user_pass', pass);
-  await Promise.all([
-    page.waitForURL(/wp-admin/, { waitUntil: 'commit' }),
-    page.click('#wp-submit')
-  ]);
+  await logIn(page, user, pass);
   return { context, page };
 }
 
