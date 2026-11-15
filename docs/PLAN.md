@@ -336,10 +336,12 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
 - [ ] Security review and a full pass of the quality gates.
 - [ ] Confirm the `surea11y` slug; submit for review.
 - [ ] A release step: with core at a published version (not `setup:core`),
-      run `npm run build` and the tests, raise `Version:` in `surea11y.php`
-      and `Stable tag:` in `readme.txt`, and package `plugins/wordpress/`
-      with its `build/` folder (not in git) for the WordPress.org
-      repository. Each core release that sites need goes out this way; see
+      run the tests, raise the version (`Version:` and `SUREA11Y_VERSION` in
+      `surea11y.php`, `Stable tag:` in `readme.txt`), and run
+      `npm run package`: it checks the three versions agree and core is a
+      release, builds, checks the size budgets, and writes
+      `dist/surea11y-<version>.zip` (the `surea11y/` folder with `build/`,
+      without the developer README) for the WordPress.org repository. Each core release that sites need goes out this way; see
       the decision "Core ships inside each plugin release".
       - **Core must be released first.** The plugin needs rules that are on
         core's main branch but not in 1.17.0 (the CMS pack uses

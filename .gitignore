@@ -4,3 +4,4 @@ plugins/wordpress/build/
 tests/e2e/results/
 vendor/
 composer.lock
+dist/

@@ -131,6 +131,7 @@ What CI runs on every pull request, and how to run it here:
 | `npm run size` | Size budgets, after `npm run build` |
 | `composer install` then `composer lint:php` | The plugin's PHP: WordPress's coding standards, the security and database checks WordPress.org's Plugin Check runs, PHP 7.4 compatibility (`phpcs.xml.dist`) |
 | `npm run test:e2e:local` | End to end, in a real WordPress (see above) |
+| `npm run package` | The plugin's zip for WordPress.org, in `dist/` (refuses an unreleased core) |
 
 ## Related repositories
 

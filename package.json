@@ -17,6 +17,7 @@
     "format": "prettier --write \"packages/*/src/**/*.js\" \"packages/*/tests/**/*.js\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\" eslint.config.mjs",
     "format:check": "prettier --check \"packages/*/src/**/*.js\" \"packages/*/tests/**/*.js\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\" eslint.config.mjs",
     "size": "node scripts/check-size.mjs",
+    "package": "node scripts/package.mjs",
     "wp:start": "npm run build && wp-env start",
     "wp:stop": "wp-env stop",
     "wp:reset": "wp-env clean development && npm run -s wp:content",
