@@ -53,6 +53,8 @@ editor has finished loading.
 == Changelog ==
 
 = Unreleased =
+* Rules are named in plain words, in your language, on the settings page
+  and in the site overview.
 * An Accessibility column in the lists of posts and pages: each post's
   counts from its last check, with your team's answers since.
 * Dashboard → Accessibility: the problems found on the most pages, the

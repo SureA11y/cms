@@ -2,6 +2,26 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Plain rule titles for editors, in the panel, in five languages
+
+- **Why.** The settings page and the site overview named rules by core's
+  titles, written for developers and in English only ("<img> alt text must
+  be appropriate (manual review)").
+- **What.** A title per rule saying what should be true, in an editor's
+  words ("Alternative text describes the image"), for all 135 rules a
+  check can run, in English, Spanish, German, French and Japanese. The
+  translations are ours and wait for the same native review as the rest.
+- **Where.** `packages/panel/src/messages/rule-titles.<locale>.json`: CMS-
+  neutral, so other CMS integrations use them too. The build adds them to
+  `rules.json` (`titles` per locale); the plugin shows the person's
+  language, then English, then core's title. `rules.json` grows from 22 KB
+  to 61 KB, read only on the server.
+- **Not in the exports.** CSV and EARL keep core's titles: they are
+  evidence for auditors, and core's catalog is the stable reference.
+- **Held to core.** Tests check that every language titles the same rules,
+  that every title is for a real rule, that every rule the page profile
+  runs has one, and that none names markup.
+
 ## 2026-11-15: Check records move out of the post's meta; the posts list column
 
 - **Why move them.** WordPress loads all of a post's meta whenever it lists

@@ -118,15 +118,40 @@ fs.writeFileSync(
       .filter((m) => m && (!m.standard || m.standard === 'WCAG') && !m.type && m.requirement)
       .map((m) => ({ sc: m.requirement, level: m.conformanceLevel || '', id: scSlug(m.title) }));
   const byId = Object.fromEntries(catalog.map((r) => [r.ruleId, r]));
+  // Each rule's title for editors, per language (the panel's
+  // rule-titles.<locale>.json); a page shows the person's language, then
+  // English, then core's own title.
+  const plainTitles = Object.fromEntries(
+    ['en', 'es', 'de', 'fr', 'ja'].map((locale) => [
+      locale,
+      JSON.parse(
+        fs.readFileSync(
+          path.join(root, `packages/panel/src/messages/rule-titles.${locale}.json`),
+          'utf8'
+        )
+      )
+    ])
+  );
   const rules = ids('cms-page')
     .filter((id) => id !== 'manual-review')
     .sort()
     .map((id) => ({
       id,
       title: titles[id] || id,
+      titles: Object.fromEntries(
+        Object.entries(plainTitles)
+          .filter(([, t]) => t[id])
+          .map(([locale, t]) => [locale, t[id]])
+      ),
       content: content.has(id),
       wcag: wcagOf(byId[id])
     }));
+  const untitled = rules.filter((r) => !r.titles.en).map((r) => r.id);
+  if (untitled.length) {
+    console.warn(
+      `No plain title in rule-titles.en.json for: ${untitled.join(', ')}. They show core's title.`
+    );
+  }
   fs.writeFileSync(path.join(out, 'rules.json'), JSON.stringify(rules));
 
   // How to check, by hand, the undecided findings of those rules: their

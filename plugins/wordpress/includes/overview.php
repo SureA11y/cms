@@ -290,7 +290,7 @@ function surea11y_render_overview() {
 		return $names[ $user_id ];
 	};
 	$rule_title = function ( $rule ) use ( $known ) {
-		return isset( $known[ $rule ]['title'] ) ? $known[ $rule ]['title'] : $rule;
+		return isset( $known[ $rule ] ) ? surea11y_rule_title( $known[ $rule ] ) : $rule;
 	};
 
 	echo '<div class="wrap surea11y-overview"><h1>' . esc_html__( 'Accessibility overview', 'surea11y' ) . '</h1>';

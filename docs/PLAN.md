@@ -273,9 +273,10 @@ the author's.
       Accessibility, from a summary kept per post (`_surea11y_summary`) of
       its latest record and its answers as they are now; three queries and
       about 2 KB per post. Each person sees the posts they can edit.
-- [ ] Site overview: plain-language titles for each rule, in every
-      language. It shows core's titles today, written for developers
-      (`<img> alt text must be appropriate`), in English.
+- [x] Site overview: plain-language titles for each rule, in every
+      language. 135 rules in English, Spanish, German, French and Japanese
+      (`packages/panel/src/messages/rule-titles.<locale>.json`), on the
+      settings page and the overview; the exports keep core's titles.
 - [x] **Posts list column** with each post's counts from its last check,
       saved from the browser when the post is saved: nothing is scanned on
       the server or sent anywhere. "Accessibility" in the lists of posts,
