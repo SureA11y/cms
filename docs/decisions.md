@@ -2,6 +2,26 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Contrast in the editor only for the author's colours
+
+The contrast rules were measured again, on the content alone as the editor
+checks it: they are about half of a check (15 of 30 ms on the typical post,
+60 of 97 ms on the long one; at a CPU slowed 4×, 86 of 148 and 334 of 374).
+The plan's 12% was for whole pages, where the other rules cost more.
+
+- The frequent check leaves `contrast-minimum`, `contrast-computable` and
+  `link-in-text-block` out. They run only on the blocks with colours of the
+  author's (WordPress's `has-…-color` and `has-…-background-color` classes,
+  or colours in a style attribute), and only when those blocks change: an
+  author can only get wrong the colours they chose. The theme's colours are
+  checked on the page, by the page checker, which runs every rule.
+- The contrast pass names only rules the content profile runs: naming rules
+  replaces the profile, so an AAA rule (`contrast-enhanced`) would join in.
+- Result: a check after an edit takes 30 ms on the typical post (45 to 88
+  before), and the background check 0 to 156 ms of main-thread work on the
+  typical post and 89 to 145 ms on the long one (66 to 160 and 148 to 203
+  before).
+
 ## 2026-11-15: How the checks outside the sidebar behave
 
 - **The toolbar count and the pre-publish line need a check while the

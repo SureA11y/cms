@@ -117,14 +117,20 @@ Panel:
       (`output.detail: 'findings'`). The sandbox has its own Content Security
       Policy, and renders items as siblings, as the published page does.
       Rules that touch the live page touch only the sandbox.
-- [ ] Contrast run apart from the frequent check (Phase 0 decision 3).
+- [x] Contrast run apart from the frequent check (Phase 0 decision 3):
+      the frequent check leaves the contrast rules out, and they run only on
+      blocks with colours of the author's, only when those blocks change.
+      The theme's own colours are checked by the page checker.
 - [x] Results grouped the way core's own report does it, using each
       uncertain finding's lean: "Likely problems: confirm", "Probably fine:
       confirm", "Needs a person".
 - [x] Editor-friendly messages and repair suggestions for the rules editors
       meet most (alt text, headings, links, tables, lists, contrast,
       language), in English and Spanish first.
-- [ ] The same in German, French and Japanese.
+- [x] The same in German, French and Japanese, and plain wording for
+      contrast in all five.
+- [ ] German, French and Japanese reviewed by native speakers: written
+      without one, using core's own terms where they overlap.
 - [x] Results list with "show me where" and "next issue".
 - [x] The look approved from the mock-up (2026-11-15):
   - count tiles per group (icon and word, never colour alone) that filter
@@ -147,13 +153,17 @@ Panel:
 - [ ] Heading outline and alt-text views.
 - [x] Attribution: content vs. template (each finding names its block; the
       `cms-content` profile runs no theme rule).
-- [ ] Nested blocks named by their own block, not their top-level one.
+- [x] Nested blocks named by their own block, not their top-level one
+      (an image in a group's columns is "Image", and Show selects it).
 
 WordPress plugin:
 
 - [x] Block editor sidebar; jump to the block.
 - [x] Markers on the canvas.
-- [ ] Open the right setting ("Open the Alternative text field").
+- [x] Open the right setting from a finding: "Edit the alternative text"
+      (image) and "Open the header setting" (table) select the block, open
+      its settings and put focus on the field.
+- [ ] More settings to open: heading level, link text, colours.
 - [x] "Mark as fine", kept per person and per post in their editor
       preferences (the "Hide for me" half of the reviews below).
 - [x] Count on the toolbar button: what to fix or confirm, from a check

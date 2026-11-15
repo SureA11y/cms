@@ -54,19 +54,56 @@
 			.join( '\n' );
 	}
 
-	/** The post's top-level blocks as the content items the panel scans. */
+	/*
+	 * Every block, inner ones included, is tagged with its id while the
+	 * checker renders the post for its sandbox, so a finding inside a group
+	 * or columns block names the block it is in, not the group. WordPress
+	 * adds these props to the outer element of each block's saved markup; the
+	 * filter acts only during the checker's own rendering, never when a post
+	 * is saved, and the tag is left out of what identifies a finding.
+	 */
+	const tagging = { active: false, ids: new Map() }; // a block's attributes object -> its clientId
+	wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'surea11y/tag-blocks', ( props, blockType, attributes ) => {
+		if ( ! tagging.active ) {
+			return props;
+		}
+		const id = tagging.ids.get( attributes );
+		return id ? Object.assign( {}, props, { [ Panel.ITEM_ATTRIBUTE ]: id } ) : props;
+	} );
+
+	/** Every block of a tree, depth first, in the order they appear. */
+	function eachBlock( blocks, fn ) {
+		blocks.forEach( ( block ) => {
+			fn( block );
+			eachBlock( block.innerBlocks || [], fn );
+		} );
+	}
+
+	/**
+	 * The post's top-level blocks as the content items the panel scans, with
+	 * the name and order of every block, inner ones included.
+	 */
 	function contentItems() {
-		return data
-			.select( 'core/block-editor' )
-			.getBlocks()
-			.map( ( block ) => {
-				const type = wp.blocks.getBlockType( block.name );
-				return {
-					id: block.clientId,
-					html: wp.blocks.getBlockContent( block ),
-					label: type && type.title ? type.title : '',
-				};
-			} );
+		const blocks = data.select( 'core/block-editor' ).getBlocks();
+		const labels = {};
+		const names = {};
+		const order = [];
+		tagging.ids = new Map();
+		eachBlock( blocks, ( block ) => {
+			const type = wp.blocks.getBlockType( block.name );
+			labels[ block.clientId ] = type && type.title ? type.title : '';
+			names[ block.clientId ] = block.name;
+			order.push( block.clientId );
+			tagging.ids.set( block.attributes, block.clientId );
+		} );
+		tagging.active = true;
+		try {
+			const items = blocks.map( ( block ) => ( { id: block.clientId, html: wp.blocks.getBlockContent( block ) } ) );
+			return { items, labels, names, order };
+		} finally {
+			tagging.active = false;
+			tagging.ids = new Map();
+		}
 	}
 
 	/** The element that shows a block on the canvas. */
@@ -85,6 +122,87 @@
 			n.scrollIntoView( { block: 'center' } );
 		}
 		data.dispatch( 'core/block-editor' ).selectBlock( clientId, keepFocus ? null : 0 );
+	}
+
+	/*
+	 * The setting that fixes a finding, opened from its card: the block is
+	 * selected, its settings open, and focus goes to the field. Fields are
+	 * found by their label, read through WordPress's own translations (the
+	 * default text domain), so this works in any language WordPress speaks.
+	 */
+	const SETTINGS = [
+		{
+			id: 'alt',
+			block: 'core/image',
+			rules: [ 'img-alt-present', 'img-alt-quality', 'img-alt-decorative', 'image-redundant-alt' ],
+			label: () => words.openAltText,
+			field: () => wp.i18n.__( 'Alternative text' ),
+		},
+		{
+			id: 'headers',
+			block: 'core/table',
+			rules: [ 'td-has-header', 'empty-table-header' ],
+			label: () => words.openTableHeaders,
+			field: () => wp.i18n.__( 'Header section' ),
+		},
+	];
+
+	/** The control a visible label names in the block settings, if shown. */
+	function settingControl( text ) {
+		const scope = document.querySelector( '.block-editor-block-inspector' );
+		if ( ! scope ) {
+			return null;
+		}
+		for ( const label of scope.querySelectorAll( 'label' ) ) {
+			if ( label.textContent.trim() !== text ) {
+				continue;
+			}
+			const control = ( label.htmlFor && document.getElementById( label.htmlFor ) ) || label.querySelector( 'input, textarea, select' );
+			if ( control ) {
+				return control;
+			}
+		}
+		return null;
+	}
+
+	/** Selects the block, opens its settings, and moves focus to the field. */
+	function openSetting( clientId, fieldText ) {
+		data.dispatch( 'core/block-editor' ).selectBlock( clientId, null );
+		const n = blockNode( clientId );
+		if ( n ) {
+			n.scrollIntoView( { block: 'center' } );
+		}
+		const iface = data.dispatch( 'core/interface' );
+		if ( iface && iface.enableComplementaryArea ) {
+			iface.enableComplementaryArea( 'core', 'edit-post/block' );
+			iface.enableComplementaryArea( 'core/edit-post', 'edit-post/block' );
+		}
+		// The settings render a moment later.
+		let tries = 0;
+		( function focusWhenThere() {
+			const control = settingControl( fieldText );
+			if ( control ) {
+				control.scrollIntoView( { block: 'center' } );
+				control.focus();
+				return;
+			}
+			if ( ++tries < 60 ) {
+				window.requestAnimationFrame( focusWhenThere );
+			}
+		} )();
+	}
+
+	/** The settings a card can open: for the place shown, or its first. */
+	function settingsFor( card, current ) {
+		const place = ( current && current.cardKey === card.key && card.places[ current.place ] ) || card.places.find( ( p ) => p.itemId );
+		if ( ! place || ! place.itemId ) {
+			return [];
+		}
+		return SETTINGS.filter( ( s ) => s.block === place.blockName && s.rules.includes( card.ruleId ) ).map( ( s ) => ( {
+			id: s.id,
+			label: s.label(),
+			run: () => openSetting( place.itemId, s.field() ),
+		} ) );
 	}
 
 	/**
@@ -156,9 +274,27 @@
 	// True when the blocks changed after the last check began.
 	let dirty = false;
 
+	/*
+	 * Contrast runs apart (Phase 0, decision 3). It is about half of a check
+	 * (measured: 15 of 30 ms on the typical post, 60 of 97 on the long one),
+	 * and in the editor what an author can get wrong is the colours they
+	 * chose: the theme's own colours are checked on the page, by the page
+	 * checker. So the frequent check leaves the contrast rules out, and they
+	 * run only on the blocks with colours of the author's, and only when those
+	 * blocks change.
+	 */
+	// Only rules the content profile runs: naming rules replaces the profile, so
+	// an AAA rule such as contrast-enhanced would otherwise join in.
+	const CONTRAST_RULES = [ 'contrast-minimum', 'contrast-computable', 'link-in-text-block' ];
+	// WordPress marks the colours an author picks with has-…-color and
+	// has-…-background-color classes (and has-inline-color in text), or
+	// writes them in a style attribute.
+	const OWN_COLOURS = /\bhas-[\w-]*(?:color|background)\b|style="[^"]*(?:color|background)/i;
+	const contrast = { key: null, findings: [], ms: 0 };
+
 	async function scan() {
 		dirty = false;
-		const items = contentItems();
+		const { items, labels, names, order } = contentItems();
 		if ( ! Panel.hasContent( items ) ) {
 			// Nothing to check: say so, and don't load the engine for it.
 			Object.assign( checker, { state: 'done', empty: true, findings: [], error: '' } );
@@ -168,26 +304,45 @@
 		checker.state = 'scanning';
 		checker.notify();
 		try {
-			const out = await sandboxFor().scan( items, {
+			const options = {
 				profile: config.profile,
 				packs: config.packs,
 				locale: config.locale,
 				messages: Panel.messagesFor( config.locale ),
-			} );
+			};
+			const out = await sandboxFor().scan( items, Object.assign( {}, options, { runOnly: { excludeRuleIds: CONTRAST_RULES } } ) );
 			if ( out.skippedPacks && out.skippedPacks.length ) {
 				throw new Error( out.skippedPacks.map( ( p ) => p.reason || p.name ).join( '; ' ) );
 			}
-			const labels = {};
-			items.forEach( ( item ) => {
-				labels[ item.id ] = item.label;
-			} );
+			// Contrast, for the author's colours, when they changed.
+			const coloured = items.filter( ( item ) => OWN_COLOURS.test( item.html ) );
+			const key = coloured.map( ( item ) => item.id + '\u0000' + item.html ).join( '\u0001' );
+			let contrastRan = false;
+			if ( key !== contrast.key ) {
+				contrast.findings = [];
+				contrast.ms = 0;
+				if ( coloured.length ) {
+					const c = await sandboxFor().scan( coloured, Object.assign( {}, options, { runOnly: { includeRuleIds: CONTRAST_RULES } } ) );
+					contrast.findings = c.findings;
+					contrast.ms = c.timing.renderMs + c.timing.scanMs;
+					contrastRan = true;
+				}
+				contrast.key = key;
+			}
+			const findings = Panel.sortFindings(
+				out.findings.concat( contrast.findings ),
+				order
+			);
 			Object.assign( checker, {
 				state: 'done',
 				empty: false,
 				error: '',
-				findings: out.findings.map( ( f ) => Object.assign( {}, f, { itemLabel: labels[ f.itemId ] || '' } ) ),
+				findings: findings.map( ( f ) =>
+					Object.assign( {}, f, { itemLabel: labels[ f.itemId ] || '', blockName: names[ f.itemId ] || '' } )
+				),
 			} );
-			window.surea11yLastScan = out.timing; // read by the end-to-end tests
+			// Read by the end-to-end tests.
+			window.surea11yLastScan = Object.assign( {}, out.timing, { contrastRan, contrastMs: contrast.ms, coloured: coloured.length } );
 		} catch ( error ) {
 			window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
 			Object.assign( checker, { state: 'error', error: error && error.message ? error.message : String( error ) } );
@@ -212,6 +367,7 @@
 			sandbox.destroy();
 			sandbox = null;
 		}
+		contrast.key = null;
 		scheduler.now();
 	}
 
@@ -252,6 +408,7 @@
 		results.setAttribute( 'heading-level', '3' );
 		results.locale = config.locale;
 		results.marked = checker.markedKeys();
+		results.actionsFor = settingsFor;
 		host.appendChild( results );
 
 		// Markers beside the blocks, in the canvas. The canvas can be replaced

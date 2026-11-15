@@ -34,5 +34,7 @@
   "emptyHeading_hint_fail": "Write the heading's text, or remove the heading if it isn't needed.",
   "identicalLinksSamePurpose_hint_cantTell": "Links with the same text should go to the same place. If they go to different places, make each link's text say where it goes.",
   "cmsLinkToDocument_summary_unstated": "This link opens a {{format}} file, but the text doesn't say so.",
-  "cmsLinkToDocument_hint_unstated": "Add the file type and size after the link text, such as \"Annual report (PDF, 2 MB)\". Check the file itself is accessible too."
+  "cmsLinkToDocument_hint_unstated": "Add the file type and size after the link text, such as \"Annual report (PDF, 2 MB)\". Check the file itself is accessible too.",
+  "contrastMinimum_fail_belowThreshold": "This text is hard to read: its colours have a contrast of {{ratio}}:1, and it needs at least {{threshold}}:1.",
+  "contrastMinimum_hint_fail": "Choose a darker text colour or a lighter background (or the other way round) in the block's colour settings, until the contrast reaches {{threshold}}:1."
 }

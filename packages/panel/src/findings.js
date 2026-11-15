@@ -47,8 +47,9 @@ export function toFindings(result, doc) {
       const outcome = occ.occurrenceOutcome || check.outcome;
       if (outcome !== 'fail' && outcome !== 'cantTell') continue;
       const details = (occ.data && occ.data.details) || {};
+      const html = withoutItemAttribute(occ.html);
       findings.push({
-        key: findingKey(check.ruleId, details.reasonCode, occ.html),
+        key: findingKey(check.ruleId, details.reasonCode, html),
         ruleId: check.ruleId,
         title: check.title,
         outcome,
@@ -60,12 +61,23 @@ export function toFindings(result, doc) {
         lean: occ.lean || null,
         howToCheck: occ.howToCheck || null,
         selector: occ.selector || null,
-        html: occ.html || '',
+        html,
         itemId: itemOf(doc, occ.selector)
       });
     }
   }
   return sortFindings(findings);
+}
+
+/**
+ * The element's HTML without the attribute the sandbox adds to tie it to its
+ * item: item ids change between sessions (a block editor makes new ones on
+ * every load), and a finding's identity must not, or a review recorded
+ * against it would be lost on the next load.
+ */
+const ITEM_ATTRIBUTE_RE = new RegExp(`\\s${ITEM_ATTRIBUTE}="[^"]*"`, 'g');
+export function withoutItemAttribute(html) {
+  return String(html || '').replace(ITEM_ATTRIBUTE_RE, '');
 }
 
 function itemOf(doc, selector) {

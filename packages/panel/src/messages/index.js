@@ -5,8 +5,12 @@
 
 import en from './en.json' with { type: 'json' };
 import es from './es.json' with { type: 'json' };
+import de from './de.json' with { type: 'json' };
+import fr from './fr.json' with { type: 'json' };
+import ja from './ja.json' with { type: 'json' };
 
-export const MESSAGES = { en, es };
+// German, French and Japanese are not yet reviewed by native speakers.
+export const MESSAGES = { en, es, de, fr, ja };
 
 /** `engineOptions.messages` for a scan in `locale`. */
 export function messagesFor(locale) {

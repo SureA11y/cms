@@ -120,8 +120,10 @@ export function createSandbox(hostDocument, options) {
     /**
      * Renders `items` ([{ id, html }]) and scans them. Returns the findings,
      * the raw result and how long each step took, in milliseconds.
+     * `runOnly` narrows the rules (core's runOnly: `excludeRuleIds` keeps the
+     * profile and leaves rules out, `includeRuleIds` runs only those).
      */
-    async scan(items, { profile = 'cms-content', packs = [], locale = 'en', messages } = {}) {
+    async scan(items, { profile = 'cms-content', packs = [], locale = 'en', messages, runOnly = null } = {}) {
       const win = await ready;
       const doc = win.document;
       const t0 = win.performance.now();
@@ -130,7 +132,7 @@ export function createSandbox(hostDocument, options) {
       const t1 = win.performance.now();
       const engineOptions = { profile, packs, locale, output: { detail: 'findings' } };
       if (messages) engineOptions.messages = messages;
-      const result = win.a11ycore.runa11yCoreInPage(win.location.href, `#${CONTENT_ID}`, engineOptions, null);
+      const result = win.a11ycore.runa11yCoreInPage(win.location.href, `#${CONTENT_ID}`, engineOptions, runOnly);
       const t2 = win.performance.now();
       const findings = sortFindings(toFindings(result, doc), items.map((i) => i.id));
       return {

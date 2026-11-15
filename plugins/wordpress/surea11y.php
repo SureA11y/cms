@@ -107,7 +107,7 @@ function surea11y_enqueue_editor_assets() {
 	wp_enqueue_script(
 		'surea11y-editor',
 		plugins_url( 'src/editor.js', __FILE__ ),
-		array( 'surea11y-panel', 'wp-plugins', 'wp-editor', 'wp-element', 'wp-data', 'wp-blocks', 'wp-block-editor', 'wp-components', 'wp-i18n', 'wp-preferences' ),
+		array( 'surea11y-panel', 'wp-plugins', 'wp-editor', 'wp-element', 'wp-data', 'wp-blocks', 'wp-block-editor', 'wp-components', 'wp-hooks', 'wp-i18n', 'wp-preferences' ),
 		SUREA11Y_VERSION,
 		true
 	);
