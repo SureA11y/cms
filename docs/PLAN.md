@@ -325,6 +325,15 @@ answered" on a page, and export the evidence.
       with its `build/` folder (not in git) for the WordPress.org
       repository. Each core release that sites need goes out this way; see
       the decision "Core ships inside each plugin release".
+      - **Core must be released first.** The plugin needs rules that are on
+        core's main branch but not in 1.17.0 (the CMS pack uses
+        `link-name-quality-link-only` and others; the build stops with a
+        message naming the missing rule). The first plugin release waits
+        for a core release that has them.
+      - **The EN 301 549 pack moves with core.** `@surea11y/pack-en301549`
+        is pinned at 1.1.0, which needs `@surea11y/core ~1.17.0`. Raising
+        core to 1.18 or later needs a version of the pack that accepts it,
+        updated in the same change, or npm won't install the two together.
 - [ ] Translations through translate.wordpress.org.
 - [ ] Documentation for editors (what each message means, how to fix it) and
       a clear "this is not an overlay" statement.
