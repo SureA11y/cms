@@ -218,3 +218,20 @@ test('Spanish', () => {
   assert.equal($$(el, '.tile')[0].textContent, '1Por corregir');
   el.remove();
 });
+
+test("the host's own actions become buttons on the card, named by their label and described by the finding", () => {
+  const el = make(null);
+  const ran = [];
+  el.actionsFor = (card) =>
+    card.ruleId === 'td-has-header' ? [{ id: 'headers', label: 'Open the header setting', run: (c) => ran.push(c.key) }] : [];
+  el.findings = findings;
+  const table = $$(el, 'li.card').find((c) => c.textContent.includes('table'));
+  const button = [...table.querySelectorAll('button')].find((b) => b.textContent === 'Open the header setting');
+  assert.ok(button);
+  assert.equal(el.shadowRoot.getElementById(button.getAttribute('aria-describedby')).textContent, 'This table has no header cells.');
+  button.click();
+  assert.equal(ran.length, 1);
+  const others = $$(el, 'li.card').filter((c) => c !== table);
+  assert.ok(!others.some((c) => c.textContent.includes('Open the header setting')));
+  el.remove();
+});

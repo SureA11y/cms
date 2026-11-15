@@ -117,6 +117,7 @@ export class ResultsElement extends HTMLElement {
     this._error = '';
     this._empty = false;
     this._canMark = true;
+    this._actionsFor = null;
     this._editUrl = '';
     this._locale = 'en';
     this._only = null; // the group the tiles filter to
@@ -192,6 +193,19 @@ export class ResultsElement extends HTMLElement {
   }
   get marked() {
     return [...this._marked];
+  }
+
+  /**
+   * The host's actions for a card: a function (card, current) returning
+   * [{ id, label, run(card) }], such as opening the setting that fixes it.
+   * Each becomes a button on the card, after "How to fix".
+   */
+  set actionsFor(fn) {
+    this._actionsFor = typeof fn === 'function' ? fn : null;
+    this._render();
+  }
+  get actionsFor() {
+    return this._actionsFor;
   }
 
   /** Whether "Mark as fine" is offered (the host must keep the marks). */
@@ -483,6 +497,13 @@ export class ResultsElement extends HTMLElement {
           else this._howOpen.add(card.key);
           this._render();
         }, howOpen);
+      }
+      // The host's own actions, such as opening the setting that fixes it.
+      const extra = typeof this._actionsFor === 'function' ? this._actionsFor(card, this._current) || [] : [];
+      for (const action of extra) {
+        if (action && action.label && typeof action.run === 'function') {
+          add(action.label, 'button', `act:${action.id || action.label}`, () => action.run(card));
+        }
       }
       if (this._editUrl && !card.outside) {
         const a = el(doc, 'a', 'link edit', t.editInEditor);

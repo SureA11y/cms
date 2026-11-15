@@ -23,12 +23,21 @@ test('every locale has the same keys and placeholders as English', () => {
     assert.deepEqual(Object.keys(dict).sort(), Object.keys(MESSAGES.en).sort(), locale);
     for (const [k, v] of Object.entries(dict)) assert.equal(ph(v), ph(MESSAGES.en[k]), `${locale} ${k}`);
   }
-  assert.deepEqual(Object.keys(UI.es).sort(), Object.keys(UI.en).sort());
+  // The panel's own words: the same keys, nested groups included, and placeholders, in every locale.
+  const flat = (o, p = '') => Object.entries(o).flatMap(([k, v]) => (v && typeof v === 'object' ? flat(v, p + k + '.') : [[p + k, v]]));
+  const en = Object.fromEntries(flat(UI.en));
+  for (const locale of ['es', 'de', 'fr', 'ja']) {
+    const dict = Object.fromEntries(flat(UI[locale]));
+    assert.deepEqual(Object.keys(dict).sort(), Object.keys(en).sort(), `UI ${locale}`);
+    for (const [k, v] of Object.entries(dict)) assert.equal(ph(v), ph(en[k]), `UI ${locale} ${k}`);
+  }
 });
 
 test('a scan gets English and the locale asked for', () => {
   assert.deepEqual(Object.keys(messagesFor('es-ES')).sort(), ['en', 'es']);
-  assert.deepEqual(Object.keys(messagesFor('de')), ['en']);
+  assert.deepEqual(Object.keys(messagesFor('de')).sort(), ['de', 'en']);
+  assert.deepEqual(Object.keys(messagesFor('ja-JP')).sort(), ['en', 'ja']);
+  assert.deepEqual(Object.keys(messagesFor('it')), ['en']);
 });
 
 test('messages name what an author edits, not HTML', () => {

@@ -34,5 +34,7 @@
   "emptyHeading_hint_fail": "Escribe el texto del encabezado, o elimínalo si no hace falta.",
   "identicalLinksSamePurpose_hint_cantTell": "Los enlaces con el mismo texto deberían ir al mismo sitio. Si van a sitios distintos, haz que el texto de cada uno diga adónde va.",
   "cmsLinkToDocument_summary_unstated": "Este enlace abre un archivo {{format}}, pero el texto no lo dice.",
-  "cmsLinkToDocument_hint_unstated": "Añade el tipo y el tamaño del archivo después del texto del enlace, como \"Informe anual (PDF, 2 MB)\". Comprueba también que el archivo sea accesible."
+  "cmsLinkToDocument_hint_unstated": "Añade el tipo y el tamaño del archivo después del texto del enlace, como \"Informe anual (PDF, 2 MB)\". Comprueba también que el archivo sea accesible.",
+  "contrastMinimum_fail_belowThreshold": "Este texto se lee mal: sus colores tienen un contraste de {{ratio}}:1, y necesita al menos {{threshold}}:1.",
+  "contrastMinimum_hint_fail": "Elige un color de texto más oscuro o un fondo más claro (o al revés) en los ajustes de color del bloque, hasta que el contraste llegue a {{threshold}}:1."
 }

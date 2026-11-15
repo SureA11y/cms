@@ -23,6 +23,12 @@ post's content are marked "Your content", the rest "Theme or template".
   otherwise. The page checker runs only when asked.
 - **What:** the `cms-content` profile of `@surea11y/pack-cms`: WCAG 2.2 A and
   AA rules about content, the content best practices, and the pack's own.
+  Contrast runs apart, only on blocks with colours the author chose, and only
+  when they change.
+- **Which block:** every block, inner ones included, is tagged with its id
+  while the checker renders the post (never when the post is saved), so a
+  finding names the block it is in. Images and tables offer to open the
+  setting that fixes them.
   The page checker uses `cms-page`: those and the theme's rules together.
 - **Where the content is on a page:** `.wp-block-post-content`,
   `.entry-content` or `.post-content`; a theme with its own can name it with

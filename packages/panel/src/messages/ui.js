@@ -1,5 +1,7 @@
 // The panel's own words: headings, buttons and status messages.
 
+import { MORE } from './ui-more.js';
+
 export const UI = {
   en: {
     heading: 'Accessibility',
@@ -51,6 +53,8 @@ export const UI = {
     prepublishReview: 'Review in the Accessibility panel',
     prepublishNote: "This doesn't stop you publishing.",
     toolbarCount: '{{n}} to fix or confirm',
+    openAltText: 'Edit the alternative text',
+    openTableHeaders: 'Open the header setting',
     emptyTitle: 'Nothing to check yet',
     empty: 'Add some content and it will be checked here as you write.',
     nothingTitle: 'Nothing to fix or review in this content.',
@@ -111,6 +115,8 @@ export const UI = {
     prepublishReview: 'Revisar en el panel de Accesibilidad',
     prepublishNote: 'Esto no te impide publicar.',
     toolbarCount: '{{n}} por corregir o confirmar',
+    openAltText: 'Editar el texto alternativo',
+    openTableHeaders: 'Abrir el ajuste de encabezado',
     emptyTitle: 'Aún no hay nada que comprobar',
     empty: 'Añade contenido y se comprobará aquí mientras escribes.',
     nothingTitle: 'No hay nada que corregir ni revisar en este contenido.',
@@ -122,6 +128,8 @@ export const UI = {
     marker: '{{group}}: {{summary}}'
   }
 };
+
+Object.assign(UI, MORE);
 
 /** The panel's words in `locale`, falling back to English. */
 export function uiStrings(locale) {

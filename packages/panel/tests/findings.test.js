@@ -55,3 +55,19 @@ test('a selector that does not resolve leaves the finding unattributed', () => {
   assert.equal(toFindings(r, doc)[0].itemId, null);
   assert.deepEqual(toFindings(null, doc), []);
 });
+
+test("a finding's identity doesn't change with the item id, which changes between sessions", () => {
+  const result = (id) => ({
+    checksResults: [
+      {
+        ruleId: 'p-as-heading',
+        outcome: 'cantTell',
+        occurrences: [{ selector: 'p', html: `<p data-surea11y-item="${id}" class="x"><strong>Opening times</strong></p>`, data: { details: { reasonCode: 'BOLD_SHORT_PARAGRAPH' } } }]
+      }
+    ]
+  });
+  const [a] = toFindings(result('client-1'), null);
+  const [b] = toFindings(result('client-2'), null);
+  assert.equal(a.key, b.key);
+  assert.equal(a.html, '<p class="x"><strong>Opening times</strong></p>');
+});
