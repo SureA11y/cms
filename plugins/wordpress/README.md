@@ -63,6 +63,7 @@ sees only the posts they can edit. The lists of posts and pages have an
 | `includes/settings.php` | The settings page, and who may see and review. |
 | `includes/reviews.php` | Shared reviews: storage and the REST route. |
 | `includes/evidence.php` | The evidence trail: records of checks, and their CSV and EARL exports. |
+| `includes/site-editor.php` | The Site Editor: renders a template's blocks for the checker. |
 | `includes/columns.php` | The Accessibility column in the lists of posts and pages. |
 | `includes/overview.php` | The site overview (Dashboard → Accessibility), from a small summary kept per post. |
 | `includes/hidden.php` | "Hide for me" from the page checker, in the person's editor preferences. |

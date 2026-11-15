@@ -106,6 +106,101 @@
 		}
 	}
 
+	/*
+	 * The Site Editor: templates and template parts are mostly dynamic blocks,
+	 * with no saved markup, so they are rendered on the server, as visitors
+	 * get them (includes/site-editor.php), and checked with the page profile
+	 * (theme and content rules) less the rules about the whole document.
+	 * A block's class `surea11y-item--<clientId>` comes back as the item
+	 * attribute, so a finding names its block. A template part is sent as
+	 * the blocks being edited, not as saved, so unsaved changes are checked.
+	 */
+	const TEMPLATE_TYPES = [ 'wp_template', 'wp_template_part' ];
+	// About the whole document, which a template alone isn't: it has no title,
+	// language or skip link of its own (WordPress adds the skip link on the
+	// page). The page checker checks these on the page.
+	const PAGE_ONLY_RULES = [
+		'page-title-present',
+		'page-title-patterns',
+		'html-lang-attr-present',
+		'html-xml-lang-mismatch',
+		'meta-viewport-large',
+		'meta-viewport-zoom-enabled',
+		'meta-refresh-timing-absent',
+		'bypass-blocks-present',
+		'skip-link',
+		'landmark-one-main',
+		'region',
+	];
+
+	/** Whether a template or template part is being edited, in the Site Editor. */
+	function editingTemplate() {
+		if ( ! config.renderPath ) {
+			return false;
+		}
+		const editor = data.select( 'core/editor' );
+		const type = editor && editor.getCurrentPostType ? editor.getCurrentPostType() : '';
+		return TEMPLATE_TYPES.includes( type );
+	}
+
+	/**
+	 * A block tree for the server, every block tagged by a class. A template
+	 * part becomes a group in the element it renders as (header, footer…),
+	 * holding the blocks being edited.
+	 */
+	const PART_ELEMENTS = [ 'header', 'footer', 'main', 'section', 'aside', 'article', 'div' ];
+	// A block's children as the editor has them now. A template part's come
+	// from its own entity and aren't in the tree's innerBlocks.
+	function childrenOf( block ) {
+		const own = data.select( 'core/block-editor' ).getBlocks( block.clientId );
+		return own && own.length ? own : block.innerBlocks || [];
+	}
+	function tagTree( block ) {
+		const tag = 'surea11y-item--' + block.clientId;
+		const innerBlocks = childrenOf( block ).map( tagTree );
+		if ( block.name === 'core/template-part' && innerBlocks.length ) {
+			const tagName = PART_ELEMENTS.includes( block.attributes.tagName ) ? block.attributes.tagName : 'div';
+			return {
+				name: 'core/group',
+				isValid: true,
+				attributes: { tagName, className: 'wp-block-template-part ' + tag },
+				innerBlocks,
+			};
+		}
+		return Object.assign( {}, block, {
+			attributes: Object.assign( {}, block.attributes, {
+				className: [ block.attributes.className, tag ].filter( Boolean ).join( ' ' ),
+			} ),
+			innerBlocks,
+		} );
+	}
+
+	/** The template's top-level blocks, rendered on the server, as items. */
+	async function templateItems() {
+		const blocks = data.select( 'core/block-editor' ).getBlocks();
+		const labels = {};
+		const names = {};
+		const order = [];
+		const walk = ( list ) =>
+			list.forEach( ( block ) => {
+				const type = wp.blocks.getBlockType( block.name );
+				labels[ block.clientId ] = type && type.title ? type.title : '';
+				names[ block.clientId ] = block.name;
+				order.push( block.clientId );
+				walk( childrenOf( block ) );
+			} );
+		walk( blocks );
+		if ( ! blocks.length ) {
+			return { items: [], labels, names, order };
+		}
+		const response = await wp.apiFetch( {
+			path: config.renderPath,
+			method: 'POST',
+			data: { items: blocks.map( ( block ) => ( { id: block.clientId, markup: wp.blocks.serialize( tagTree( block ) ) } ) ) },
+		} );
+		return { items: response.items || [], labels, names, order };
+	}
+
 	/** The element that shows a block on the canvas. */
 	function blockNode( clientId ) {
 		return canvasDocument().querySelector( '[data-block="' + clientId + '"]' );
@@ -458,8 +553,52 @@
 	const OWN_COLOURS = /\bhas-[\w-]*(?:color|background)\b|style="[^"]*(?:color|background)/i;
 	const contrast = { key: null, findings: [], ms: 0 };
 
+	/** A template or template part: rendered on the server, the page profile, all rules at once. */
+	async function scanTemplate() {
+		checker.state = 'scanning';
+		checker.notify();
+		try {
+			const { items, labels, names, order } = await templateItems();
+			if ( ! Panel.hasContent( items ) ) {
+				Object.assign( checker, { state: 'done', empty: true, findings: [], outline: null, error: '' } );
+				checker.notify();
+				return;
+			}
+			const out = await sandboxFor().scan( items, {
+				profile: config.templateProfile,
+				packs: config.packs,
+				locale: config.locale,
+				messages: Panel.messagesFor( config.locale ),
+				runOnly: { excludeRuleIds: PAGE_ONLY_RULES.concat( DISABLED ) },
+				withOutline: true,
+				wrapper: 'div',
+			} );
+			if ( out.skippedPacks && out.skippedPacks.length ) {
+				throw new Error( out.skippedPacks.map( ( p ) => p.reason || p.name ).join( '; ' ) );
+			}
+			Object.assign( checker, {
+				state: 'done',
+				empty: false,
+				error: '',
+				outline: out.outline,
+				findings: Panel.sortFindings( out.findings, order ).map( ( f ) =>
+					Object.assign( {}, f, { itemLabel: labels[ f.itemId ] || '', blockName: names[ f.itemId ] || '' } )
+				),
+			} );
+			// Read by the end-to-end tests.
+			window.surea11yLastScan = Object.assign( {}, out.timing, { template: true } );
+		} catch ( error ) {
+			window.console.error( '[SureA11y]', error );
+			Object.assign( checker, { state: 'error', error: error && error.message ? error.message : String( error ) } );
+		}
+		checker.notify();
+	}
+
 	async function scan() {
 		dirty = false;
+		if ( editingTemplate() ) {
+			return scanTemplate();
+		}
 		const { items, labels, names, order } = contentItems();
 		if ( ! Panel.hasContent( items ) ) {
 			// Nothing to check: say so, and don't load the engine for it.
@@ -521,10 +660,38 @@
 	}
 
 	const scheduler = Panel.createScheduler( scan, { delay: () => ( checker.watching ? 1000 : 3000 ) } );
+	/*
+	 * What a check depends on: the tree's top-level blocks and, in the Site
+	 * Editor, each template part's own blocks, which change apart from the
+	 * tree. Compared by reference, so this costs a walk of the containers,
+	 * not of every block.
+	 */
+	function blockState() {
+		const editor = data.select( 'core/block-editor' );
+		const blocks = editor.getBlocks();
+		if ( ! config.renderPath ) {
+			return [ blocks ];
+		}
+		const state = [ blocks ];
+		const parts = ( list ) =>
+			list.forEach( ( block ) => {
+				if ( block.name === 'core/template-part' ) {
+					const own = editor.getBlocks( block.clientId );
+					state.push( own );
+					parts( own );
+				} else {
+					parts( block.innerBlocks || [] );
+				}
+			} );
+		parts( blocks );
+		return state;
+	}
+	const sameState = ( a, b ) => a.length === b.length && a.every( ( x, i ) => x === b[ i ] );
+
 	let lastBlocks = null;
 	data.subscribe( () => {
-		const blocks = data.select( 'core/block-editor' ).getBlocks();
-		if ( lastBlocks !== null && blocks !== lastBlocks ) {
+		const blocks = blockState();
+		if ( lastBlocks !== null && ! sameState( blocks, lastBlocks ) ) {
 			dirty = true;
 			// Without the background check (Settings), nothing runs while
 			// nobody looks: the next view to open checks at once.

@@ -53,6 +53,8 @@ editor has finished loading.
 == Changelog ==
 
 = Unreleased =
+* The Accessibility sidebar in the Site Editor: templates, headers and
+  footers are checked as visitors get them, with each finding on its block.
 * "Check it" speaks an editor's language for nineteen more kinds of
   finding: contrast over images, tables, embeds, moving images and the
   phone-width check.

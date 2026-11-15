@@ -289,8 +289,15 @@ the author's.
       counts that aren't zero, "Nothing found" or "Not checked yet", and
       the date. No query added: the list has already loaded each post's
       meta.
-- [ ] **Site Editor:** templates, template parts, headers and footers
-      checked with the theme profile, where theme problems are fixed.
+- [x] **Site Editor:** templates, template parts, headers and footers
+      checked where theme problems are fixed. Rendered on the server as
+      visitors get them (`POST /surea11y/v1/render`, for people who can
+      edit templates), checked in the browser with the page profile less
+      the rules about the whole document (title, language, skip link, one
+      main region), which the page checker covers. Findings name their
+      block, inside template parts too, and unsaved edits are checked.
+- [ ] Site Editor: reviews, "Hide for me" and the evidence trail for
+      templates (they key on a post ID; a template's is its slug).
 - [ ] **WordPress Block Validation Framework** integration behind a setting,
       while it is experimental: our checks appear where WordPress shows its
       own, and errors can block publishing if the site chooses.

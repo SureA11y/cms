@@ -24,6 +24,7 @@ require_once __DIR__ . '/includes/hidden.php';
 require_once __DIR__ . '/includes/evidence.php';
 require_once __DIR__ . '/includes/overview.php';
 require_once __DIR__ . '/includes/columns.php';
+require_once __DIR__ . '/includes/site-editor.php';
 
 /**
  * The locales the engine has messages for, besides English, each with its
@@ -150,6 +151,15 @@ function surea11y_enqueue_editor_assets() {
 	wp_enqueue_style( 'surea11y-editor', plugins_url( 'src/editor.css', __FILE__ ), array(), SUREA11Y_VERSION );
 	wp_set_script_translations( 'surea11y-editor', 'surea11y' );
 	$GLOBALS['surea11y_config'] = surea11y_config( 'cms-content', (int) get_the_ID() );
+	// In the Site Editor, templates and template parts are rendered on the
+	// server (includes/site-editor.php) and checked with the page profile:
+	// the theme's rules and the content rules, since a template has images,
+	// headings, links and colours too.
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( $screen && 'site-editor' === $screen->id && surea11y_render_permission() ) {
+		$GLOBALS['surea11y_config']['renderPath']      = '/surea11y/v1/render';
+		$GLOBALS['surea11y_config']['templateProfile'] = 'cms-page';
+	}
 }
 add_action( 'enqueue_block_editor_assets', 'surea11y_enqueue_editor_assets' );
 

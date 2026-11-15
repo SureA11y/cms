@@ -122,6 +122,10 @@ export function createSandbox(hostDocument, options) {
      * `runOnly` narrows the rules (core's runOnly: `excludeRuleIds` keeps the
      * profile and leaves rules out, `includeRuleIds` runs only those).
      * `withOutline` adds the content's headings and images (readOutline).
+     * `wrapper` is the element the items go in: `main` for content, which
+     * is the page's main content; `div` for a template, which brings its
+     * own landmarks (a second main would be a finding of ours, not the
+     * template's).
      */
     async scan(
       items,
@@ -131,13 +135,21 @@ export function createSandbox(hostDocument, options) {
         locale = 'en',
         messages,
         runOnly = null,
-        withOutline = false
+        withOutline = false,
+        wrapper = 'main'
       } = {}
     ) {
       const win = await ready;
       const doc = win.document;
       const t0 = win.performance.now();
-      const main = doc.getElementById(CONTENT_ID);
+      let main = doc.getElementById(CONTENT_ID);
+      const tag = wrapper === 'div' ? 'div' : 'main';
+      if (main.localName !== tag) {
+        const next = doc.createElement(tag);
+        next.id = CONTENT_ID;
+        main.replaceWith(next);
+        main = next;
+      }
       renderItems(main, items);
       const t1 = win.performance.now();
       const engineOptions = { profile, packs, locale, output: { detail: 'findings' } };

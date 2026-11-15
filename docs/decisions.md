@@ -2,6 +2,38 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: The Site Editor: templates rendered on the server, checked in the browser
+
+- **Why not as posts are checked.** A post is checked from each block's
+  saved markup. A template is mostly dynamic blocks (site title,
+  navigation, query loop, template parts) that have no saved markup:
+  WordPress renders them for each visitor. Checked the same way, a template
+  would show almost nothing.
+- **How.** In the Site Editor, the sidebar sends the template's blocks, as
+  being edited, to `POST /surea11y/v1/render`, which renders them with
+  WordPress's own `do_blocks()` and sends the HTML back; the check runs in
+  the sandbox in the browser, as for posts. Nothing is checked on the
+  server and nothing leaves the site. Only people who can edit templates
+  (`edit_theme_options`) and see the checker may use it; at most 200 blocks
+  and 1 MB at once.
+- **Findings name their block.** Each block goes with a class naming its
+  editor block; WordPress keeps a block's classes on its outer element, and
+  the render turns the class into the panel's item attribute. A template
+  part goes as the blocks being edited, inside a group in the element it
+  renders as, so unsaved changes are checked and its blocks are named.
+  The Site Editor keeps a part's blocks apart from the main tree; the
+  checker reads them there and watches them for changes.
+- **Which rules.** The page profile (theme and content rules: a template
+  has images, headings, links and colours too), not the theme profile the
+  plan named, which lacks those. Less the rules about the whole document,
+  which a template alone isn't: page title, language, viewport, timed
+  refresh, skip link, bypass, one main region, content in regions. The page
+  checker checks those on the page. The sandbox renders a template in a
+  `div`, not the `main` it uses for post content, since a template brings
+  its own main region.
+- **Not yet.** Reviews, "Hide for me" and the evidence trail key on a post
+  ID; a template's is its slug. They are off in the Site Editor for now.
+
 ## 2026-11-15: Plain rule titles for editors, in the panel, in five languages
 
 - **Why.** The settings page and the site overview named rules by core's
