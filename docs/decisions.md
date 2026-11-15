@@ -2,6 +2,30 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Competitor names stay in this repository while it is private
+
+The research report, README and ideas name other checkers and engines
+because they are a competitor analysis. They stay while the repository is
+private. Before it becomes public, review them and anonymise or remove what
+should not be published.
+
+## 2026-11-15: The plan follows core 1.17.0
+
+Core moved from 1.9.0 to 1.17.0 since the plan was written. The four engine
+improvements we asked for have landed: compact results, a scope that matches
+nothing reported instead of scanning the whole page, suspicious alt text told
+apart, and "How to check" steps for every uncertain result. The plan now:
+
+- builds questions on core's "How to check" steps and leans instead of
+  writing its own;
+- matches answers across scans with core's finding identity;
+- takes other standards and laws, EN 301 549 first, from packs rather than
+  from core, which is moving them out;
+- gives the engine bundle its own size budget, since it grew from 0.21 MB
+  to 0.49 MB compressed between 1.9.0 and 1.17.0;
+- treats packs as the home for editor content checks that are good practice
+  rather than WCAG failures.
+
 ## 2026-10-04: Licences split by component
 
 | Component | Licence | Why |
