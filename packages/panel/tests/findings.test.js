@@ -71,3 +71,28 @@ test("a finding's identity doesn't change with the item id, which changes betwee
   assert.equal(a.key, b.key);
   assert.equal(a.html, '<p class="x"><strong>Opening times</strong></p>');
 });
+
+test('the same finding has the same identity in the editor and on the published page', () => {
+  const editor = findingKey('img-alt-quality', 'FILE', '<img src="/wp-content/uploads/a.png" alt="IMG_1234.png"/>');
+  const page = findingKey(
+    'img-alt-quality',
+    'FILE',
+    '<img fetchpriority="high" decoding="async" width="800" src="https://example.org/wp-content/uploads/a.png?ver=2" alt="IMG_1234.png" class="wp-image-5" srcset="a-300.png 300w" sizes="(max-width: 800px) 100vw">'
+  );
+  assert.equal(editor, page);
+  const p1 = findingKey('p-as-heading', 'B', '<p><strong>Opening&nbsp;times</strong></p>');
+  const p2 = findingKey('p-as-heading', 'B', '<p class="has-text-align-left"><strong>Opening times</strong></p>');
+  assert.equal(p1, p2);
+});
+
+test('different elements, rules or reasons have different identities', () => {
+  const a = findingKey('img-alt-quality', 'FILE', '<img src="/a.png" alt="IMG_1.png">');
+  assert.notEqual(a, findingKey('img-alt-quality', 'FILE', '<img src="/b.png" alt="IMG_1.png">'));
+  assert.notEqual(a, findingKey('img-alt-quality', 'FILE', '<img src="/a.png" alt="IMG_2.png">'));
+  assert.notEqual(a, findingKey('img-alt-present', 'FILE', '<img src="/a.png" alt="IMG_1.png">'));
+  assert.notEqual(a, findingKey('img-alt-quality', 'OTHER', '<img src="/a.png" alt="IMG_1.png">'));
+  assert.notEqual(
+    findingKey('link-name-quality', 'G', '<a href="/prices">click here</a>'),
+    findingKey('link-name-quality', 'G', '<a href="/report">click here</a>')
+  );
+});

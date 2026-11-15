@@ -53,6 +53,36 @@
 		markers.update( results.cards, results.current );
 	}
 
+	/**
+	 * Saves or reopens a review through the REST API, with the cookie nonce,
+	 * and shows the site's answer (who and when). An error takes back what
+	 * the list showed.
+	 */
+	let confirmed = config.reviews && ! Array.isArray( config.reviews ) ? config.reviews : {};
+	function sendReview( method, body ) {
+		if ( ! config.reviewsPath || ! config.restRoot ) {
+			return;
+		}
+		const url = config.restRoot.replace( /\/$/, '' ) + config.reviewsPath;
+		window
+			.fetch( url, {
+				method,
+				credentials: 'same-origin',
+				headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': config.restNonce },
+				body: JSON.stringify( body ),
+			} )
+			.then( ( r ) => ( r.ok ? r.json() : Promise.reject( new Error( 'HTTP ' + r.status ) ) ) )
+			.then( ( r ) => {
+				confirmed = r.reviews && ! Array.isArray( r.reviews ) ? r.reviews : {};
+				results.reviews = confirmed;
+			} )
+			.catch( ( error ) => {
+				window.console.error( '[SureA11y]', error ); // eslint-disable-line no-console
+				results.reviews = confirmed;
+			} )
+			.then( drawMarkers );
+	}
+
 	function check() {
 		results.empty = false;
 		results.state = 'scanning';
@@ -68,6 +98,8 @@
 					locale: config.locale,
 					messages: Panel.messagesFor( config.locale ),
 					labels: { content: words.yourContent, theme: words.themeOrTemplate },
+					// Rules the site turned off, in Settings.
+					runOnly: config.disabledRules && config.disabledRules.length ? { excludeRuleIds: config.disabledRules } : null,
 				} );
 				if ( out.skippedPacks.length ) {
 					throw new Error( out.skippedPacks.map( ( p ) => p.reason || p.name ).join( '; ' ) );
@@ -97,8 +129,12 @@
 			results = document.createElement( 'surea11y-results' );
 			results.setAttribute( 'heading-level', '3' );
 			results.locale = config.locale;
-			// Marks are kept in the editor, where findings are tied to blocks.
+			// Personal hides are kept in the editor's preferences; shared
+			// reviews are the same here as there, so they can be made here.
 			results.canMark = false;
+			results.canReview = !! config.canReview;
+			results.reviewer = config.reviewer || '';
+			results.reviews = config.reviews && ! Array.isArray( config.reviews ) ? config.reviews : {};
 			results.editUrl = config.editUrl || '';
 			panel.body.appendChild( results );
 			results.addEventListener( 'surea11y-show', ( event ) => {
@@ -109,6 +145,8 @@
 				drawMarkers();
 			} );
 			results.addEventListener( 'surea11y-retry', check );
+			results.addEventListener( 'surea11y-review', ( event ) => sendReview( 'POST', { keys: event.detail.keys, note: event.detail.note } ) );
+			results.addEventListener( 'surea11y-reopen', ( event ) => sendReview( 'DELETE', { keys: event.detail.keys } ) );
 		}
 		if ( panel.isOpen() ) {
 			panel.close();

@@ -149,7 +149,7 @@ export function createMarkers(doc, { anchorFor, onPick, label = (card) => card.s
     }
     const perItem = new Map();
     for (const card of cards || []) {
-      if (card.marked) continue;
+      if (card.settled || card.marked) continue;
       card.places.forEach((p, place) => {
         if (!p.itemId) return;
         if (!perItem.has(p.itemId)) perItem.set(p.itemId, []);

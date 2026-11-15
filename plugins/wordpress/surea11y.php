@@ -16,6 +16,10 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'SUREA11Y_VERSION', '0.1.0' );
+define( 'SUREA11Y_FILE', __FILE__ );
+
+require_once __DIR__ . '/includes/settings.php';
+require_once __DIR__ . '/includes/reviews.php';
 
 /**
  * The locales the engine has messages for, besides English, each with its
@@ -36,12 +40,15 @@ function surea11y_is_built() {
 
 /**
  * What every checker needs to know: where the engine is, in which language
- * to speak, and which profile and pack to check with.
+ * to speak, which profile and pack to check with, the rules turned off, and
+ * the post's reviews and who may add them.
  *
  * @param string $profile The engine profile to check with.
+ * @param int    $post_id The post being checked (0 for none yet).
  * @return array
  */
-function surea11y_config( $profile ) {
+function surea11y_config( $profile, $post_id = 0 ) {
+	$settings = surea11y_settings();
 	$build   = plugins_url( 'build/', __FILE__ );
 	$dir     = plugin_dir_path( __FILE__ ) . 'build/';
 	$version = (string) filemtime( $dir . 'engine.js' );
@@ -54,8 +61,13 @@ function surea11y_config( $profile ) {
 		'engineUrl'  => $build . 'engine.js?ver=' . $version,
 		'localeUrls' => $locales,
 		'locale'     => $locale,
-		'profile'    => $profile,
-		'packs'      => array( '@surea11y/pack-cms@' . surea11y_pack_version() ),
+		'profile'       => $profile,
+		'packs'         => array( '@surea11y/pack-cms@' . surea11y_pack_version() ),
+		'disabledRules' => $settings['disabled_rules'],
+		'background'    => (bool) $settings['background'],
+		'postId'        => (int) $post_id,
+		'canReview'     => surea11y_can_review( $post_id ),
+		'reviewsPath'   => $post_id ? '/surea11y/v1/reviews/' . (int) $post_id : '',
 	);
 }
 
@@ -85,11 +97,22 @@ add_action( 'admin_footer', 'surea11y_print_config', 5 );
 add_action( 'wp_footer', 'surea11y_print_config', 5 );
 
 /**
- * Registers the panel's script, which both checkers use.
+ * Registers the panel's script, which both checkers use, and the file with
+ * its words in the person's language when that is not English. Returns the
+ * handle the checker's own script depends on.
+ *
+ * @return string
  */
 function surea11y_register_panel() {
 	$dir = plugin_dir_path( __FILE__ ) . 'build/';
 	wp_register_script( 'surea11y-panel', plugins_url( 'build/panel.js', __FILE__ ), array(), (string) filemtime( $dir . 'panel.js' ), true );
+	$locale = strtolower( substr( determine_locale(), 0, 2 ) );
+	$file   = 'panel.i18n.' . $locale . '.js';
+	if ( in_array( $locale, surea11y_engine_locales(), true ) && file_exists( $dir . $file ) ) {
+		wp_register_script( 'surea11y-panel-i18n', plugins_url( 'build/' . $file, __FILE__ ), array( 'surea11y-panel' ), (string) filemtime( $dir . $file ), true );
+		return 'surea11y-panel-i18n';
+	}
+	return 'surea11y-panel';
 }
 
 /**
@@ -100,20 +123,20 @@ function surea11y_register_panel() {
  * frame, the first time a check runs.
  */
 function surea11y_enqueue_editor_assets() {
-	if ( ! current_user_can( 'edit_posts' ) || ! surea11y_is_built() ) {
+	if ( ! surea11y_can_see() || ! surea11y_is_built() ) {
 		return;
 	}
-	surea11y_register_panel();
+	$panel = surea11y_register_panel();
 	wp_enqueue_script(
 		'surea11y-editor',
 		plugins_url( 'src/editor.js', __FILE__ ),
-		array( 'surea11y-panel', 'wp-plugins', 'wp-editor', 'wp-element', 'wp-data', 'wp-blocks', 'wp-block-editor', 'wp-components', 'wp-hooks', 'wp-i18n', 'wp-preferences' ),
+		array( $panel, 'wp-api-fetch', 'wp-plugins', 'wp-editor', 'wp-element', 'wp-data', 'wp-blocks', 'wp-block-editor', 'wp-components', 'wp-hooks', 'wp-i18n', 'wp-preferences' ),
 		SUREA11Y_VERSION,
 		true
 	);
 	wp_enqueue_style( 'surea11y-editor', plugins_url( 'src/editor.css', __FILE__ ), array(), SUREA11Y_VERSION );
 	wp_set_script_translations( 'surea11y-editor', 'surea11y' );
-	$GLOBALS['surea11y_config'] = surea11y_config( 'cms-content' );
+	$GLOBALS['surea11y_config'] = surea11y_config( 'cms-content', (int) get_the_ID() );
 }
 add_action( 'enqueue_block_editor_assets', 'surea11y_enqueue_editor_assets' );
 
@@ -129,19 +152,19 @@ function surea11y_page_post_id() {
 		return 0;
 	}
 	$post_id = (int) get_queried_object_id();
-	return ( $post_id && current_user_can( 'edit_post', $post_id ) ) ? $post_id : 0;
+	return ( $post_id && surea11y_can_see() && current_user_can( 'edit_post', $post_id ) ) ? $post_id : 0;
 }
 
 /**
  * Where the post's content is on the page, so findings there are told apart
- * from the theme's. Block themes and most classic themes use one of these;
- * a theme with its own can be named with the `surea11y_content_selector`
- * filter.
+ * from the theme's: the setting (block themes and most classic themes use
+ * the default), which the `surea11y_content_selector` filter can change.
  *
  * @return string A CSS selector.
  */
 function surea11y_content_selector() {
-	return (string) apply_filters( 'surea11y_content_selector', '.wp-block-post-content, .entry-content, .post-content' );
+	$settings = surea11y_settings();
+	return (string) apply_filters( 'surea11y_content_selector', $settings['content_selector'] );
 }
 
 /**
@@ -153,11 +176,18 @@ function surea11y_enqueue_page_assets() {
 	if ( ! $post_id ) {
 		return;
 	}
-	surea11y_register_panel();
-	wp_enqueue_script( 'surea11y-page', plugins_url( 'src/page.js', __FILE__ ), array( 'surea11y-panel' ), SUREA11Y_VERSION, true );
+	$panel = surea11y_register_panel();
+	wp_enqueue_script( 'surea11y-page', plugins_url( 'src/page.js', __FILE__ ), array( $panel ), SUREA11Y_VERSION, true );
+	$user = wp_get_current_user();
 	$GLOBALS['surea11y_config'] = array_merge(
-		surea11y_config( 'cms-page' ),
+		surea11y_config( 'cms-page', $post_id ),
 		array(
+			// The page has no editor around it: the reviews come with it, and
+			// changes go through the REST API with the cookie nonce.
+			'reviews'         => surea11y_reviews_for_display( $post_id ),
+			'reviewer'        => $user ? $user->display_name : '',
+			'restRoot'        => esc_url_raw( rest_url() ),
+			'restNonce'       => wp_create_nonce( 'wp_rest' ),
 			'contentSelector' => surea11y_content_selector(),
 			'editUrl'         => (string) get_edit_post_link( $post_id, 'raw' ),
 			'title'           => __( 'Accessibility', 'surea11y' ),

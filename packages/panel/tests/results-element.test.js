@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import './locales.js';
 import { installDom } from './dom.js';
 
 installDom();
@@ -118,16 +119,16 @@ test('a finding outside the content says so, with nothing to show', () => {
   el.remove();
 });
 
-test('"Mark as fine" moves a card out of the counts, and Undo brings it back', () => {
+test('"Hide for me" moves a card out of the counts, and Undo brings it back', () => {
   const el = make();
   const events = [];
   el.addEventListener('surea11y-mark', (e) => events.push(e.detail));
   const tableCard = $$(el, 'li.card').find((c) => c.textContent.includes('table'));
-  [...tableCard.querySelectorAll('button')].find((b) => b.textContent === 'Mark as fine').click();
+  [...tableCard.querySelectorAll('button')].find((b) => b.textContent === 'Hide for me').click();
   assert.deepEqual(events[0], { keys: ['b1', 'b2'], fine: true });
   assert.equal($$(el, '.tile')[1].textContent, '0Likely problems');
   const marked = $(el, 'section[data-group="marked"] .group-toggle');
-  assert.equal(marked.textContent, 'Marked fine by you (1)');
+  assert.equal(marked.textContent, 'Hidden by you (1)');
   assert.equal(el.shadowRoot.activeElement.dataset.focus, 'group:marked', 'its group emptied: focus goes to where the card went');
   marked.click();
   $$(el, 'section[data-group="marked"] button').find((b) => b.textContent === 'Undo').click();
@@ -143,7 +144,7 @@ test('marks set by the host are honoured; problems cannot be marked fine', () =>
   el.findings = findings;
   assert.equal($$(el, '.tile')[2].textContent, '1Need a person');
   const problem = $$(el, 'li.card')[0];
-  assert.ok(![...problem.querySelectorAll('button')].some((b) => b.textContent === 'Mark as fine'));
+  assert.ok(![...problem.querySelectorAll('button')].some((b) => b.textContent === 'Hide for me'));
   el.remove();
 });
 
@@ -233,5 +234,61 @@ test("the host's own actions become buttons on the card, named by their label an
   assert.equal(ran.length, 1);
   const others = $$(el, 'li.card').filter((c) => c !== table);
   assert.ok(!others.some((c) => c.textContent.includes('Open the header setting')));
+  el.remove();
+});
+
+test('"Reviewed, it\'s fine" takes an optional note, is shared, and can be reopened', () => {
+  const el = make(null);
+  el.canReview = true;
+  el.reviewer = 'Ana';
+  el.findings = findings;
+  const events = [];
+  el.addEventListener('surea11y-review', (e) => events.push(['review', e.detail]));
+  el.addEventListener('surea11y-reopen', (e) => events.push(['reopen', e.detail]));
+  const table = () => $$(el, 'li.card').find((c) => c.textContent.includes('table'));
+  [...table().querySelectorAll('button')].find((b) => b.textContent === "Reviewed, it's fine").click();
+  // The form: a labelled note, focused, with Save and Cancel.
+  const note = table().querySelector('textarea');
+  assert.equal(el.shadowRoot.activeElement, note);
+  assert.equal(el.shadowRoot.querySelector(`label[for="${note.id}"]`).textContent, 'Note (optional)');
+  note.value = 'Layout table for the price list.';
+  [...table().querySelectorAll('button')].find((b) => b.textContent === 'Save review').click();
+  assert.deepEqual(events[0], ['review', { keys: ['b1', 'b2'], note: 'Layout table for the price list.' }]);
+  assert.equal($$(el, '.tile')[1].textContent, '0Likely problems', 'out of the counts');
+  const reviewed = $(el, 'section[data-group="reviewed"] .group-toggle');
+  assert.equal(reviewed.textContent, 'Reviewed, fine (1)');
+  reviewed.click();
+  const card = $(el, 'section[data-group="reviewed"] li.card');
+  assert.match(card.querySelector('.review-meta').textContent, /^Ana reviewed it on /);
+  assert.equal(card.querySelector('.note').textContent, 'Layout table for the price list.');
+  [...card.querySelectorAll('button')].find((b) => b.textContent === 'Reopen').click();
+  assert.deepEqual(events[1], ['reopen', { keys: ['b1', 'b2'] }]);
+  assert.equal($$(el, '.tile')[1].textContent, '2Likely problems');
+  el.remove();
+});
+
+test('reviews set by the host show who and when; without permission there is no review or reopen', () => {
+  const el = make(null);
+  el.reviews = { c: { by: 'Ben', when: '14 Nov 2026', note: '' } };
+  el.findings = findings;
+  assert.equal($$(el, '.tile')[2].textContent, '1Need a person');
+  $(el, 'section[data-group="reviewed"] .group-toggle').click();
+  const card = $(el, 'section[data-group="reviewed"] li.card');
+  assert.equal(card.querySelector('.review-meta').textContent, 'Ben reviewed it on 14 Nov 2026.');
+  assert.equal(card.querySelector('.note'), null);
+  assert.ok(![...card.querySelectorAll('button')].some((b) => b.textContent === 'Reopen'));
+  assert.ok(!$$(el, 'button').some((b) => b.textContent === "Reviewed, it's fine"));
+  el.remove();
+});
+
+test('Escape closes the review form, and focus goes back to its button', () => {
+  const el = make(null);
+  el.canReview = true;
+  el.findings = findings;
+  const table = () => $$(el, 'li.card').find((c) => c.textContent.includes('table'));
+  [...table().querySelectorAll('button')].find((b) => b.textContent === "Reviewed, it's fine").click();
+  table().querySelector('textarea').dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  assert.equal(table().querySelector('textarea'), null);
+  assert.equal(el.shadowRoot.activeElement.textContent, "Reviewed, it's fine");
   el.remove();
 });

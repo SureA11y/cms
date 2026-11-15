@@ -138,7 +138,7 @@ test('a finding opens the setting that fixes it, with focus on the field', { ski
   }
 });
 
-test('"Mark as fine" on a whole block survives a reload: the item id is not part of a finding', { skip }, async (t) => {
+test('"Hide for me" on a whole block survives a reload: the item id is not part of a finding', { skip }, async (t) => {
   const browser = await chromium.launch({ executablePath: CHROMIUM });
   t.after(() => browser.close());
   let { context, page } = await login(browser);
@@ -157,7 +157,7 @@ test('"Mark as fine" on a whole block survives a reload: the item id is not part
   const before = await counts();
   // The bold-line finding is on the <p> itself, the block's own element.
   const card = page.locator('surea11y-results').locator('li.card', { hasText: 'This bold line comes before plain text' });
-  await card.getByRole('button', { name: 'Mark as fine' }).click();
+  await card.getByRole('button', { name: 'Hide for me' }).click();
   const after = await counts();
   assert.ok(after[2] < before[2]);
   await serverMarks(true);

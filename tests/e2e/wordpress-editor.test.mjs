@@ -199,13 +199,13 @@ test('the arrows step through the places and keep focus in the sidebar', { skip 
   assert.equal(state.selected, state.currentItem);
 });
 
-test('"Mark as fine" is kept for the person across reloads, and Undo brings it back', { skip }, async (t) => {
+test('"Hide for me" is kept for the person across reloads, and Undo brings it back', { skip }, async (t) => {
   const browser = await chromium.launch({ executablePath: CHROMIUM });
   t.after(() => browser.close());
   let { context, page } = await openEditor(browser, POST_TYPICAL);
   const counts = () => page.evaluate(() => [...document.querySelector('surea11y-results').shadowRoot.querySelectorAll('.tile .count')].map((c) => Number(c.textContent)));
   const before = await counts();
-  const fine = page.locator('surea11y-results').locator('section[data-group="review"]').getByRole('button', { name: 'Mark as fine' }).first();
+  const fine = page.locator('surea11y-results').locator('section[data-group="review"]').getByRole('button', { name: 'Hide for me' }).first();
   // WordPress saves preferences to the server a few seconds after a change:
   // wait until the server has them.
   const serverMarks = (p, post) =>

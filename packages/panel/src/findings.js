@@ -24,12 +24,30 @@ export function groupOf(outcome, lean) {
 export const GROUP_ORDER = ['problem', 'likely', 'review', 'probably-fine'];
 
 /**
- * A finding's identity, the one core keeps across scans (rule, reason code
- * and the element's HTML): a review recorded against it still applies after
- * the author edits something else.
+ * A finding's identity: its rule and reason, and what the element is and
+ * says (its tag, the link or image it points to, its alternative text and
+ * its text), not its whole markup. A review recorded against it still
+ * applies after the author edits something else, and the same finding has
+ * the same identity in the editor and on the published page, where
+ * WordPress and themes add attributes (classes, loading, srcset, sizes).
  */
 export function findingKey(ruleId, reasonCode, html) {
-  return `${ruleId}|${reasonCode || ''}|${html || ''}`;
+  const source = String(html || '');
+  const open = source.slice(0, source.indexOf('>') + 1);
+  const tag = (open.match(/^\s*<([a-zA-Z][\w-]*)/) || [])[1] || '';
+  const attr = (name) => {
+    const m = open.match(new RegExp(`\\s${name}\\s*=\\s*"([^"]*)"`, 'i'));
+    return m ? decode(m[1]) : '';
+  };
+  // An address as written, without the site's origin or a query.
+  const where = (url) => url.replace(/^https?:\/\/[^/]+/i, '').replace(/[?#].*$/, '');
+  const text = decode(source.replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim().slice(0, 120);
+  return [ruleId, reasonCode || '', tag.toLowerCase(), where(attr('src')), where(attr('href')), attr('alt'), text].join('|');
+}
+
+const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', '#39': "'", '#039': "'" };
+function decode(text) {
+  return text.replace(/&(#?\w+);/g, (m, e) => (e in ENTITIES ? ENTITIES[e] : m));
 }
 
 /**

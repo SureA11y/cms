@@ -12,7 +12,9 @@ export function cardKey(f) {
 /**
  * Merges findings into cards, keeping the findings' order (groups first,
  * then the content's order). `marked` holds the finding keys the person has
- * marked as fine: a card is marked when all its places are.
+ * hidden for themselves, and `reviews` the shared reviews by finding key
+ * ({ by, when, note }): a card is marked, or reviewed, when all its places
+ * are. A card either way is `settled`: out of the counts and the steps.
  *
  * Each card: { key, group, ruleId, summary, hint, itemLabel, places, marked,
  * inContent, outside }. `places` are the findings, in order. `inContent`
@@ -20,7 +22,7 @@ export function cardKey(f) {
  * every place is outside the author's content (a template or theme problem:
  * a finding with no `itemId`, or one the host flags `outside`).
  */
-export function toCards(findings, marked = []) {
+export function toCards(findings, marked = [], reviews = {}) {
   const markedSet = marked instanceof Set ? marked : new Set(marked);
   const byKey = new Map();
   for (const f of findings || []) {
@@ -43,6 +45,8 @@ export function toCards(findings, marked = []) {
   const cards = [...byKey.values()];
   for (const card of cards) {
     card.marked = card.places.every((p) => markedSet.has(p.key));
+    card.review = card.places.every((p) => reviews && reviews[p.key]) ? reviews[card.places[0].key] : null;
+    card.settled = card.marked || !!card.review;
     card.inContent = card.places.some((p) => p.itemId);
     card.outside = card.places.every((p) => p.outside || !p.itemId);
     const labels = new Set(card.places.map((p) => p.itemLabel).filter(Boolean));
@@ -51,9 +55,9 @@ export function toCards(findings, marked = []) {
   return cards.sort((a, b) => GROUP_ORDER.indexOf(a.group) - GROUP_ORDER.indexOf(b.group));
 }
 
-/** How many places each group holds, leaving out marked cards. */
+/** How many places each group holds, leaving out settled cards. */
 export function countPlaces(cards) {
   const counts = Object.fromEntries(GROUP_ORDER.map((g) => [g, 0]));
-  for (const c of cards) if (!c.marked) counts[c.group] += c.places.length;
+  for (const c of cards) if (!c.settled) counts[c.group] += c.places.length;
   return counts;
 }

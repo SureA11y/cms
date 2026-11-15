@@ -6,6 +6,7 @@ export { hasContent } from './content.js';
 export { createSandbox, renderItems, sandboxPolicy } from './sandbox.js';
 export { toFindings, groupOf, sortFindings, countByGroup, findingKey, GROUP_ORDER, ITEM_ATTRIBUTE } from './findings.js';
 export { MESSAGES, messagesFor } from './messages/index.js';
+export { addLocale, LOCALES } from './locales.js';
 export { UI, uiStrings, fill } from './messages/ui.js';
 export { ResultsElement, defineResultsElement } from './ui/results-element.js';
 export { createMarkers } from './ui/markers.js';

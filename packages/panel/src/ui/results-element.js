@@ -15,7 +15,9 @@
 // Events (bubbling, composed):
 // - surea11y-show  { itemId, finding, card, via }  bring a place into view
 //   (via 'show': a Show button or marker; 'step': the arrows);
-// - surea11y-mark  { keys, fine }       finding keys marked fine, or undone;
+// - surea11y-mark  { keys, fine }       finding keys hidden for the person, or undone;
+// - surea11y-review { keys, note }      reviewed and found fine, for everyone;
+// - surea11y-reopen { keys }            a review taken back;
 // - surea11y-retry {}                   the person asked to check again.
 
 import { GROUP_ORDER } from '../findings.js';
@@ -93,12 +95,20 @@ ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: col
 .where { margin-top: var(--sa11y-space-2); font-style: italic; color: var(--sa11y-text-muted); }
 .actions { display: flex; flex-wrap: wrap; gap: var(--sa11y-space-2); margin-top: var(--sa11y-space-3); }
 
-${GROUP_ORDER.concat('marked')
+${GROUP_ORDER.concat('reviewed', 'marked')
+  .map((g) => [g, g === 'probably-fine' || g === 'reviewed' ? 'fine' : g])
   .map(
-    (g) => `[data-group="${g}"] .group-icon { color: var(--sa11y-${g === 'probably-fine' ? 'fine' : g}); }
-.tile[data-group="${g}"][aria-pressed="true"], .card[data-group="${g}"][aria-current="true"] { border-color: var(--sa11y-${g === 'probably-fine' ? 'fine' : g}); background: var(--sa11y-${g === 'probably-fine' ? 'fine' : g}-tint); }`
+    ([g, token]) => `[data-group="${g}"] .group-icon { color: var(--sa11y-${token}); }
+.tile[data-group="${g}"][aria-pressed="true"], .card[data-group="${g}"][aria-current="true"] { border-color: var(--sa11y-${token}); background: var(--sa11y-${token}-tint); }`
   )
   .join('\n')}
+
+.review-meta { margin-top: var(--sa11y-space-2); color: var(--sa11y-text-muted); }
+.note { margin-top: var(--sa11y-space-1); padding: var(--sa11y-space-1) var(--sa11y-space-2); border-inline-start: 3px solid var(--sa11y-border); white-space: pre-wrap; overflow-wrap: anywhere; }
+.review-form { display: flex; flex-direction: column; gap: var(--sa11y-space-1); margin-top: var(--sa11y-space-3); }
+.review-form label { font-weight: 600; }
+.review-form textarea { font: inherit; color: inherit; min-height: 64px; padding: var(--sa11y-space-1) var(--sa11y-space-2); border: 1px solid var(--sa11y-border-strong); border-radius: var(--sa11y-radius-small); background: var(--sa11y-surface); resize: vertical; }
+.review-form textarea:focus-visible { outline: var(--sa11y-focus-width) solid var(--sa11y-focus); outline-offset: 1px; }
 
 @media (forced-colors: active) {
   .tile[aria-pressed="true"], .card[aria-current="true"] { border-color: Highlight; }
@@ -121,7 +131,11 @@ export class ResultsElement extends HTMLElement {
     this._editUrl = '';
     this._locale = 'en';
     this._only = null; // the group the tiles filter to
-    this._closed = new Set(['marked']);
+    this._closed = new Set(['reviewed', 'marked']);
+    this._reviews = {};
+    this._canReview = false;
+    this._reviewer = '';
+    this._reviewing = null; // the card whose review form is open
     this._howOpen = new Set();
     this._current = null; // { cardKey, place }
     const root = this.attachShadow({ mode: 'open' });
@@ -229,6 +243,35 @@ export class ResultsElement extends HTMLElement {
     return this._editUrl;
   }
 
+  /**
+   * The shared reviews, by finding key: { by, when, note }. `by` and `when`
+   * are as the host wants them shown (a name, a date in the person's locale).
+   */
+  set reviews(map) {
+    this._reviews = map && typeof map === 'object' ? { ...map } : {};
+    this._render();
+  }
+  get reviews() {
+    return { ...this._reviews };
+  }
+
+  /** Whether this person may review findings, and reopen reviews. */
+  set canReview(value) {
+    this._canReview = !!value;
+    this._render();
+  }
+  get canReview() {
+    return this._canReview;
+  }
+
+  /** The name a review made here is shown with until the host confirms it. */
+  set reviewer(name) {
+    this._reviewer = name || '';
+  }
+  get reviewer() {
+    return this._reviewer;
+  }
+
   /** The cards as shown, for hosts that draw markers. */
   get cards() {
     return this._cards || [];
@@ -284,9 +327,9 @@ export class ResultsElement extends HTMLElement {
     if (scanning) return; // the last outcome stays until the check ends
 
     const focusId = this._focusedId();
-    const cards = (this._cards = toCards(this._findings, this._marked));
+    const cards = (this._cards = toCards(this._findings, this._marked, this._reviews));
     const counts = countPlaces(cards);
-    const open = cards.filter((c) => !c.marked);
+    const open = cards.filter((c) => !c.settled);
     if (this._only && !open.some((c) => c.group === this._only)) this._only = null;
     this._keepCurrent(cards);
 
@@ -333,7 +376,7 @@ export class ResultsElement extends HTMLElement {
   }
 
   _renderList(doc, t, cards, counts) {
-    const open = cards.filter((c) => !c.marked);
+    const open = cards.filter((c) => !c.settled);
     if (open.length) {
       // Count tiles.
       const tiles = el(doc, 'div', 'tiles');
@@ -389,7 +432,9 @@ export class ResultsElement extends HTMLElement {
       count: counts[g]
     }));
     if (!this._only) {
-      const marked = cards.filter((c) => c.marked);
+      const reviewed = cards.filter((c) => c.review);
+      const marked = cards.filter((c) => c.marked && !c.review);
+      groups.push({ id: 'reviewed', cards: reviewed, count: reviewed.length });
       groups.push({ id: 'marked', cards: marked, count: marked.length });
     }
     for (const group of groups) {
@@ -420,7 +465,7 @@ export class ResultsElement extends HTMLElement {
     const isOpen = !this._closed.has(group.id);
     toggle.setAttribute('aria-expanded', String(isOpen));
     const ic = el(doc, 'span', 'group-icon');
-    ic.append(icon(doc, group.id, 18));
+    ic.append(icon(doc, group.id === 'reviewed' ? 'probably-fine' : group.id, 18));
     const chevron = icon(doc, 'chevron', 18);
     chevron.classList.add('chevron');
     toggle.append(ic, el(doc, 'span', 'group-name', `${t.groups[group.id]} (${group.count})`), chevron);
@@ -445,7 +490,7 @@ export class ResultsElement extends HTMLElement {
     li.dataset.group = card.group;
     li.dataset.key = card.key;
     const id = `${this._id}-c${this._cards.indexOf(card)}`;
-    const here = !card.marked && this._current && this._current.cardKey === card.key;
+    const here = !card.settled && this._current && this._current.cardKey === card.key;
     if (here) {
       li.setAttribute('aria-current', 'true');
       const n = card.places.length;
@@ -463,7 +508,7 @@ export class ResultsElement extends HTMLElement {
 
     const howOpen = this._howOpen.has(card.key);
     const hintId = `${id}-hint`;
-    if (card.hint && howOpen && !card.marked) {
+    if (card.hint && howOpen && !card.settled) {
       const hint = el(doc, 'p', 'hint');
       hint.id = hintId;
       hint.append(el(doc, 'strong', '', `${t.howToFix}: `), doc.createTextNode(card.hint));
@@ -484,7 +529,12 @@ export class ResultsElement extends HTMLElement {
       b.addEventListener('click', action);
       actions.append(b);
     };
-    if (card.marked) {
+    if (card.review) {
+      const r = card.review;
+      li.append(el(doc, 'p', 'review-meta', r.by ? fill(t.reviewedBy, { by: r.by, when: r.when || '' }) : fill(t.reviewedOn, { when: r.when || '' })));
+      if (r.note) li.append(el(doc, 'p', 'note', r.note));
+      if (this._canReview) add(t.reopen, 'button', 'reopen', () => this._reopen(card));
+    } else if (card.marked) {
       add(t.undo, 'button', 'undo', () => this._mark(card, false));
     } else {
       if (card.inContent) {
@@ -512,10 +562,54 @@ export class ResultsElement extends HTMLElement {
         a.dataset.focus = `card:${hash(card.key)}:edit`;
         actions.append(a);
       }
-      if (this._canMark && card.group !== 'problem') add(t.markFine, 'link', 'fine', () => this._mark(card, true));
+      if (this._canReview && card.group !== 'problem' && this._reviewing !== card.key) {
+        add(t.reviewedFine, 'button', 'review', () => {
+          this._reviewing = card.key;
+          this._render();
+          this._restoreFocus(`card:${hash(card.key)}:note`);
+        });
+      }
+      if (this._canMark && card.group !== 'problem') add(t.hideForMe, 'link', 'fine', () => this._mark(card, true));
     }
     li.append(actions);
+    if (this._reviewing === card.key && !card.settled) li.append(this._reviewForm(doc, t, card, id));
     return li;
+  }
+
+  /** The note a review can carry, and Save or Cancel. Escape cancels. */
+  _reviewForm(doc, t, card, summaryId) {
+    const form = el(doc, 'div', 'review-form');
+    form.setAttribute('role', 'group');
+    form.setAttribute('aria-labelledby', summaryId);
+    const noteId = `${summaryId}-note`;
+    const label = el(doc, 'label', '', t.noteLabel);
+    label.htmlFor = noteId;
+    const note = el(doc, 'textarea');
+    note.id = noteId;
+    note.maxLength = 500;
+    note.dataset.focus = `card:${hash(card.key)}:note`;
+    const row = el(doc, 'div', 'actions');
+    const save = el(doc, 'button', 'button primary', t.saveReview);
+    save.type = 'button';
+    save.dataset.focus = `card:${hash(card.key)}:save`;
+    save.addEventListener('click', () => this._review(card, note.value.trim()));
+    const cancel = el(doc, 'button', 'button', t.cancel);
+    cancel.type = 'button';
+    const close = () => {
+      this._reviewing = null;
+      this._render();
+      this._restoreFocus(`card:${hash(card.key)}:review`);
+    };
+    cancel.addEventListener('click', close);
+    form.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        close();
+      }
+    });
+    row.append(save, cancel);
+    form.append(label, note, row);
+    return form;
   }
 
   /* ---------- behaviour ---------- */
@@ -524,7 +618,7 @@ export class ResultsElement extends HTMLElement {
   _places() {
     const out = [];
     for (const card of this._cards || []) {
-      if (card.marked || (this._only && card.group !== this._only)) continue;
+      if (card.settled || (this._only && card.group !== this._only)) continue;
       card.places.forEach((p, place) => {
         if (p.itemId) out.push({ card, place });
       });
@@ -540,7 +634,7 @@ export class ResultsElement extends HTMLElement {
   /** After a rescan, the card last shown stays shown while it exists. */
   _keepCurrent(cards) {
     if (!this._current) return;
-    const card = cards.find((c) => c.key === this._current.cardKey && !c.marked);
+    const card = cards.find((c) => c.key === this._current.cardKey && !c.settled);
     if (!card) this._current = null;
     else if (this._current.place >= card.places.length) this._current.place = card.places.length - 1;
   }
@@ -602,6 +696,32 @@ export class ResultsElement extends HTMLElement {
     this._render();
     this._restoreFocus(this.shadowRoot.querySelector(`[data-focus="${from}"]`) ? from : to);
     this._emit('surea11y-mark', { keys, fine });
+  }
+
+  /** Records a review here at once; the host saves it and confirms who and when. */
+  _review(card, note) {
+    const keys = card.places.map((p) => p.key);
+    const when = new Date().toLocaleDateString(this._locale);
+    for (const k of keys) this._reviews[k] = { by: this._reviewer, when, note };
+    this._reviewing = null;
+    if (this._current && this._current.cardKey === card.key) this._current = null;
+    this._settle(card.group, 'reviewed');
+    this._emit('surea11y-review', { keys, note });
+  }
+
+  _reopen(card) {
+    const keys = card.places.map((p) => p.key);
+    for (const k of keys) delete this._reviews[k];
+    this._settle('reviewed', card.group);
+    this._emit('surea11y-reopen', { keys });
+  }
+
+  /** Re-renders after a card moved, focus on the group it left or, if gone, the one it joined. */
+  _settle(fromGroup, toGroup) {
+    const from = `group:${fromGroup}`;
+    const to = `group:${toGroup}`;
+    this._render();
+    this._restoreFocus(this.shadowRoot.querySelector(`[data-focus="${from}"]`) ? from : to);
   }
 
   _emit(type, detail) {

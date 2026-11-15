@@ -2,6 +2,32 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-15: Shared reviews, who may make them, and a finding's identity
+
+- **Two ways to set a finding aside.** "Reviewed, it's fine" is shared: it
+  is kept with the post and everyone who edits it sees who reviewed it,
+  when, and the note. "Hide for me" is one person's, in their editor
+  preferences. A reviewed or hidden finding leaves the counts, the steps
+  and the markers, and comes back with Reopen or Undo, or when its content
+  changes.
+- **Who.** Two settings, each a capability: who sees the checker (default
+  `edit_posts`, Contributors and above) and who may review (default
+  `publish_posts`, Authors and above: people who decide what is published).
+  The REST route checks both, and `edit_post` for that post; the interface
+  only follows.
+- **A finding's identity is its rule, reason, and what the element is and
+  says** (tag, link, image source, alternative text, text), not its whole
+  markup. WordPress and themes add attributes on the published page
+  (classes, `loading`, `srcset`), so the markup differs between the editor
+  and the page; this identity doesn't, and a review made in one applies in
+  the other. Two identical elements share it, and a judgement on one is a
+  judgement on both. Marks made before this change don't carry over; the
+  plugin is unreleased.
+- **Each language is a file of its own.** Milestone 4 put all five in the
+  panel's script (84 KB, 25 KB compressed). Now the script has English
+  (45 KB, 16 KB compressed) and each other language is 8 to 17 KB, loaded
+  only for people working in it.
+
 ## 2026-11-15: Contrast in the editor only for the author's colours
 
 The contrast rules were measured again, on the content alone as the editor

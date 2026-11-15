@@ -42,7 +42,7 @@ export function loadEngine(doc, urls) {
  * - contentSelector: where the author's content is (the first match).
  * - excludeSelectors: what to leave out (the checker's own interface, the
  *   site's admin bar).
- * - profile, packs, locale, messages: as for the engine.
+ * - profile, packs, locale, messages, runOnly: as for the engine.
  * - labels: { content, theme }: the tag each finding gets.
  *
  * Returns { findings, result, scanMs }. Each finding's `itemId` is its
@@ -56,13 +56,14 @@ export function scanPage(doc, {
   packs = [],
   locale = 'en',
   messages,
+  runOnly = null,
   labels = { content: 'Your content', theme: 'Theme or template' }
 } = {}) {
   const win = doc.defaultView;
   const engineOptions = { profile, packs, locale, excludeSelectors, output: { detail: 'findings' } };
   if (messages) engineOptions.messages = messages;
   const t0 = win.performance.now();
-  const result = win.a11ycore.runa11yCoreInPage(win.location.href, 'html', engineOptions, null);
+  const result = win.a11ycore.runa11yCoreInPage(win.location.href, 'html', engineOptions, runOnly);
   const scanMs = win.performance.now() - t0;
   const content = contentSelector ? first(doc, contentSelector) : null;
   const excluded = (el) => excludeSelectors.some((sel) => {
