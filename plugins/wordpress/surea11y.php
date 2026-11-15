@@ -203,6 +203,19 @@ function surea11y_enqueue_page_assets() {
 	}
 	$panel = surea11y_register_panel();
 	wp_enqueue_script( 'surea11y-page', plugins_url( 'src/page.js', __FILE__ ), array( $panel ), SUREA11Y_VERSION, true );
+	// On a phone, WordPress's toolbar shows only its own chosen items:
+	// show "Check accessibility" there too, as an icon the size of theirs,
+	// its words kept for screen readers.
+	wp_add_inline_style(
+		'admin-bar',
+		'@media screen and (max-width: 782px) {'
+		. '#wpadminbar li#wp-admin-bar-surea11y { display: block; }'
+		. '#wpadminbar #wp-admin-bar-surea11y > .ab-item { width: 52px; padding: 0; justify-content: center; }'
+		. '#wpadminbar #wp-admin-bar-surea11y .ab-icon { margin: 0; width: 52px; height: 46px; }'
+		. '#wpadminbar #wp-admin-bar-surea11y .ab-icon:before { font: normal 32px/46px dashicons; width: 52px; text-align: center; top: 0; }'
+		. '#wpadminbar #wp-admin-bar-surea11y .ab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }'
+		. '}'
+	);
 	$user                       = wp_get_current_user();
 	$GLOBALS['surea11y_config'] = array_merge(
 		surea11y_config( 'cms-page', $post_id ),

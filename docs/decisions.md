@@ -19,6 +19,27 @@ A running log, newest first. Each entry says what was decided and why.
   end-to-end tests were run with the overrides.
 - **Remove them** once Playground raises its pins.
 
+## 2026-11-15: Interface fixes from the stress tests
+
+- **The page checker on a phone.** WordPress's toolbar shows only its own
+  chosen items below 782 pixels, so "Check accessibility" vanished on
+  phones. It now shows there as an icon the size of WordPress's own, its
+  words kept for screen readers.
+- **The page panel off the screen.** A page wider than the phone's screen
+  (a long web address in the text, say) is laid out wider than the screen,
+  and the fixed panel was placed against that layout, half off the screen.
+  The panel now takes the visible area's right edge and width when the
+  layout is wider than it or it is narrow, and follows zoom and scrolling
+  (`visualViewport`). Checked at 390 by 844: everything in view, the
+  engine's own checks pass on the panel.
+- **"Probably fine" starts folded.** It is the checker's own all-clear; open
+  by default it put every probably-fine card between the editor and what
+  needs work (on a 600-block post, hundreds more tab stops). Its count stays
+  on its tile, a tile opens it, and showing a place in it unfolds it.
+- **Checked and fine.** The panel alone in five languages at 280, 320 and
+  600 pixels with 300 findings: nothing overflows its box, nothing scrolls
+  sideways, the engine's WCAG 2.2 AA checks pass, under 25 ms to draw.
+
 ## 2026-11-15: Markers placed in one pass, after a stress test froze the editor
 
 - **Found.** On a 600-block post with 671 findings, typing with the sidebar
@@ -29,9 +50,8 @@ A running log, newest first. Each entry says what was decided and why.
   reading its block's position after moving the last marker made the
   browser lay the whole canvas out again.
 - **Fixed.** The markers read every position first, then move every marker:
-  one layout a time. They are placed in the next animation frame, hidden
-  until then, and aren't drawn again when the cards and the place shown
-  haven't changed.
+  one layout a time. They aren't drawn again when the cards and the place
+  shown haven't changed; then they are only moved, in the next frame.
 - **Measured after.** The pause after typing went from 973 to 319 ms (the
   check and the sidebar's 224 cards, once, after typing stops), and nothing
   while typing beyond the editor's own.

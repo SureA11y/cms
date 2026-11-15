@@ -132,7 +132,6 @@ export function createMarkers(
     const b = doc.createElement('button');
     b.type = 'button';
     b.className = 'marker';
-    b.hidden = true; // Shown once placed.
 
     b.tabIndex = -1;
     b.dataset.group = group;
@@ -220,8 +219,8 @@ export function createMarkers(
         placed.push({ button, itemId, slot: shown.length });
       }
     }
-    if (frameBox) frameBox.box.hidden = true;
-    schedule();
+    // Placed at once, in one pass of reads then writes.
+    position();
   }
 
   function destroy() {
