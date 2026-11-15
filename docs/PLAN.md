@@ -2,7 +2,7 @@
 
 How SureA11y for CMS gets from research to a first release, and beyond.
 Written from the [research report](research/2026-10-04-cms-checkers.md) and
-the [decisions](decisions.md) made so far. Last updated 2026-10-04.
+the [decisions](decisions.md) made so far. Last updated 2026-11-15, against `@surea11y/core` 1.17.0.
 
 ## Goal
 
@@ -22,11 +22,13 @@ Order of platforms: **WordPress**, then a **headless CMS**, then
 ## Architecture
 
 ```
-@surea11y/core          the engine (SureA11y/core, MPL-2.0)
+@surea11y/core          the engine (SureA11y/core, MPL-2.0): browser bundle,
+      │                 "How to check" steps (@surea11y/core/how-to-check)
+optional packs          standards and laws, e.g. @surea11y/pack-en301549
       │
 @surea11y/panel         CMS-agnostic layer (this repo, MPL-2.0)
   ├─ runner             loads the engine where the content is rendered,
-  │                     scopes the scan, schedules it, strips results
+  │                     scopes the scan, schedules it, keeps results compact
   ├─ attribution        maps each problem to "content" or "template",
   │                     and to a content item (block, field) via adapter hooks
   ├─ messages           editor-friendly wording and repair suggestions
@@ -74,6 +76,12 @@ Answer the questions the research could not, in a real browser:
       (an iframe) using a local WordPress (wp-env or WordPress Playground).
 - [ ] Time a scan on short, typical and long posts; with and without the
       contrast rules.
+- [ ] Time loading the bundle itself: 1.87 MB, or 0.49 MB compressed, in
+      core 1.17.0, more than twice the October size. Measure download, parse
+      and first-scan cost in the editor, and whether it should load only when
+      the checker is opened.
+- [ ] Load the "How to check" steps in the browser
+      (`@surea11y/core/how-to-check`): the bundle does not add them itself.
 - [ ] Confirm scoping to the post content works, and what the template adds
       when the whole page is scanned.
 - [ ] Try mapping a finding's element back to its block (block client ID).
@@ -89,9 +97,13 @@ a pause in typing, or on demand). If a typical post scans in under about
 
 Panel:
 
-- [ ] Runner: scope, debounce, strip `engineOptions` from results, refuse a
-      scope that matches nothing, exclude rules that touch the live page
-      (`.focus()`, injected styles).
+- [ ] Runner: scope, debounce, compact results for storage
+      (`output.detail: 'findings'`), treat a scope that matched nothing as an
+      error, exclude rules that touch the live page (`.focus()`, injected
+      styles).
+- [ ] Results grouped the way core's own report does it, using each
+      uncertain finding's lean: "Likely problems: confirm", "Probably fine:
+      confirm", "Needs a person".
 - [ ] Editor-friendly messages and repair suggestions for the rules editors
       meet most (alt text, headings, links, tables, lists, contrast,
       language), in English and Spanish first, then de, fr, ja.
@@ -119,10 +131,14 @@ the author's.
 ### Phase 2: What sets us apart
 
 - [ ] **Questions instead of warnings.** Each uncertain result becomes a
-      question the author answers (Yes / No / Not sure). Answers are kept
-      until the content they refer to changes.
+      question the author answers (Yes / No / Not sure), built on core's "How
+      to check" steps and what passing and failing look like (`passWhen`,
+      `failWhen`), reworded for editors where needed. Answers are kept, by
+      core's finding identity, until the content they refer to changes.
 - [ ] **Evidence trail.** A dated record of results and answers per page,
-      mapped to WCAG 2.2 and, optionally, EN 301 549. Export as CSV and EARL.
+      mapped to WCAG 2.2 and, through packs, to other standards such as
+      EN 301 549 (`@surea11y/pack-en301549`), with the law a profile is
+      assessed under where the pack gives one. Export as CSV and EARL.
 - [ ] **Site overview** built from editors' own page views (no crawler):
       top problems, pages with most problems, recent reviews.
 - [ ] **WordPress Block Validation Framework** integration behind a setting,
@@ -179,7 +195,9 @@ it affects them.
 - **Editor responsiveness.** No noticeable typing lag; long scans are
   scheduled after a pause in typing, never on every keystroke.
 - **Size budgets** for the panel's JavaScript and CSS (compressed), checked
-  in CI.
+  in CI. The engine bundle has its own line in the budget, starting from
+  core 1.17.0's 0.49 MB compressed, so a core upgrade that grows it is
+  noticed and judged, not just absorbed.
 - **Server cost.** No crawling from PHP; a fixed, small number of database
   queries per request; results stored compactly (no repeated engine options).
 - **Memory.** No references kept to the page between scans.
@@ -230,7 +248,7 @@ paid tier.
 | Hide and "reviewed" with who and when | 1 | No |
 | Questions for uncertain results | 2 | No |
 | Evidence trail and CSV/EARL export | 2 | Possibly (export, long history) |
-| EN 301 549 mapping and statement support | 2 | Possibly |
+| Other standards and laws through packs (EN 301 549 first), statement support | 2 | Possibly |
 | Site overview from page views | 2 | Possibly (advanced reports) |
 | Publish blocking via WordPress validation | 2 | No |
 | Multisite network management | Later | Likely |
@@ -239,25 +257,34 @@ paid tier.
 
 ## Engine dependencies
 
-Changes wanted in SureA11y/core, and what the panel does until they land.
+What the plan needs from SureA11y/core. Status checked against core 1.17.0
+on 2026-11-15.
 
-| Core change | Needed by | Until then |
+| Core change | Needed by | Status |
 | --- | --- | --- |
-| Stop copying `engineOptions` (with the whole translation) into every result | Phase 1 | Strip it before saving |
-| Flag a scope that matches nothing; flag a malformed `runOnly` | Phase 1 | Check the selector before scanning |
-| Option to skip rules that touch the live page | Phase 1 | Exclude them by ID |
-| `img-alt-quality` tells suspicious alt text from ordinary alt text | Phase 1 | Accept the noise, or hide that rule |
-| A question for every uncertain result, including manual rules | Phase 2 | Questions written in the panel |
-| Stable identity per finding, to match answers across scans | Phase 2 | Panel computes its own key |
-| Content checks: URL as link text, PDF links, ALL CAPS, fake lists, adjacent duplicate links, readability | Phase 2 | Implement in the panel as custom rules |
-| Scan a given element or document | Only if Phase 0 shows it is needed | Load the bundle inside the iframe |
-| Yield to the browser during a scan | Only if Phase 0 shows it is needed | Scan after a pause in typing |
+| Stop copying the translation into every result | Phase 1 | Done. A scan with Spanish loaded measured 285 KB, down from 21 MB |
+| Flag a scope that matches nothing | Phase 1 | Done. It scans nothing and the result says so |
+| `img-alt-quality` tells suspicious alt text from ordinary alt text | Phase 1 | Done: file names, web addresses, placeholders, "image of" openings, very long alt |
+| A question for every uncertain result | Phase 2 | Done, as "How to check" steps with `passWhen`, `failWhen` and a lean |
+| Stable identity per finding, to match answers across scans | Phase 2 | Done: rule ID + reason code + HTML, with `migrateBaselineEntries` when a code is split |
+| Compact results for storage | Phase 1 | Done: `output.detail: 'findings'` |
+| Other standards and laws | Phase 2 | Done, as packs (experimental until 1.18.0 for parts of the standard API) |
+| Option to skip rules that touch the live page | Phase 1 | Not found. Until then, exclude them by ID |
+| Content checks: PDF and Office links, ALL CAPS, fake lists, adjacent duplicate links, readability | Phase 2 | Not found in 1.17.0 (web address as link text: to check). Until then, custom rules in the panel, or a pack |
+| Scan a given element or document | Only if Phase 0 shows it is needed | Not found. Load the bundle inside the iframe |
+| Yield to the browser during a scan | Only if Phase 0 shows it is needed | Not found. Scan after a pause in typing |
+
+Packs are now the natural home for editor-oriented content checks that are
+good practice rather than WCAG failures: they keep core's WCAG results clean
+and can be shared with other SureA11y products.
 
 ## Risks
 
 | Risk | Mitigation |
 | --- | --- |
 | Scans too slow for live checking | Phase 0 measures first; fall back to scanning after a pause or on demand |
+| The engine bundle keeps growing with core | Its own size budget; load it only when the checker is opened; measure every core upgrade |
+| Experimental core APIs (parts of packs and standards) change | Pin core's minor version; upgrade deliberately |
 | The block editor changes and breaks the plugin (it broke Editoria11y) | Use public editor APIs only; test against Gutenberg's nightly builds |
 | Noise from themes and plugins | Content-area scoping and attribution from Phase 1 |
 | Stored results become attack surface (Editoria11y's 2026 advisory) | Capability checks on every endpoint; security review before Phase 3 |
