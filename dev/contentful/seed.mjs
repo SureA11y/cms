@@ -17,8 +17,15 @@ const IMAGE_URL =
   'https://cdn.sanity.io/images/1tmgxdtl/development/2e89e74ff33d2e4856699a3a1c15f8eb8ab9d7d4-640x360.png';
 
 export function api(method, path, body, headers = {}) {
-  const args = ['-s', '-X', method, '-H', 'Content-Type: application/vnd.contentful.management.v1+json'];
-  if (process.env.CONTENTFUL_TOKEN) args.push('-H', `Authorization: Bearer ${process.env.CONTENTFUL_TOKEN}`);
+  const args = [
+    '-s',
+    '-X',
+    method,
+    '-H',
+    'Content-Type: application/vnd.contentful.management.v1+json'
+  ];
+  if (process.env.CONTENTFUL_TOKEN)
+    args.push('-H', `Authorization: Bearer ${process.env.CONTENTFUL_TOKEN}`);
   for (const [k, v] of Object.entries(headers)) args.push('-H', `${k}: ${v}`);
   if (body !== undefined) args.push('--data-binary', JSON.stringify(body));
   args.push(`https://api.contentful.com/spaces/${SPACE}/environments/${ENV}/${path}`);
@@ -29,7 +36,10 @@ export function api(method, path, body, headers = {}) {
 const version = (path) => (api('GET', path).sys || {}).version;
 function put(path, body, extra = {}) {
   const v = version(path);
-  const out = api('PUT', path, body, { ...(v ? { 'X-Contentful-Version': String(v) } : {}), ...extra });
+  const out = api('PUT', path, body, {
+    ...(v ? { 'X-Contentful-Version': String(v) } : {}),
+    ...extra
+  });
   if (out.sys && out.sys.type === 'Error') throw new Error(`${path}: ${out.message}`);
   return out;
 }
@@ -59,7 +69,9 @@ export function seed() {
       fields: {
         title: { [LOCALE]: 'Hero' },
         description: { [LOCALE]: 'IMG_2041.jpg' },
-        file: { [LOCALE]: { contentType: 'image/png', fileName: 'IMG_2041.png', upload: IMAGE_URL } }
+        file: {
+          [LOCALE]: { contentType: 'image/png', fileName: 'IMG_2041.png', upload: IMAGE_URL }
+        }
       }
     });
     api('PUT', `assets/${ASSET}/files/${LOCALE}/process`, undefined, {
@@ -74,28 +86,38 @@ export function seed() {
   }
 
   const link = { sys: { type: 'Link', linkType: 'Asset', id: ASSET } };
-  put(`entries/${ENTRY}`, {
-    fields: {
-      title: { [LOCALE]: 'Opening hours over the holidays' },
-      mainImage: { [LOCALE]: link },
-      body: {
-        [LOCALE]: node('document', [
-          node('heading-2', [text('From 23 December')]),
-          p(
-            text('All branches close at 15:00. For the full list of branches, '),
-            node('hyperlink', [text('click here')], { uri: 'https://library.example/branches' }),
-            text('.')
-          ),
-          node('heading-4', [text("Children's library")]),
-          p(text('The reading room stays open until 17:00.')),
-          node('table', [
-            node('table-row', [node('table-cell', [p(text('Branch'))]), node('table-cell', [p(text('24 Dec'))])]),
-            node('table-row', [node('table-cell', [p(text('Central'))]), node('table-cell', [p(text('10–14'))])])
+  put(
+    `entries/${ENTRY}`,
+    {
+      fields: {
+        title: { [LOCALE]: 'Opening hours over the holidays' },
+        mainImage: { [LOCALE]: link },
+        body: {
+          [LOCALE]: node('document', [
+            node('heading-2', [text('From 23 December')]),
+            p(
+              text('All branches close at 15:00. For the full list of branches, '),
+              node('hyperlink', [text('click here')], { uri: 'https://library.example/branches' }),
+              text('.')
+            ),
+            node('heading-4', [text("Children's library")]),
+            p(text('The reading room stays open until 17:00.')),
+            node('table', [
+              node('table-row', [
+                node('table-cell', [p(text('Branch'))]),
+                node('table-cell', [p(text('24 Dec'))])
+              ]),
+              node('table-row', [
+                node('table-cell', [p(text('Central'))]),
+                node('table-cell', [p(text('10–14'))])
+              ])
+            ])
           ])
-        ])
+        }
       }
-    }
-  }, { 'X-Contentful-Content-Type': 'article' });
+    },
+    { 'X-Contentful-Content-Type': 'article' }
+  );
   return api('GET', `entries/${ENTRY}`);
 }
 

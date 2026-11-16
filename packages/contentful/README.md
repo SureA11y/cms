@@ -61,6 +61,11 @@ page can check them. Embedded entries are left out too.
 `dev/contentful/deploy.mjs` does steps 2 and 3 through the Management API,
 for the test space.
 
+Languages: English, Spanish, German, French and Japanese, following the
+language Contentful's web app is set to, else the browser's. The panel's
+words, the engine's messages and the "how to check" steps all follow it.
+The configuration screen is in English.
+
 Licence: MPL-2.0.
 
 ## Developing

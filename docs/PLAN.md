@@ -411,8 +411,9 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
       (`packages/contentful`; see the decisions "Where the checker sits in
       Contentful" and "How the Contentful app is built"). Tested on the
       maintainer's test space and checked by the maintainer in the editor.
+- [x] Contentful: the five languages, following the web app's.
 - [ ] Contentful: an editor tab of our own with lines under fields, once
-      proven; the live preview check; languages other than English.
+      proven; the live preview check.
 - [ ] Storyblok, only with a clear lead over its built-in checker.
 
 ### Phase 5: Drupal

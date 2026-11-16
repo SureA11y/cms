@@ -122,3 +122,48 @@ test(
     );
   }
 );
+
+test(
+  "in the person's language: Contentful set to Spanish, the panel, the engine and the steps in Spanish",
+  { skip },
+  async (t) => {
+    seed();
+    removeReview();
+    const browser = await chromium.launch({
+      executablePath: CHROMIUM,
+      ...(HTTPS_PROXY ? { proxy: { server: HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } } : {})
+    });
+    t.after(() => browser.close());
+    const context = await browser.newContext({
+      ignoreHTTPSErrors: !!HTTPS_PROXY,
+      viewport: { width: 400, height: 1200 }
+    });
+    const page = await context.newPage();
+    await page.goto(`${CONTENTFUL_APP_URL}/?lang=es-ES`);
+    await page.waitForFunction(
+      () => document.querySelector('surea11y-results')?.state === 'done',
+      null,
+      {
+        timeout: 60000
+      }
+    );
+    const results = page.locator('surea11y-results');
+    await results.getByRole('button', { name: /^Hallazgos/ }).waitFor();
+    assert.equal(
+      await results.getByRole('button', { name: 'Editar la descripción de la imagen' }).count(),
+      1
+    );
+    // The engine's own message, in Spanish.
+    const summaries = await page.evaluate(() =>
+      document.querySelector('surea11y-results').cards.map((c) => c.summary)
+    );
+    assert.ok(
+      summaries.some((s) => /imagen/i.test(s)),
+      `Spanish summaries: ${summaries.join(' / ')}`
+    );
+    // How to check, in Spanish.
+    const card = results.locator('li.card', { hasText: 'click here' });
+    await card.getByRole('button', { name: 'Comprobarlo' }).click();
+    await card.getByText('Cómo comprobarlo').waitFor({ timeout: 10000 });
+  }
+);

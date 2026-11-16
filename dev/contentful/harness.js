@@ -26,15 +26,28 @@ const cma = {
   asset: { get: ({ assetId }) => call('GET', `/assets/${assetId}`) },
   entry: {
     get: ({ entryId }) => call('GET', `/entries/${entryId}`),
-    update: ({ entryId }, e) => call('PUT', `/entries/${entryId}`, { fields: e.fields }, { 'X-Contentful-Version': String(e.sys.version) }),
+    update: ({ entryId }, e) =>
+      call(
+        'PUT',
+        `/entries/${entryId}`,
+        { fields: e.fields },
+        { 'X-Contentful-Version': String(e.sys.version) }
+      ),
     createWithId: ({ contentTypeId, entryId }, e) =>
-      call('PUT', `/entries/${entryId}`, { fields: e.fields }, { 'X-Contentful-Content-Type': contentTypeId })
+      call(
+        'PUT',
+        `/entries/${entryId}`,
+        { fields: e.fields },
+        { 'X-Contentful-Content-Type': contentTypeId }
+      )
   },
   contentType: {
     get: ({ contentTypeId }) => call('GET', `/content_types/${contentTypeId}`),
     createWithId: ({ contentTypeId }, ct) => call('PUT', `/content_types/${contentTypeId}`, ct),
     publish: ({ contentTypeId }, ct) =>
-      call('PUT', `/content_types/${contentTypeId}/published`, undefined, { 'X-Contentful-Version': String(ct.sys.version) })
+      call('PUT', `/content_types/${contentTypeId}/published`, undefined, {
+        'X-Contentful-Version': String(ct.sys.version)
+      })
   }
 };
 
@@ -62,6 +75,8 @@ for (const f of contentType.fields) {
 
 window.opened = [];
 const sdk = {
+  // The web app's language, as Contentful gives it (?lang=es-ES on the test page).
+  uiLanguageLocale: params.get('lang') || 'en-US',
   locales: { default: 'en-US' },
   ids: { space: SPACE, entry: ENTRY },
   user: { firstName: 'Test', lastName: 'Editor', sys: { id: 'test-editor' } },
