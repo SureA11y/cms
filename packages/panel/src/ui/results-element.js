@@ -348,6 +348,19 @@ export class ResultsElement extends HTMLElement {
    * separate website draws). It sets how findings outside the content are
    * named.
    */
+  /**
+   * Whether the host can show a place in the content (default true). A
+   * host that can't (Contentful's apps can't move the form) sets it false:
+   * no Show buttons and no arrows; each card still names its field.
+   */
+  set canShow(value) {
+    this._canShow = !!value;
+    this._render();
+  }
+  get canShow() {
+    return this._canShow !== false;
+  }
+
   set site(value) {
     this._site = value === 'website' ? 'website' : 'theme';
     this._render();
@@ -548,7 +561,7 @@ export class ResultsElement extends HTMLElement {
 
       // "3 of 11", over every place in the content that is shown.
       const places = this._places();
-      if (places.length) {
+      if (places.length && this.canShow) {
         const nav = el(doc, 'div', 'nav');
         const i = this._currentIndex(places);
         const prev = this._navButton(doc, 'previous', t.previous, () => this.showPrevious());
@@ -844,7 +857,7 @@ export class ResultsElement extends HTMLElement {
     } else if (card.marked) {
       add(t.undo, 'button', 'undo', () => this._mark(card, false));
     } else {
-      if (card.inContent) {
+      if (card.inContent && this.canShow) {
         const next = here && card.places.length > 1;
         add(next ? t.showNextPlace : t.show, 'button primary show', 'show', () =>
           this._showCard(card)
