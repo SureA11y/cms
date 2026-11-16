@@ -407,11 +407,12 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
 - [x] Sanity: a preview script for sites using its live preview (mode B),
       mapping problems to fields through Sanity's own tags, merged with
       the fields' check in one list (see the decision of 2026-11-16).
-- [ ] Contentful, as a private app (see the decision "Where the checker sits
-      in Contentful"): a panel in the entry's sidebar as the base, then an
-      editor tab of our own with lines under fields, once proven.
-      `packages/contentful` turns an entry into checkable items. The app and
-      tests on a real space need a Contentful account and test space.
+- [x] Contentful, as a private app: a panel in the entry's sidebar
+      (`packages/contentful`; see the decisions "Where the checker sits in
+      Contentful" and "How the Contentful app is built"). Tested on the
+      maintainer's test space and checked by the maintainer in the editor.
+- [ ] Contentful: an editor tab of our own with lines under fields, once
+      proven; the live preview check; languages other than English.
 - [ ] Storyblok, only with a clear lead over its built-in checker.
 
 ### Phase 5: Drupal

@@ -2,6 +2,30 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: How the Contentful app is built
+
+- **The sidebar app first**, `packages/contentful`, `@surea11y/contentful`,
+  MPL-2.0. An entry's Rich Text blocks and Media images are the items, named
+  "field#block" ("body#2"), so each card names its field and block.
+- **No Show.** Contentful's apps can't move the form to a field, so the
+  panel's new `canShow` property (default true) leaves out Show and the
+  arrows; cards name the field instead.
+- **Alternative text is the asset's description**, set once in Media, and
+  the card about it opens the image (`navigator.openAsset`).
+- **Answers** are kept in entries of the app's own content type
+  `surea11yReview`, one per checked entry, never published. The app's
+  configuration screen creates it and puts the panel in every content
+  type's sidebar, under Publish.
+- **The engine** travels as text and runs from a `blob:` address, as in
+  Sanity; the build now writes the engine files for both packages.
+- **Tested** on the maintainer's test space: on a test page with a
+  stand-in for the App SDK backed by the space's real data (Contentful's
+  editor needs a person's login), and installed as a private app, hosted by
+  Contentful, where the maintainer checked it in the real editor.
+- **Not yet:** an editor tab with lines under fields (the option on top),
+  the live preview check, languages other than English, and the
+  Marketplace.
+
 ## 2026-11-16: Where the checker sits in Contentful
 
 From three mock-ups (a panel in the sidebar, an editor tab of our own, a
