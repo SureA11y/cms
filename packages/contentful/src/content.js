@@ -162,3 +162,21 @@ export function linkedAssets(values) {
   walk(values);
   return [...ids];
 }
+
+/** Which field links each asset, from the entry's values (Media and Rich Text). */
+export function assetFieldsOf(values) {
+  const out = {};
+  const walk = (node, fieldId) => {
+    if (!node || typeof node !== 'object') return;
+    const target = node.data && node.data.target;
+    if (target && target.sys && target.sys.linkType === 'Asset') out[target.sys.id] = fieldId;
+    for (const child of node.content || []) walk(child, fieldId);
+  };
+  for (const [fieldId, v] of Object.entries(values)) {
+    for (const item of Array.isArray(v) ? v : [v]) {
+      if (item && item.sys && item.sys.linkType === 'Asset') out[item.sys.id] = fieldId;
+      else if (item && item.nodeType === 'document') walk(item, fieldId);
+    }
+  }
+  return out;
+}

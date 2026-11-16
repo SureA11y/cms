@@ -5,7 +5,6 @@
   "description": "SureA11y for Contentful: an accessibility checker for the people who write the content, in the entry's sidebar",
   "license": "MPL-2.0",
   "type": "module",
-  "main": "src/index.js",
   "files": [
     "src/",
     "LICENSE"
@@ -22,9 +21,13 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "@lingui/core": "5.9.5",
-    "@lingui/message-utils": "5.9.5"
+    "@lingui/message-utils": "5.9.5",
+    "@vercel/stega": "1.1.0"
   },
   "engines": {
     "node": ">=22.12"
+  },
+  "exports": {
+    "./preview": "./src/preview.js"
   }
 }
