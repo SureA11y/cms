@@ -384,9 +384,13 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
 
 ### Phase 4: Headless
 
-- [ ] Investigation: Sanity, Storyblok and Contentful. How each shows
+- [x] Investigation: Sanity, Storyblok and Contentful. How each shows
       previews, whether a preview script is acceptable to customers, and
       how rich text (Portable Text, JSON) can be rendered for checking.
+      See `docs/research/2026-11-16-headless.md`. It recommends Sanity
+      first: content fields checked in the editor (mode A), then a preview
+      script (mode B). Storyblok shipped a free built-in checker on
+      2026-10-23. Waiting on the maintainer's choice.
 - [ ] First adapter for the platform the investigation favours.
 
 ### Phase 5: Drupal
