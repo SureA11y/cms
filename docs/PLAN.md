@@ -63,6 +63,8 @@ packages/panel/        @surea11y/panel            LICENSE: MPL-2.0
 plugins/wordpress/     WordPress plugin "SureA11y" LICENSE: GPL-2.0-or-later
 docs/                  plan, decisions, research
 packages/pack-cms/     @surea11y/pack-cms         LICENSE: MPL-2.0
+packages/sanity/       @surea11y/sanity           LICENSE: MPL-2.0 (Sanity Studio plugin)
+dev/sanity-studio/     a Studio for developing and testing it (not shipped)
 prototypes/            throwaway experiments, such as Phase 0
 ```
 
@@ -391,8 +393,14 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
       first: content fields checked in the editor (mode A), then a preview
       script (mode B). Storyblok shipped a free built-in checker on
       2026-10-23.
-- [ ] Sanity: a Studio plugin with the panel as a side panel, checking the
-      content fields (mode A), answers kept in a document type of ours.
+- [x] Sanity: a Studio plugin with the panel as a side panel, checking the
+      content fields (mode A), answers kept in a document type of ours, and
+      an optional line under each field with a finding (see the decision
+      "Where the checker sits in Sanity Studio"). `packages/sanity`; tested
+      in a real Studio (`tests/e2e/sanity-studio.test.mjs`).
+- [ ] Sanity: the Studio's dark theme for the panel and the field lines.
+- [ ] Sanity: publish `@surea11y/sanity` on npm and list it on Sanity's
+      plugin directory (needs core released first, as for WordPress).
 - [ ] Sanity: a preview script for sites using its live preview (mode B),
       mapping problems to fields through Sanity's own tags.
 - [ ] Contentful, as a private app; then Storyblok, only with a clear lead

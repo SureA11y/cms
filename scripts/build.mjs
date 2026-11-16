@@ -1,4 +1,5 @@
-// Builds the WordPress plugin's assets into plugins/wordpress/build/:
+// Builds the WordPress plugin's assets into plugins/wordpress/build/ (and
+// the same engine and steps for the Sanity plugin, at the end):
 // - panel.js: @surea11y/panel for the browser (global SureA11yPanel), in
 //   English; panel.i18n.<locale>.js adds each other language;
 // - engine.js: core's browser bundle with the CMS pack built in, which runs
@@ -242,6 +243,27 @@ for (const locale of ['de', 'es', 'fr', 'ja']) {
   fs.copyFileSync(
     path.join(coreDir, `surea11y.i18n.${locale}.js`),
     path.join(out, `engine.i18n.${locale}.js`)
+  );
+}
+
+// The Sanity plugin takes the same engine and steps, as modules that export
+// each script's text: the plugin imports one only when a check first needs
+// it, and runs it from a blob: address in its sandbox. A bundler (the
+// Studio's) then keeps them out of the Studio's own bundle, in files of
+// their own, without needing to know where the package's assets live.
+const sanityOut = path.join(root, 'packages/sanity/dist');
+fs.rmSync(sanityOut, { recursive: true, force: true });
+fs.mkdirSync(sanityOut, { recursive: true });
+const asModule = (file) =>
+  `export default ${JSON.stringify(fs.readFileSync(path.join(out, file), 'utf8'))};\n`;
+fs.writeFileSync(path.join(sanityOut, 'engine.js'), asModule('engine.js'));
+for (const locale of ['en', 'es', 'de', 'fr', 'ja']) {
+  fs.writeFileSync(path.join(sanityOut, `review.${locale}.js`), asModule(`review.${locale}.js`));
+}
+for (const locale of ['de', 'es', 'fr', 'ja']) {
+  fs.writeFileSync(
+    path.join(sanityOut, `engine.i18n.${locale}.js`),
+    asModule(`engine.i18n.${locale}.js`)
   );
 }
 

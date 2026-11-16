@@ -2,6 +2,67 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: How the Sanity plugin is built
+
+- **The engine travels as text, loaded when first needed.** The build writes
+  the engine and the "how to check" steps into `packages/sanity/dist` as
+  modules that export each script's text. The plugin imports one only when
+  a check first runs, and runs it from a `blob:` address in the sandbox,
+  whose policy then allows `blob:` scripts (only the page's own code can
+  make one). A Studio's bundler keeps these in files of their own, with no
+  setup in the Studio. Measured: the engine file is 530 KB compressed, the
+  same as in WordPress; the plugin adds 27 KB compressed to the Studio.
+- **The check runs while the document is open**, from the document's root
+  input. It follows unsaved edits, waits for a pause as in WordPress, and
+  leaves out the contrast rules (the fields carry no styles). The header
+  button's count and the lines under fields come from it, so they work with
+  the panel closed.
+- **Answers are kept in a document of ours, `surea11y.review.<id>`.** An id
+  with a dot cannot be read without a token, even in a public dataset, and
+  the document has no schema type, so it stays out of the lists. This
+  replaced a document type in the schema, which would have needed every
+  project to add it and would have listed the reviews.
+- **"Hide for me" is kept in the person's browser.** The Studio's per-user
+  storage is internal (`@internal`) and could change without notice.
+- **Tested against a real Studio** on the maintainer's test project, with an
+  Editor token the environment adds to requests. The test answers the
+  Studio's live-update streams with a short reply: through this
+  environment's proxy the browser speaks HTTP/1.1, six connections per
+  host, and the streams took them all.
+- **Not yet:** the Studio's dark theme (the panel stays light), and the
+  check of the live preview page.
+
+## 2026-11-16: Where the checker sits in Sanity Studio
+
+The maintainer chose from four mock-ups (a side panel, a tab of its own, a
+line under each field, the live preview) and took the recommendation.
+
+- **A side panel next to the form** is the main place. An "Accessibility"
+  button with a count in the document's header opens it, the way Sanity's
+  own validation panel opens (a document inspector). Show moves the form to
+  the field and frames it. Each card names its field. It is the same panel
+  as in WordPress.
+- **A line under each field** with a finding, as an extra that editors can
+  turn off. It is seen while writing; the side panel has the details,
+  questions and views.
+- **The live preview** (markers on the real page, the same panel beside it)
+  follows once the preview script exists, in the same phase.
+- **Not taken: a tab of its own.** It hides the form, so fixing means
+  switching back and forth.
+
+How it is built:
+
+- **`packages/sanity`, `@surea11y/sanity`, MPL-2.0** like the panel. Sanity
+  sets no licence for plugins, and MPL-2.0 keeps changes to our files open
+  while letting any Studio use it.
+- **The document is checked as the published page would have it, in
+  order.** Each Portable Text block (a run of list items counts as one) and
+  each image is an item whose id is its field path, so a finding names its
+  field and Show can move the form to it. Strings such as the title and
+  slug are left out: the website decides how they appear.
+- **Alt text** is read from the image's own field: `alt`, `altText` or
+  `alternativeText` by default, configurable.
+
 ## 2026-11-16: Headless: Sanity first, fields then preview
 
 The maintainer took the recommendations of the headless research

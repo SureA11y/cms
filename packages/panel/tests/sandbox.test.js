@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { renderItems, sandboxPolicy, scriptSources } from '../src/sandbox.js';
+import { createSandbox, renderItems, sandboxPolicy, scriptSources } from '../src/sandbox.js';
 
 test('items are rendered as siblings, each top-level element marked with its id', () => {
   const doc = new JSDOM('<main></main>').window.document;
@@ -59,4 +59,23 @@ test('scripts are allowed by their own address, not the whole site', () => {
     sandboxPolicy(sources),
     /script-src https:\/\/example\.test\/wp-content\/plugins\/surea11y\/build\/engine\.js /
   );
+});
+
+test('a host can set where scripts may come from: blob: for scripts it bundled', () => {
+  const doc = new JSDOM('<body></body>', { url: 'https://studio.example/' }).window.document;
+  const sandbox = createSandbox(doc, {
+    engineUrl: 'blob:https://studio.example/1',
+    scriptOrigins: ['blob:']
+  });
+  sandbox.ready.catch(() => {});
+  assert.match(sandbox.frame.srcdoc, /script-src blob:;/);
+  sandbox.destroy();
+  const own = createSandbox(doc, { engineUrl: 'https://cdn.example/engine.js?ver=1' });
+  own.ready.catch(() => {});
+  assert.match(
+    own.frame.srcdoc,
+    /script-src https:\/\/cdn\.example\/engine\.js;/,
+    "by default, the engine's own address"
+  );
+  own.destroy();
 });

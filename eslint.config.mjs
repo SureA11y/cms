@@ -7,7 +7,16 @@ import globals from 'globals';
 import prettierConfig from 'eslint-config-prettier';
 
 export default [
-  { ignores: ['**/node_modules/**', 'vendor/**', 'plugins/*/build/**', 'prototypes/**'] },
+  {
+    ignores: [
+      '**/node_modules/**',
+      'vendor/**',
+      'plugins/*/build/**',
+      'packages/*/dist/**',
+      'dev/*/dist/**',
+      'prototypes/**'
+    ]
+  },
   js.configs.recommended,
   {
     languageOptions: {

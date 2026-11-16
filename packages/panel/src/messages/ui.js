@@ -102,6 +102,10 @@ export const UI = {
     tryAgain: 'Try again',
     errorDetails: 'Details for your administrator',
     viewLabel: 'What to show',
+    // Under a field of the form, where the host shows one (Sanity).
+    moreInField: '{{n}} more in this field',
+    details: 'Details',
+    fieldLines: 'Show findings under each field',
     viewFindings: 'Findings',
     viewHeadings: 'Headings',
     viewImages: 'Images',

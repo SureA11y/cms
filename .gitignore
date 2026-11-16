@@ -5,3 +5,4 @@ tests/e2e/results/
 vendor/
 composer.lock
 dist/
+.sanity/

@@ -110,5 +110,8 @@
   "phoneCheck": "In Smartphone-Breite prüfen",
   "phoneChecking": "Prüfung in Smartphone-Breite…",
   "phoneDone": "In Smartphone-Breite geprüft (320 Pixel): {{n}} gefunden.",
-  "phoneError": "Die Prüfung in Smartphone-Breite wurde nicht abgeschlossen."
+  "phoneError": "Die Prüfung in Smartphone-Breite wurde nicht abgeschlossen.",
+  "moreInField": "{{n}} weitere in diesem Feld",
+  "details": "Details",
+  "fieldLines": "Befunde unter jedem Feld zeigen"
 }
