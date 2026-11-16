@@ -22,8 +22,10 @@ import {
   useCurrentUser,
   useDataset,
   useFormValue,
+  useColorSchemeValue,
   useProjectId
 } from 'sanity';
+import { applyTokens, studioTokens } from './theme.js';
 import { DocumentInspectorHeader, useDocumentPane } from 'sanity/structure';
 import {
   addLocale,
@@ -175,6 +177,7 @@ function FieldLine(props) {
   } catch {
     pane = null; // a form outside a document pane: no panel to open
   }
+  const tokens = studioTokens(useColorSchemeValue());
   const field = pathToString(props.path || []);
   const open = checker && fieldLinesOn() ? checker.findingsIn(field) : [];
   const current = checker && checker.current && checker.fields[checker.current] === field;
@@ -194,14 +197,14 @@ function FieldLine(props) {
           key: 'surea11y',
           className: 'surea11y-field-line',
           'data-group': first.group,
-          style: lineStyle(first.group)
+          style: lineStyle(first.group, tokens)
         },
         h('strong', null, `${(t.badges && t.badges[first.group]) || t.groups[first.group]}. `),
         h('span', null, first.summary),
         more > 0
           ? h(
               'span',
-              { style: { color: 'var(--card-muted-fg-color)' } },
+              { style: { color: tokens['text-muted'] } },
               ` ${fill(t.moreInField, { n: more })}.`
             )
           : null,
@@ -211,7 +214,7 @@ function FieldLine(props) {
               {
                 type: 'button',
                 className: 'surea11y-field-details',
-                style: linkStyle,
+                style: linkStyle(tokens),
                 onClick: () => pane.openInspector(INSPECTOR_NAME)
               },
               t.details
@@ -224,45 +227,45 @@ function FieldLine(props) {
     'div',
     {
       className: current ? 'surea11y-field surea11y-field-current' : 'surea11y-field',
-      style: current ? frameStyle(first ? first.group : 'review') : undefined
+      style: current ? frameStyle(first ? first.group : 'review', tokens) : undefined
     },
     ...children
   );
 }
 
-const GROUP_COLOURS = {
-  problem: ['#b32d2e', '#fcf0f1'],
-  likely: ['#8a4d00', '#fcf3e6'],
-  review: ['#1d5fa6', '#eef4fb'],
-  'probably-fine': ['#00702a', '#edf7ef']
-};
-function lineStyle(group) {
-  const [fg, bg] = GROUP_COLOURS[group] || GROUP_COLOURS.review;
+/** A group's colour token: 'probably-fine' is drawn as 'fine'. */
+const groupToken = (group) =>
+  group === 'probably-fine' ? 'fine' : group in GROUP_NAMES ? group : 'review';
+const GROUP_NAMES = { problem: 1, likely: 1, review: 1, fine: 1 };
+
+function lineStyle(group, tokens) {
+  const g = groupToken(group);
   return {
     marginTop: 8,
     padding: '6px 10px',
     borderRadius: 4,
-    borderInlineStart: `4px solid ${fg}`,
-    background: bg,
-    color: '#1e1e1e',
+    borderInlineStart: `4px solid ${tokens[g]}`,
+    background: tokens[`${g}-tint`],
+    color: tokens.text,
     fontSize: 13,
     lineHeight: 1.45
   };
 }
-function frameStyle(group) {
-  const [fg] = GROUP_COLOURS[group] || GROUP_COLOURS.review;
-  return { outline: `2px solid ${fg}`, outlineOffset: 6, borderRadius: 4 };
+function frameStyle(group, tokens) {
+  return { outline: `2px solid ${tokens[groupToken(group)]}`, outlineOffset: 6, borderRadius: 4 };
 }
-const linkStyle = {
-  marginInlineStart: 8,
-  padding: 0,
-  border: 0,
-  background: 'none',
-  color: '#1d5fa6',
-  textDecoration: 'underline',
-  font: 'inherit',
-  cursor: 'pointer'
-};
+function linkStyle(tokens) {
+  return {
+    marginInlineStart: 8,
+    padding: 0,
+    border: 0,
+    background: 'none',
+    color: tokens.accent,
+    textDecoration: 'underline',
+    font: 'inherit',
+    cursor: 'pointer'
+  };
+}
 
 // ---- The side panel --------------------------------------------------------
 
@@ -279,6 +282,7 @@ function Inspector(props) {
   const results = useRef(null);
   const [lines, setLines] = useState(fieldLinesOn());
   const t = uiStrings(locale);
+  const scheme = useColorSchemeValue();
 
   // The panel itself, made once.
   useEffect(() => {
@@ -289,6 +293,11 @@ function Inspector(props) {
     results.current = el;
     return () => el.remove();
   }, []);
+
+  // The Studio's own colours, light or dark as the Studio is.
+  useEffect(() => {
+    if (results.current) applyTokens(results.current, studioTokens(scheme));
+  }, [scheme]);
 
   // Words, who answers, and how to check a finding.
   useEffect(() => {
