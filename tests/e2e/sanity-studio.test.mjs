@@ -8,6 +8,7 @@
 // in: SANITY_TOKEN, or an environment whose proxy adds the token.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { chromium } from 'playwright-core';
 import { seed, api, article, DATASET } from '../../dev/sanity-studio/seed.mjs';
 
@@ -117,6 +118,27 @@ test(
     const line = page.locator('.surea11y-field-line', { hasText: 'file name' });
     assert.equal(await line.count(), 1, 'a line under the main image');
     assert.ok((await page.locator('.surea11y-field-line').count()) >= 2, 'and one under the body');
+
+    // Our own interface passes the engine's checks: the panel, its setting
+    // and the lines under fields.
+    await page.addScriptTag({
+      content: fs.readFileSync('plugins/wordpress/build/engine.js', 'utf8')
+    });
+    const own = await page.evaluate(() => {
+      const failures = [];
+      for (const sel of ['[data-surea11y-inspector]', '.surea11y-field-line']) {
+        const r = window.a11ycore.runa11yCoreInPage(
+          location.href,
+          sel,
+          { profile: 'wcag22-aa' },
+          null
+        );
+        for (const c of r.checksResults)
+          if (c.outcome === 'fail') failures.push(`${sel} ${c.ruleId}`);
+      }
+      return failures;
+    });
+    assert.deepEqual(own, [], 'no failures in our own interface');
 
     // Show frames the field the finding is in.
     await results

@@ -399,7 +399,10 @@ function Inspector(props) {
     h(DocumentInspectorHeader, { title: t.heading, closeButtonLabel: t.close, onClose }),
     h(
       'div',
-      { style: { flex: 1, minHeight: 0, overflow: 'auto', padding: 16 } },
+      {
+        'data-surea11y-inspector': '',
+        style: { flex: 1, minHeight: 0, overflow: 'auto', padding: 16 }
+      },
       h('div', { ref: host }),
       settings.fieldLines
         ? h(
