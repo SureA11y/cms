@@ -39,6 +39,46 @@ form, **Show** moves to the field and puts the cursor in it.
   view at a time: "Fields" or "Accessibility", with a switch at the top.
   Show moves to the field; Details on a line opens the panel.
 
+### The live preview's page (optional)
+
+With Contentful's live preview open, the editor tab, put first among the
+content type's editors, also checks the website's preview page, as
+visitors get it, and shows one list with the fields':
+
+- A problem found in both is listed once.
+- Each card says whose it is: its field ("Body: Heading 4", "Title"), or
+  **Website design** for what is not in the entry's content (the pale grey
+  line of a site's footer). On a page with no tags at all, what only the
+  page has is labelled **On the page**: it may be content the fields don't
+  show.
+- **Show** moves to the field and shows the place on the preview page.
+- The sidebar can't do this: Contentful hides it while the live preview is
+  open.
+
+What it needs:
+
+1. **The preview script**, in the site's preview (draft) mode only, next to
+   Contentful's live preview package. Visitors never get it.
+
+   ```js
+   import { enableSureA11yPreview } from '@surea11y/contentful/preview';
+
+   if (draftMode) enableSureA11yPreview();
+   ```
+
+   It names each problem's field from inspector mode's attributes
+   (`data-contentful-entry-id`, `data-contentful-field-id`) or from Content
+   Source Maps' hidden characters (Premium plans), which it takes out of
+   the page while checking and puts back at once. It answers only the app
+   hosted by Contentful (`*.ctfcloud.net`) or the addresses given as
+   `appOrigins`.
+2. **The preview's address** on the app's configuration screen ("Preview
+   addresses"). The tab accepts results from those addresses only.
+
+The results go from the preview's frame to the tab's frame through the
+browser (postMessage), never to a server. The script includes the engine,
+about 530 KB compressed, loaded on the first check.
+
 ## What is checked
 
 The entry's content, as the page will have it:
@@ -73,10 +113,13 @@ page can check them. Embedded entries are left out too.
    folder as its bundle (hosted by Contentful).
 3. Install it in a space. Its configuration screen adds the panel to every
    content type's sidebar, under Publish, and creates the "Accessibility
-   answers" content type.
+   answers" content type. For the live preview check, add the **Entry
+   editor** location too, enter the website's preview addresses, and put
+   the Accessibility tab first in the content type's Entry editors.
 
 `dev/contentful/deploy.mjs` does steps 2 and 3 through the Management API,
-for the test space.
+for the test space (`PREVIEW_ORIGINS=https://… node dev/contentful/deploy.mjs`
+sets the preview address and puts the tab first).
 
 Languages: English, Spanish, German, French and Japanese, following the
 language Contentful's web app is set to, else the browser's. The panel's
@@ -92,11 +135,19 @@ Licence: MPL-2.0.
 App SDK backed by the test space's real data: Contentful's own editor needs
 a person's login.
 
+`dev/contentful/preview-site` is a test website in preview mode: the test
+article, Contentful's live preview package with inspector mode's tags, and
+the preview script. On the test page, `?view=tab&preview=<its address>`
+puts it beside the tab, as Contentful's live preview does.
+
 ```sh
 npm run build
 npx esbuild dev/contentful/harness.js --bundle --format=esm --splitting --outdir=dev/contentful/dist
-node dev/contentful/server.mjs        # http://localhost:3336
-CONTENTFUL_APP_URL=http://localhost:3336 node --test tests/e2e/contentful-app.test.mjs
+npx esbuild dev/contentful/preview-site/site.js --bundle --format=esm --splitting --outdir=dev/contentful/preview-site/dist
+node dev/contentful/server.mjs                # http://localhost:3336
+node dev/contentful/preview-site/server.mjs   # http://127.0.0.1:3337
+CONTENTFUL_APP_URL=http://localhost:3336 CONTENTFUL_PREVIEW_URL=http://127.0.0.1:3337 \
+  node --test tests/e2e/contentful-app.test.mjs
 ```
 
 The test needs the space's content management token: `CONTENTFUL_TOKEN`, or
