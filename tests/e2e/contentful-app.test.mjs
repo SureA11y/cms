@@ -219,3 +219,55 @@ test(
     assert.deepEqual(errors, []);
   }
 );
+
+test(
+  'the editor tab beside the live preview: one view at a time, Show and Details moving between them',
+  { skip },
+  async (t) => {
+    seed();
+    removeReview();
+    const browser = await chromium.launch({
+      executablePath: CHROMIUM,
+      ...(HTTPS_PROXY ? { proxy: { server: HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } } : {})
+    });
+    t.after(() => browser.close());
+    const context = await browser.newContext({
+      ignoreHTTPSErrors: !!HTTPS_PROXY,
+      // About the width Contentful gives the tab beside its live preview.
+      viewport: { width: 600, height: 1000 }
+    });
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto(`${CONTENTFUL_APP_URL}/?view=tab`);
+    await page.waitForFunction(
+      () => document.querySelector('surea11y-results')?.state === 'done',
+      null,
+      { timeout: 60000 }
+    );
+    const sw = page.getByRole('group', { name: 'Fields or accessibility' });
+    const fieldsBtn = sw.getByRole('button', { name: /^Fields/ });
+    const findingsBtn = sw.getByRole('button', { name: /^Accessibility/ });
+    // The panel first; the form hidden, not removed.
+    assert.equal(await findingsBtn.getAttribute('aria-pressed'), 'true');
+    assert.ok(!(await page.locator('[data-surea11y-form]').isVisible()));
+    assert.match(await fieldsBtn.innerText(), /2/);
+    // Show switches to the fields, frames the field and puts the cursor in it.
+    await page
+      .locator('surea11y-results li.card', { hasText: 'skipping a level' })
+      .getByRole('button', { name: 'Show' })
+      .click();
+    await page.locator('.surea11y-field-current[data-field="body"]').waitFor({ timeout: 5000 });
+    assert.equal(await fieldsBtn.getAttribute('aria-pressed'), 'true');
+    assert.ok(!(await page.locator('[data-surea11y-inspector]').isVisible()));
+    await page.waitForFunction(() => !!document.activeElement.closest('[data-field="body"]'));
+    // Details on a line goes back to the panel.
+    await page
+      .locator('[data-field="mainImage"] .surea11y-field-line')
+      .getByRole('button', { name: 'Details' })
+      .click();
+    assert.equal(await findingsBtn.getAttribute('aria-pressed'), 'true');
+    assert.ok(await page.locator('[data-surea11y-inspector]').isVisible());
+    assert.deepEqual(errors, []);
+  }
+);

@@ -114,6 +114,8 @@
   "moreInField": "{{n}} weitere in diesem Feld",
   "details": "Details",
   "fieldLines": "Befunde unter jedem Feld zeigen",
+  "viewFields": "Felder",
+  "tabViews": "Felder oder Barrierefreiheit",
   "websiteDesign": "Design der Website",
   "inWebsite": "Im Design der Website, nicht in Ihrem Inhalt: Wer die Website betreut, kann es beheben.",
   "checkedBoth": "In den Feldern und auf der Vorschauseite geprüft."

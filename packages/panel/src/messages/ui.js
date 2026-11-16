@@ -106,6 +106,9 @@ export const UI = {
     moreInField: '{{n}} more in this field',
     details: 'Details',
     fieldLines: 'Show findings under each field',
+    // A narrow editor tab's switch between the form and the list (Contentful).
+    viewFields: 'Fields',
+    tabViews: 'Fields or accessibility',
     // A page whose design is a website's, not a theme's (headless).
     websiteDesign: 'Website design',
     inWebsite:

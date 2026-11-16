@@ -416,8 +416,8 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
       option per content type; the sidebar stays the base).
 - [ ] Contentful: the live preview check, in our editor tab beside the
       live preview (proven on the test space; see the decision "The preview
-      check in Contentful"). Next: the tab's narrow layout, then the
-      preview script and the merged list.
+      check in Contentful"). The tab's narrow layout is done; next,
+      the preview script and the merged list.
 - [ ] Storyblok, only with a clear lead over its built-in checker.
 
 ### Phase 5: Drupal

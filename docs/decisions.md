@@ -35,9 +35,15 @@ that panel is.
 - **Origins:** the app accepts messages only from the preview address set on
   its configuration screen; the preview script answers only the frame that
   asked.
-- **Open:** the tab's narrow layout beside the preview (about 600 px), from
-  three mock-ups: a Fields/Findings switch (recommended), fields with a
-  summary bar that opens the list, or one column.
+- **The tab's narrow layout**, beside the preview (about 600 px), from three
+  mock-ups (a switch, fields with a summary bar opening the list, one
+  column); the maintainer took the recommendation, the switch. Below 760 px
+  the tab shows one view at a time, "Fields" or "Accessibility" (the panel),
+  each with its count. Show switches to Fields, frames the field and puts
+  the cursor in it; Details on a line switches back. Both views stay
+  mounted, so nothing typed is lost. Not taken: the summary bar (its list
+  covers the form, as the dialog did) and one column (the form below a
+  long list).
 
 ## 2026-11-16: How the Contentful app is built
 

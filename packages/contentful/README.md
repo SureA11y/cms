@@ -34,6 +34,10 @@ form, **Show** moves to the field and puts the cursor in it.
 - It draws Contentful's built-in field editors only: a field whose editor
   is another app looks different there. The sidebar stays the base.
 - It is about 980 KB compressed, loaded only when the tab is opened.
+- **Beside Contentful's live preview**, where the tab is narrow (put it
+  first among the content type's editors to have it there), it shows one
+  view at a time: "Fields" or "Accessibility", with a switch at the top.
+  Show moves to the field; Details on a line opens the panel.
 
 ## What is checked
 
