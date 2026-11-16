@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const types = { '.html': 'text/html', '.js': 'text/javascript' };
+const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' };
 http
   .createServer((req, res) => {
     const url = new URL(req.url, 'http://localhost');

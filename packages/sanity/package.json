@@ -23,7 +23,7 @@
     "node": ">=22.12"
   },
   "peerDependencies": {
-    "react": "^19",
+    "react": "^18.3 || ^19",
     "sanity": "^6"
   },
   "exports": {

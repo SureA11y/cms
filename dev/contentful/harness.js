@@ -3,6 +3,7 @@
 // API). It lets the app run end to end without Contentful's web app, which
 // needs a person's login. Not shipped.
 import { mount } from '../../packages/contentful/src/app.js';
+import { mountEditorTab } from '../../packages/contentful/src/editor-tab.js';
 import { ensureReviewType } from '../../packages/contentful/src/reviews.js';
 
 const params = new URLSearchParams(location.search);
@@ -59,8 +60,47 @@ await ensureReviewType(cma);
 
 const listeners = [];
 const fields = {};
+// One field in one locale, as Contentful's field editors use it.
+function fieldApi(f, locale) {
+  const own = [];
+  const api = {
+    id: f.id,
+    name: f.name,
+    locale,
+    type: f.type,
+    linkType: f.linkType,
+    items: f.items,
+    required: !!f.required,
+    validations: f.validations || [],
+    getValue: () => entry.fields[f.id] && entry.fields[f.id][locale],
+    setValue: async (value) => {
+      fields[f.id].setValue(value, locale);
+      return value;
+    },
+    removeValue: async () => fields[f.id].setValue(undefined, locale),
+    onValueChanged: (fn) => {
+      own.push(fn);
+      fn(api.getValue());
+      return () => {};
+    },
+    onIsDisabledChanged: (fn) => {
+      fn(false);
+      return () => {};
+    },
+    onSchemaErrorsChanged: (fn) => {
+      fn([]);
+      return () => {};
+    },
+    getIsDisabled: () => false,
+    getSchemaErrors: () => [],
+    setInvalid: () => {}
+  };
+  listeners.push((value) => own.forEach((fn) => fn(value)));
+  return api;
+}
 for (const f of contentType.fields) {
   fields[f.id] = {
+    getForLocale: (locale) => fieldApi(f, locale),
     getValue: (locale) => entry.fields[f.id] && entry.fields[f.id][locale],
     setValue: (value, locale = 'en-US') => {
       entry.fields[f.id] = { ...(entry.fields[f.id] || {}), [locale]: value };
@@ -77,14 +117,66 @@ window.opened = [];
 const sdk = {
   // The web app's language, as Contentful gives it (?lang=es-ES on the test page).
   uiLanguageLocale: params.get('lang') || 'en-US',
-  locales: { default: 'en-US' },
+  locales: {
+    default: 'en-US',
+    available: ['en-US'],
+    names: { 'en-US': 'English (United States)' },
+    fallbacks: {},
+    optional: { 'en-US': false },
+    direction: { 'en-US': 'ltr' }
+  },
   ids: { space: SPACE, entry: ENTRY },
   user: { firstName: 'Test', lastName: 'Editor', sys: { id: 'test-editor' } },
   contentType,
-  entry: { fields },
+  entry: {
+    fields,
+    getSys: () => entry.sys,
+    onSysChanged: (fn) => {
+      fn(entry.sys);
+      return () => {};
+    },
+    getMetadata: () => entry.metadata || { tags: [] }
+  },
   cma,
-  navigator: { openAsset: (id) => window.opened.push(id) },
+  navigator: {
+    openAsset: (id) => window.opened.push(id),
+    openEntry: () => {},
+    onSlideInNavigation: () => () => {}
+  },
+  dialogs: {
+    selectSingleAsset: async () => null,
+    selectSingleEntry: async () => null,
+    openCurrent: async () => null
+  },
+  notifier: { success() {}, error() {} },
+  access: { can: async () => true },
+  parameters: { installation: {}, instance: {} },
+  editor: {
+    editorInterface: { controls: [] },
+    getLocaleSettings: () => ({ mode: 'single', focused: 'en-US', active: ['en-US'] }),
+    onLocaleSettingsChanged: (fn) => {
+      fn({ mode: 'single', focused: 'en-US', active: ['en-US'] });
+      return () => {};
+    },
+    getShowDisabledFields: () => false,
+    onShowDisabledFieldsChanged: (fn) => {
+      fn(false);
+      return () => {};
+    },
+    getShowHiddenFields: () => false,
+    onShowHiddenFieldsChanged: (fn) => {
+      fn(false);
+      return () => {};
+    }
+  },
+  space: {},
+  hostnames: { webapp: 'app.contentful.com' },
   window: { startAutoResizer() {} }
 };
-window.app = mount(sdk, document.getElementById('app'));
+if (params.get('view') === 'tab') {
+  document.getElementById('app').style.width = 'auto';
+  mountEditorTab(sdk, document.getElementById('app'));
+} else {
+  window.app = mount(sdk, document.getElementById('app'));
+}
 window.sdk = sdk;
