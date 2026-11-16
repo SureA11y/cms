@@ -70,10 +70,11 @@ async function getReview(cma, entryId) {
   }
 }
 
-export async function loadAnswers(cma, entryId, locale) {
+/** `locale`: the space's content locale; `display`: the language dates are shown in. */
+export async function loadAnswers(cma, entryId, locale, display = 'en') {
   const entry = await getReview(cma, entryId);
   const fields = (entry && entry.fields) || {};
-  return answersFrom(fields.answers && fields.answers[LOCALE_KEY(locale)]);
+  return answersFrom(fields.answers && fields.answers[LOCALE_KEY(locale)], display);
 }
 
 async function writeAnswers(cma, entryId, change, locale) {

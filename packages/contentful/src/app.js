@@ -18,6 +18,7 @@ import {
 import { entryItems, linkedAssets } from './content.js';
 import { PACK } from '../dist/pack.js';
 import { loadAnswers, saveAnswer, removeAnswers, loadHidden, saveHidden } from './reviews.js';
+import { engineLocaleUrls, loadPanelWords, pickLocale, questionLoader, WORDS } from './language.js';
 
 // The fields are checked without the website's styles, so colours can't be.
 const LEFT_OUT = ['contrast-minimum', 'contrast-computable', 'link-in-text-block'];
@@ -25,10 +26,15 @@ const LEFT_OUT = ['contrast-minimum', 'contrast-computable', 'link-in-text-block
 const blobUrl = (text) => URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
 
 let sandbox = null;
-async function sandboxFor(doc) {
+async function sandboxFor(doc, lang) {
   if (!sandbox) {
     const engine = (await import('../dist/engine.js')).default;
-    sandbox = createSandbox(doc, { engineUrl: blobUrl(engine), scriptOrigins: ['blob:'] });
+    sandbox = createSandbox(doc, {
+      engineUrl: blobUrl(engine),
+      localeUrls: await engineLocaleUrls(lang),
+      scriptOrigins: ['blob:'],
+      lang
+    });
   }
   return sandbox;
 }
@@ -40,9 +46,29 @@ function assetIn(asset, locale) {
   return { title: pick(f.title), description: pick(f.description), file: pick(f.file) };
 }
 
-export function mount(sdk, root, { doc = root.ownerDocument } = {}) {
+/**
+ * Options, for the editor tab: `canShow` and `onShow(itemId, field)` when the
+ * host can show a place (the tab draws the form itself); `onResults(findings,
+ * fieldOf)` after each check, for the lines under fields.
+ */
+export function mount(
+  sdk,
+  root,
+  { doc = root.ownerDocument, canShow = false, onShow = null, onResults = null } = {}
+) {
   const locale = sdk.locales.default;
   const entryId = sdk.ids.entry;
+  // The person's language: Contentful's, else the browser's, else English.
+  const wanted = pickLocale(
+    sdk.uiLanguageLocale,
+    doc.defaultView && doc.defaultView.navigator && doc.defaultView.navigator.language
+  );
+  let lang = 'en';
+  const languageReady = loadPanelWords(wanted).then((l) => {
+    lang = l;
+    results.locale = l;
+    results.questionFor = questionLoader(doc, l);
+  });
   const t = uiStrings('en');
   const fields = (sdk.contentType.fields || []).map((f) => ({
     id: f.id,
@@ -59,7 +85,7 @@ export function mount(sdk, root, { doc = root.ownerDocument } = {}) {
   results.setAttribute('heading-level', '2');
   results.site = 'website';
   // An app can't move Contentful's form to a field: cards name the field.
-  results.canShow = false;
+  results.canShow = canShow;
   results.canReview = true;
   results.reviewer =
     (sdk.user && `${sdk.user.firstName || ''} ${sdk.user.lastName || ''}`.trim()) || '';
@@ -93,6 +119,7 @@ export function mount(sdk, root, { doc = root.ownerDocument } = {}) {
   }
 
   async function check() {
+    await languageReady;
     const v = values();
     await fetchAssets(v);
     const out = entryItems(v, fields, assets);
@@ -105,18 +132,19 @@ export function mount(sdk, root, { doc = root.ownerDocument } = {}) {
     }
     results.state = 'scanning';
     try {
-      const box = await sandboxFor(doc);
+      const box = await sandboxFor(doc, lang);
       const scan = await box.scan(out.items, {
         profile: 'cms-content',
         packs: [PACK],
-        locale: 'en',
-        messages: messagesFor('en'),
+        locale: lang,
+        messages: messagesFor(lang),
         runOnly: { excludeRuleIds: LEFT_OUT },
         withOutline: true
       });
       results.empty = false;
       results.outline = scan.outline;
       results.findings = scan.findings.map((f) => ({ ...f, itemLabel: labels[f.itemId] || '' }));
+      if (onResults) onResults(results.findings, fieldOf);
     } catch (error) {
       results.error = error && error.message ? error.message : String(error);
     }
@@ -128,7 +156,8 @@ export function mount(sdk, root, { doc = root.ownerDocument } = {}) {
     .map((f) => sdk.entry.fields[f.id].onValueChanged(locale, () => scheduler.changed()));
 
   // Answers, shared in the space.
-  loadAnswers(sdk.cma, entryId, locale)
+  languageReady
+    .then(() => loadAnswers(sdk.cma, entryId, locale, lang))
     .then((answers) => {
       results.reviews = answers;
     })
@@ -145,7 +174,7 @@ export function mount(sdk, root, { doc = root.ownerDocument } = {}) {
       return [
         {
           id: 'description',
-          label: "Edit the image's description",
+          label: (WORDS[lang] || WORDS.en).editDescription,
           run: () => sdk.navigator.openAsset(id, { slideIn: true })
         }
       ];
@@ -172,6 +201,15 @@ export function mount(sdk, root, { doc = root.ownerDocument } = {}) {
     removeAnswers(sdk.cma, entryId, event.detail.keys, locale).catch(() => {});
   });
   results.addEventListener('surea11y-retry', () => scheduler.now());
+  results.addEventListener('surea11y-show', (event) => {
+    const itemId = event.detail && event.detail.itemId;
+    if (onShow && itemId) onShow(itemId, fieldOf[itemId]);
+  });
+  // Hidden and answered findings change what the lines under fields show.
+  const resend = () => onResults && onResults(results.findings, fieldOf, results.cards);
+  results.addEventListener('surea11y-mark', resend);
+  results.addEventListener('surea11y-review', resend);
+  results.addEventListener('surea11y-reopen', resend);
 
   if (sdk.window && sdk.window.startAutoResizer) sdk.window.startAutoResizer();
   scheduler.now();

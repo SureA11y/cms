@@ -11,6 +11,12 @@ init((sdk) => {
     mount(sdk, root);
     return;
   }
+  // The editor tab, an option a team adds per content type: loaded only
+  // here, since it brings Contentful's field editors.
+  if (sdk.location.is(locations.LOCATION_ENTRY_EDITOR)) {
+    import('./editor-tab.js').then(({ mountEditorTab }) => mountEditorTab(sdk, root));
+    return;
+  }
   if (sdk.location.is(locations.LOCATION_APP_CONFIG)) {
     configure(sdk);
   }

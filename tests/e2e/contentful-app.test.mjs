@@ -122,3 +122,100 @@ test(
     );
   }
 );
+
+test(
+  "in the person's language: Contentful set to Spanish, the panel, the engine and the steps in Spanish",
+  { skip },
+  async (t) => {
+    seed();
+    removeReview();
+    const browser = await chromium.launch({
+      executablePath: CHROMIUM,
+      ...(HTTPS_PROXY ? { proxy: { server: HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } } : {})
+    });
+    t.after(() => browser.close());
+    const context = await browser.newContext({
+      ignoreHTTPSErrors: !!HTTPS_PROXY,
+      viewport: { width: 400, height: 1200 }
+    });
+    const page = await context.newPage();
+    await page.goto(`${CONTENTFUL_APP_URL}/?lang=es-ES`);
+    await page.waitForFunction(
+      () => document.querySelector('surea11y-results')?.state === 'done',
+      null,
+      {
+        timeout: 60000
+      }
+    );
+    const results = page.locator('surea11y-results');
+    await results.getByRole('button', { name: /^Hallazgos/ }).waitFor();
+    assert.equal(
+      await results.getByRole('button', { name: 'Editar la descripción de la imagen' }).count(),
+      1
+    );
+    // The engine's own message, in Spanish.
+    const summaries = await page.evaluate(() =>
+      document.querySelector('surea11y-results').cards.map((c) => c.summary)
+    );
+    assert.ok(
+      summaries.some((s) => /imagen/i.test(s)),
+      `Spanish summaries: ${summaries.join(' / ')}`
+    );
+    // How to check, in Spanish.
+    const card = results.locator('li.card', { hasText: 'click here' });
+    await card.getByRole('button', { name: 'Comprobarlo' }).click();
+    await card.getByText('Cómo comprobarlo').waitFor({ timeout: 10000 });
+  }
+);
+
+test(
+  "the editor tab: Contentful's own field editors, lines under fields, Show moving to the field",
+  { skip },
+  async (t) => {
+    seed();
+    removeReview();
+    const browser = await chromium.launch({
+      executablePath: CHROMIUM,
+      ...(HTTPS_PROXY ? { proxy: { server: HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } } : {})
+    });
+    t.after(() => browser.close());
+    const context = await browser.newContext({
+      ignoreHTTPSErrors: !!HTTPS_PROXY,
+      viewport: { width: 1280, height: 1000 }
+    });
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto(`${CONTENTFUL_APP_URL}/?view=tab`);
+    await page.waitForFunction(
+      () => document.querySelector('surea11y-results')?.state === 'done',
+      null,
+      {
+        timeout: 60000
+      }
+    );
+    // Every field, drawn with Contentful's editors, the entry's text in them.
+    assert.equal(await page.locator('[data-field]').count(), 3);
+    assert.equal(
+      await page.locator('[data-field="title"] input').inputValue(),
+      'Opening hours over the holidays'
+    );
+    await page
+      .locator('[data-field="body"] [contenteditable="true"]')
+      .getByText("Children's library")
+      .waitFor();
+    // A line under each field with a finding.
+    await page
+      .locator('[data-field="mainImage"] .surea11y-field-line', { hasText: 'file name' })
+      .waitFor();
+    await page.locator('[data-field="body"] .surea11y-field-line').waitFor();
+    // Show frames the field and puts the cursor in it.
+    await page
+      .locator('surea11y-results li.card', { hasText: 'skipping a level' })
+      .getByRole('button', { name: 'Show' })
+      .click();
+    await page.locator('.surea11y-field-current[data-field="body"]').waitFor({ timeout: 5000 });
+    assert.ok(await page.evaluate(() => !!document.activeElement.closest('[data-field="body"]')));
+    assert.deepEqual(errors, []);
+  }
+);

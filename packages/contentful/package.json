@@ -17,7 +17,12 @@
   "dependencies": {
     "@contentful/rich-text-html-renderer": "17.2.3",
     "@contentful/rich-text-types": "17.2.7",
-    "@contentful/app-sdk": "5.0.0"
+    "@contentful/app-sdk": "5.0.0",
+    "@contentful/default-field-editors": "4.3.16",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@lingui/core": "5.9.5",
+    "@lingui/message-utils": "5.9.5"
   },
   "engines": {
     "node": ">=22.12"

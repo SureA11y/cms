@@ -46,7 +46,11 @@ const env = (p) => `https://api.contentful.com/spaces/${SPACE}/environments/${EN
 
 // 1. The app's definition: where it shows (sidebar, configuration screen).
 let def = (curl('GET', org('app_definitions')).items || []).find((d) => d.name === NAME);
-const locations = [{ location: 'entry-sidebar' }, { location: 'app-config' }];
+const locations = [
+  { location: 'entry-sidebar' },
+  { location: 'entry-editor' },
+  { location: 'app-config' }
+];
 if (!def)
   def = curl('POST', org('app_definitions'), {
     body: { name: NAME, locations, src: 'https://localhost:1' }
@@ -116,11 +120,17 @@ const sidebar = (
   ]
 ).filter((w) => w.widgetId !== def.sys.id);
 sidebar.splice(1, 0, { widgetId: def.sys.id, widgetNamespace: 'app' });
+// 6. And, for trying it, the editor tab next to Contentful's own editor.
+const editors = [
+  { widgetId: 'default-editor', widgetNamespace: 'editor-builtin' },
+  ...(ei.editors || []).filter((e) => e.widgetId !== def.sys.id && e.widgetId !== 'default-editor'),
+  { widgetId: def.sys.id, widgetNamespace: 'app' }
+];
 curl('PUT', env('content_types/article/editor_interface'), {
   body: {
     controls: ei.controls,
     sidebar,
-    editors: ei.editors,
+    editors,
     editorLayout: ei.editorLayout,
     groupControls: ei.groupControls
   },
