@@ -329,7 +329,6 @@ test(
     const card = page
       .locator('surea11y-results')
       .locator('li.card', { hasText: 'This bold line comes before plain text' });
-    await card.getByRole('button', { name: 'More' }).click();
     await card.getByRole('button', { name: 'Hide for me' }).click();
     const after = await counts();
     assert.ok(after[2] < before[2]);

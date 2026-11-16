@@ -269,8 +269,10 @@ test('who may review is a setting, and the site enforces it', { skip }, async ()
       'no answer for an Editor'
     );
     assert.ok(
-      (await eda.page.locator('surea11y-results').getByRole('button', { name: 'More' }).count()) >
-        0,
+      (await eda.page
+        .locator('surea11y-results')
+        .getByRole('button', { name: 'Hide for me' })
+        .count()) > 0,
       'hiding for oneself stays'
     );
     const status = await eda.page.evaluate(async (p) => {

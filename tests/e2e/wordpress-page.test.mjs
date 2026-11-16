@@ -165,7 +165,9 @@ test(
         checkIt: [...el.shadowRoot.querySelectorAll('button')].some(
           (b) => b.textContent === 'Check it'
         ),
-        hide: [...el.shadowRoot.querySelectorAll('button')].some((b) => b.textContent === 'More')
+        hide: [...el.shadowRoot.querySelectorAll('button')].some(
+          (b) => b.textContent === 'Hide for me'
+        )
       };
     });
     assert.equal(r.state, 'done');
@@ -264,7 +266,6 @@ test('"Hide for me" on the page is the same as in the editor', { skip }, async (
   const { page } = await login(browser);
   const results = await pageChecker(page, POST_TYPICAL, { clear: true });
   const card = results.locator('li.card', { hasText: 'This bold line comes before plain text' });
-  await card.getByRole('button', { name: 'More' }).click();
   await card.getByRole('button', { name: 'Hide for me' }).click();
   await page.waitForFunction(
     async (p) => {

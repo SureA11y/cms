@@ -342,7 +342,6 @@ test(
         { post, want: true },
         { timeout: 20000, polling: 1000 }
       );
-    await firstCard.getByRole('button', { name: 'More' }).click();
     await fine.click();
     const after = await counts();
     await serverMarks(page, POST_TYPICAL);

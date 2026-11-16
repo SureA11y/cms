@@ -230,10 +230,8 @@ test('"Hide for me" moves a card out of the counts, and Undo brings it back', ()
   const el = make();
   const events = [];
   el.addEventListener('surea11y-mark', (e) => events.push(e.detail));
-  const tableCard = () => $$(el, 'li.card').find((c) => c.textContent.includes('table'));
-  // Setting a finding aside waits behind "More".
-  [...tableCard().querySelectorAll('button')].find((b) => b.textContent === 'More').click();
-  [...tableCard().querySelectorAll('button')].find((b) => b.textContent === 'Hide for me').click();
+  const tableCard = $$(el, 'li.card').find((c) => c.textContent.includes('table'));
+  [...tableCard.querySelectorAll('button')].find((b) => b.textContent === 'Hide for me').click();
   assert.deepEqual(events[0], { keys: ['b1', 'b2'], fine: true });
   assert.equal($$(el, '.tile')[1].textContent, '0Likely problems');
   const marked = $(el, 'section[data-group="marked"] .group-toggle');
@@ -375,17 +373,14 @@ const QUESTION = {
   failWhen: 'Nothing labels the columns.'
 };
 
-test('an uncertain card offers Show, Check it, and Hide for me behind More; a problem card How to fix', () => {
+test('an uncertain card offers Show, Check it and Hide for me; a problem card How to fix', () => {
   const el = make(null);
   el.canReview = true;
   el.findings = findings;
   assert.deepEqual(
     [...tableCard(el).querySelectorAll('button')].map((b) => b.textContent),
-    ['Show', 'Check it', 'More']
+    ['Show', 'Check it', 'Hide for me']
   );
-  buttonIn(tableCard(el), 'More').click();
-  assert.equal(buttonIn(tableCard(el), 'More').getAttribute('aria-expanded'), 'true');
-  assert.ok(buttonIn(tableCard(el), 'Hide for me'));
   const problem = $(el, 'section[data-group="problem"] li.card');
   assert.deepEqual(
     [...problem.querySelectorAll('button')].map((b) => b.textContent),
@@ -490,11 +485,7 @@ test('"No" makes it one to fix, saying who confirmed it; Reopen puts it back', a
     /^Ana confirmed it is a problem on /
   );
   assert.ok(buttonIn(card, 'How to fix'), 'a problem to fix');
-  buttonIn(card, 'More').click();
-  buttonIn(
-    $$(el, 'section[data-group="problem"] li.card').find((c) => c.textContent.includes('table')),
-    'Reopen'
-  ).click();
+  buttonIn(card, 'Reopen').click();
   assert.equal($$(el, '.tile')[1].textContent, '2Likely problems', 'back in its own group');
   el.remove();
 });

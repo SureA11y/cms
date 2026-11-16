@@ -104,7 +104,7 @@ ul, ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction:
 .summary { font-size: var(--sa11y-font-size-title); font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
 .hint { margin-top: var(--sa11y-space-2); }
 .where { margin-top: var(--sa11y-space-2); font-style: italic; color: var(--sa11y-text-muted); }
-.actions { display: flex; flex-wrap: wrap; gap: var(--sa11y-space-2); margin-top: var(--sa11y-space-3); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--sa11y-space-1) var(--sa11y-space-2); margin-top: var(--sa11y-space-3); }
 .button.fix { display: inline-flex; align-items: center; gap: var(--sa11y-space-1); border-color: transparent; background: transparent; padding: 0 var(--sa11y-space-1); font-weight: 600; }
 .button.fix:hover { text-decoration: underline; }
 .button.more { border-color: transparent; background: transparent; color: var(--sa11y-text-muted); padding: 0 var(--sa11y-space-2); }
@@ -881,15 +881,16 @@ export class ResultsElement extends HTMLElement {
         a.dataset.focus = `card:${hash(card.key)}:edit`;
         actions.append(a);
       }
-      // Setting a finding aside: always behind "More", so what fixes it
-      // comes first and stands out.
+      // Setting a finding aside: shown at once, one click, when it is the
+      // only such action; behind "More" when there are two, so a card shows
+      // at most four buttons and what fixes it comes first.
       const later = [];
       if (this._canReview && (card.confirmed || card.unsure)) {
         later.push([t.reopen, 'button', 'reopen', () => this._reopen(card)]);
       }
       if (this._canMark && card.group !== 'problem')
         later.push([t.hideForMe, 'link', 'fine', () => this._mark(card, true)]);
-      if (later.length) {
+      if (later.length > 1) {
         const open = this._moreOpen.has(card.key);
         const moreId = `${id}-more`;
         add(t.more, 'button more', 'more', () => {
