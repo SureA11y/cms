@@ -343,6 +343,20 @@ export class ResultsElement extends HTMLElement {
   }
 
   /**
+   * What the page around the content is: 'theme' (a CMS that draws the
+   * page, as WordPress) or 'website' (a headless CMS, whose pages a
+   * separate website draws). It sets how findings outside the content are
+   * named.
+   */
+  set site(value) {
+    this._site = value === 'website' ? 'website' : 'theme';
+    this._render();
+  }
+  get site() {
+    return this._site || 'theme';
+  }
+
+  /**
    * The content's headings and images ({ headings, images }, as
    * readOutline makes them). When set, the list offers a view of each.
    */
@@ -669,7 +683,7 @@ export class ResultsElement extends HTMLElement {
       }
       const tags = [
         view === 'images' && entry.src ? entry.src : '',
-        entry.outside ? t.themeOrTemplate : ''
+        entry.outside ? (this.site === 'website' ? t.websiteDesign : t.themeOrTemplate) : ''
       ].filter(Boolean);
       if (tags.length) {
         const box = el(doc, 'p', 'tags');
@@ -772,7 +786,14 @@ export class ResultsElement extends HTMLElement {
       li.append(hint);
     }
     if (card.outside)
-      li.append(el(doc, 'p', 'where', card.inContent ? t.inTheme : t.outsideContent));
+      li.append(
+        el(
+          doc,
+          'p',
+          'where',
+          this.site === 'website' ? t.inWebsite : card.inContent ? t.inTheme : t.outsideContent
+        )
+      );
     // A person's answer that leaves the card open: a confirmed problem, or
     // not sure.
     const open = card.confirmed || card.unsure;

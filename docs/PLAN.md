@@ -402,8 +402,9 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
       (the Studio's own colours; see the decision of 2026-11-16).
 - [ ] Sanity: publish `@surea11y/sanity` on npm and list it on Sanity's
       plugin directory (needs core released first, as for WordPress).
-- [ ] Sanity: a preview script for sites using its live preview (mode B),
-      mapping problems to fields through Sanity's own tags.
+- [x] Sanity: a preview script for sites using its live preview (mode B),
+      mapping problems to fields through Sanity's own tags, merged with
+      the fields' check in one list (see the decision of 2026-11-16).
 - [ ] Contentful, as a private app; then Storyblok, only with a clear lead
       over its built-in checker.
 

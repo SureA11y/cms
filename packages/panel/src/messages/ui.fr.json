@@ -113,5 +113,8 @@
   "phoneError": "La vérification en largeur de téléphone n’a pas abouti.",
   "moreInField": "{{n}} de plus dans ce champ",
   "details": "Détails",
-  "fieldLines": "Afficher les constats sous chaque champ"
+  "fieldLines": "Afficher les constats sous chaque champ",
+  "websiteDesign": "Design du site",
+  "inWebsite": "Dans le design du site, pas dans votre contenu : la personne qui gère le site peut le corriger.",
+  "checkedBoth": "Vérifié dans les champs et sur la page d’aperçu."
 }

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>City Library</title>
+  <style>
+    body { margin: 0; font: 16px/1.6 Georgia, serif; color: #222; background: #fff; }
+    html { background: #fff; }
+    header { background: #233648; color: #fff; padding: 12px 24px; display: flex; gap: 20px; }
+    header a { color: #fff; }
+    header strong { margin-inline-end: auto; }
+    main { max-width: 720px; margin: 0 auto; padding: 24px; }
+    .hero { width: 100%; height: auto; display: block; }
+    table { border-collapse: collapse; } td { border: 1px solid #bbb; padding: 4px 10px; }
+    /* The website's design: pale grey text, on purpose. */
+    .byline { color: #a2a2a2; font-size: 14px; }
+    footer { background: #233648; color: #c4ced8; padding: 12px 24px; }
+  </style>
+</head>
+<body>
+  <header><strong>City Library</strong><a href="/branches">Branches</a><a href="/events">Events</a></header>
+  <main id="article"><p>Loading…</p></main>
+  <footer>© City Library</footer>
+  <script type="module" src="/dist/site.js"></script>
+</body>
+</html>

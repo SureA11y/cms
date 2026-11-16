@@ -106,6 +106,11 @@ export const UI = {
     moreInField: '{{n}} more in this field',
     details: 'Details',
     fieldLines: 'Show findings under each field',
+    // A page whose design is a website's, not a theme's (headless).
+    websiteDesign: 'Website design',
+    inWebsite:
+      "In the website's design, not in your content: whoever looks after the website can fix it.",
+    checkedBoth: 'Checked in the fields and on the preview page.',
     viewFindings: 'Findings',
     viewHeadings: 'Headings',
     viewImages: 'Images',

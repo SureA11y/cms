@@ -113,5 +113,8 @@
   "phoneError": "La comprobación con ancho de móvil no terminó.",
   "moreInField": "{{n}} más en este campo",
   "details": "Detalles",
-  "fieldLines": "Mostrar los hallazgos bajo cada campo"
+  "fieldLines": "Mostrar los hallazgos bajo cada campo",
+  "websiteDesign": "Diseño del sitio web",
+  "inWebsite": "En el diseño del sitio web, no en tu contenido: puede corregirlo quien se ocupa del sitio.",
+  "checkedBoth": "Comprobado en los campos y en la página de vista previa."
 }

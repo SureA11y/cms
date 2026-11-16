@@ -36,9 +36,56 @@ The document's content, as the page will have it:
 Strings such as the title and slug, numbers, dates and references are left
 out. The website decides how they appear, so only the page can check them.
 
-The website's own design is not seen here: its colours, landmarks, and
-headings that components add. A check of the live preview page will cover
-those (planned).
+The website's own design is not seen in the fields: its colours,
+landmarks, and headings that components add. The live preview check covers
+those.
+
+## The live preview
+
+When a site uses Sanity's live preview (the Presentation tool) and adds the
+preview script, the side panel also checks the preview page, as visitors
+get it. The panel shows one list:
+
+- A problem found in both the fields and the page is listed once.
+- Each card says whose it is: your content, named by its field, or the
+  website's design ("Website design"), which whoever looks after the
+  website can fix.
+- **Show** moves the form to the field and points at the place on the
+  preview page.
+- The panel says "Checked in the fields and on the preview page."
+
+The site adds one call, in its preview (draft) mode only, so visitors never
+get it:
+
+```js
+import { enableSureA11yPreview } from '@surea11y/sanity/preview';
+
+if (draftMode) enableSureA11yPreview({ studioOrigin: 'https://your-project.sanity.studio' });
+```
+
+And the Studio is told where the preview runs:
+
+```js
+surea11y({ previewOrigins: ['https://www.example.org'] })
+```
+
+How it works:
+
+- It names each problem's field from the tags Sanity's preview already puts
+  on the page (hidden characters in text, `data-sanity`).
+- It takes those characters out while it checks, and puts them back in the
+  same step, so Sanity's own overlays are untouched.
+- It sends results only to the Studio's window, and the Studio takes them
+  only from the preview's address.
+
+The engine is loaded from a `blob:` address. A site whose Content Security
+Policy blocks that can serve the engine file itself and pass its address as
+`engineUrl`.
+
+In the Presentation tool, the Studio shows the preview, the form and this
+panel side by side, and gives the preview most of the width. The panel can
+start partly off the right edge, even on a 1920-pixel screen: drag the
+divider between the preview and the form to the left to make room.
 
 ## Privacy
 
@@ -76,6 +123,7 @@ Options:
 | --- | --- | --- |
 | `altFields` | `['alt', 'altText', 'alternativeText']` | Where images keep their alternative text, tried in order |
 | `fieldLines` | `true` | Show a line under each field with a finding |
+| `previewOrigins` | `[]` | The addresses the site's preview runs on, whose preview script may send results |
 
 Languages: English, Spanish, German, French and Japanese, following the
 Studio's language. Other languages show English.
@@ -100,10 +148,17 @@ node seed.mjs                      # puts the test article in the project
 npx sanity dev --port 3333
 ```
 
-The end-to-end test runs against it:
+The test website for the live preview is in `dev/preview-site`:
 
 ```sh
-SANITY_STUDIO_URL=http://localhost:3333 node --test tests/e2e/sanity-studio.test.mjs
+cd dev/preview-site && npm install && npm run build && npm start   # http://localhost:3334
+```
+
+The end-to-end tests run against them:
+
+```sh
+SANITY_STUDIO_URL=http://localhost:3333 SANITY_PREVIEW_URL=http://localhost:3334 \
+  node --test tests/e2e/sanity-studio.test.mjs
 ```
 
 It needs a logged-in Studio: set `SANITY_TOKEN` to an Editor token of the

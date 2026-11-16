@@ -2,6 +2,9 @@
 // project: the header button's count, the side panel's findings named by
 // field, the line under a field, Show framing the field, an answer saved in
 // the project, and "Hide for me" kept after a reload.
+// With the test website running (SANITY_PREVIEW_URL), also the live
+// preview: one list from the fields and the page, each problem once, and
+// the website's design apart.
 //
 // Runs when SANITY_STUDIO_URL is set (the dev Studio, for example
 // http://localhost:3333); skipped otherwise. The Studio needs to be logged
@@ -12,8 +15,10 @@ import fs from 'node:fs';
 import { chromium } from 'playwright-core';
 import { seed, api, article, DATASET } from '../../dev/sanity-studio/seed.mjs';
 
-const { SANITY_STUDIO_URL, CHROMIUM, HTTPS_PROXY, SANITY_TOKEN } = process.env;
+const { SANITY_STUDIO_URL, SANITY_PREVIEW_URL, CHROMIUM, HTTPS_PROXY, SANITY_TOKEN } = process.env;
 const skip = !SANITY_STUDIO_URL && 'SANITY_STUDIO_URL is not set';
+// The live preview needs the test website too (dev/preview-site).
+const skipPreview = skip || (!SANITY_PREVIEW_URL && 'SANITY_PREVIEW_URL is not set');
 const REVIEW_ID = `surea11y.review.${article._id}`;
 
 async function studio(browser, colorScheme = 'light') {
@@ -224,5 +229,64 @@ test(
       return failures;
     });
     assert.deepEqual(own, []);
+  }
+);
+
+test(
+  'with the live preview: one list from the fields and the page, the website design apart',
+  { skip: skipPreview },
+  async (t) => {
+    seed();
+    removeReviews();
+    const browser = await chromium.launch({
+      executablePath: CHROMIUM,
+      ...(HTTPS_PROXY ? { proxy: { server: HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } } : {})
+    });
+    t.after(() => browser.close());
+    const { page } = await studio(browser);
+    await page.goto(
+      `${SANITY_STUDIO_URL}/presentation?preview=${encodeURIComponent(`/?id=${article._id}`)}`
+    );
+    // An editor clicks the page's title to open the document beside it.
+    const site = await (async () => {
+      for (let i = 0; i < 60; i++) {
+        const f = page.frames().find((fr) => fr.url().startsWith(SANITY_PREVIEW_URL));
+        if (f) return f;
+        await page.waitForTimeout(500);
+      }
+      throw new Error('the preview did not load');
+    })();
+    await site.locator('h1').click({ timeout: 60000 });
+    await page.getByText('Main image').first().waitFor({ timeout: 60000 });
+    await page.getByRole('button', { name: 'Accessibility (5)' }).waitFor({ timeout: 60000 });
+    await openPanel(page);
+    const cards = await page.evaluate(() =>
+      document
+        .querySelector('surea11y-results')
+        .cards.map((c) => [c.ruleId, c.itemLabel, !!c.outside])
+    );
+    assert.equal(
+      cards.length,
+      5,
+      'four in the content, found by both checks, listed once; one in the design'
+    );
+    assert.deepEqual(
+      cards.filter((c) => c[2]).map((c) => [c[0], c[1]]),
+      [['contrast-minimum', 'Website design']]
+    );
+    assert.equal(
+      await page.locator('.surea11y-checked').textContent(),
+      'Checked in the fields and on the preview page.'
+    );
+    // Show on the design's card points at it on the preview page.
+    await page
+      .locator('surea11y-results li.card', { hasText: 'contrast' })
+      .getByRole('button', { name: 'Show' })
+      .click();
+    await site.waitForFunction(
+      () => getComputedStyle(document.querySelector('.byline')).outlineStyle === 'solid',
+      null,
+      { timeout: 5000 }
+    );
   }
 );

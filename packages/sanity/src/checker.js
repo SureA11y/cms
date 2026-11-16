@@ -13,10 +13,13 @@ import {
   hasContent,
   messagesFor,
   countPlaces,
-  toCards
+  toCards,
+  uiStrings
 } from '@surea11y/panel';
 import { documentItems, ALT_FIELDS } from './content.js';
 import { publishedId } from './paths.js';
+import { mergeFindings } from './merge.js';
+import { PACK } from '../dist/pack.js';
 
 export { publishedId };
 
@@ -83,6 +86,20 @@ function sharedSandbox(locale) {
 }
 
 const checkers = new Map();
+// The preview page's results for documents not open yet, by published id.
+const pendingPages = new Map();
+
+/**
+ * The preview page's results, for each document it shows: `page` is
+ * { findings, source, origin } (source: the preview's window, for Show).
+ */
+export function receivePage(documentIds, page) {
+  for (const id of documentIds.map(publishedId)) {
+    const checker = checkers.get(id);
+    if (checker) checker.setPage(page);
+    else pendingPages.set(id, page);
+  }
+}
 
 /**
  * The checker for a document (by its published id), made on first use.
@@ -120,6 +137,17 @@ function createChecker(id, { locale = 'en', projectId, dataset, altFields = ALT_
     marked: [],
     /** The item last shown, so its field can be framed. */
     current: null,
+    /** The preview page's results, when the live preview is open. */
+    page: null,
+    /** Finding key → where it is on the preview page. */
+    preview: {},
+
+    /** The preview page sent new results. */
+    setPage(page) {
+      checker.page = page;
+      merge();
+      checker.notify();
+    },
 
     subscribe(fn) {
       listeners.add(fn);
@@ -171,18 +199,36 @@ function createChecker(id, { locale = 'en', projectId, dataset, altFields = ALT_
     }
   };
 
+  // The fields' own results, kept apart so the page's can be merged in.
+  const own = { findings: [], labels: {}, fields: {}, titles: {} };
+  function merge() {
+    const out = mergeFindings(id, own.findings, checker.page, {
+      labels: own.labels,
+      fields: own.fields,
+      titles: own.titles,
+      websiteLabel: uiStrings(locale).websiteDesign
+    });
+    checker.findings = out.findings;
+    checker.fields = out.fields;
+    checker.preview = out.preview;
+  }
+
   async function scan() {
     if (!value) return;
     const { items, labels, fields } = documentItems(value, schemaType, { altFields, imageUrl });
+    own.labels = labels;
+    own.fields = fields;
+    own.titles = Object.fromEntries(
+      ((schemaType && schemaType.fields) || []).map((f) => [
+        f.name,
+        f.title || (f.type && f.type.title) || f.name
+      ])
+    );
     if (!hasContent(items)) {
-      Object.assign(checker, {
-        state: 'done',
-        empty: true,
-        findings: [],
-        outline: null,
-        error: '',
-        fields
-      });
+      // Nothing in the fields to check; the preview page may still have findings.
+      own.findings = [];
+      merge();
+      Object.assign(checker, { state: 'done', empty: !checker.page, outline: null, error: '' });
       checker.notify();
       return;
     }
@@ -192,19 +238,15 @@ function createChecker(id, { locale = 'en', projectId, dataset, altFields = ALT_
       const sandbox = await sharedSandbox(locale);
       const out = await sandbox.scan(items, {
         profile: 'cms-content',
+        packs: [PACK],
         locale,
         messages: messagesFor(locale),
         runOnly: { excludeRuleIds: LEFT_OUT },
         withOutline: true
       });
-      Object.assign(checker, {
-        state: 'done',
-        empty: false,
-        error: '',
-        outline: out.outline,
-        fields,
-        findings: out.findings.map((f) => ({ ...f, itemLabel: labels[f.itemId] || '' }))
-      });
+      own.findings = out.findings.map((f) => ({ ...f, itemLabel: labels[f.itemId] || '' }));
+      merge();
+      Object.assign(checker, { state: 'done', empty: false, error: '', outline: out.outline });
     } catch (error) {
       Object.assign(checker, {
         state: 'error',
@@ -215,5 +257,9 @@ function createChecker(id, { locale = 'en', projectId, dataset, altFields = ALT_
   }
 
   const scheduler = createScheduler(scan, { delay: () => (watching ? 1000 : 3000) });
+  if (pendingPages.has(id)) {
+    checker.page = pendingPages.get(id);
+    pendingPages.delete(id);
+  }
   return checker;
 }

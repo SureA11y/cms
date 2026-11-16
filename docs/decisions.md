@@ -2,6 +2,42 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: The preview check in Sanity: one panel, one list
+
+The maintainer chose from three mock-ups (one list, two lists, a panel
+inside the preview) and took the recommendation: one list.
+
+- **One panel, one list.** With the live preview open, the side panel
+  checks the preview page and the fields together. A problem found in both
+  is listed once. Each card says whose it is: "Your content" with its field,
+  or "Website design". Markers show on the preview page.
+- **Without the preview script**, the panel checks the fields alone, as
+  before.
+- **What a site adds:** one call, in its preview (draft) mode only, which
+  visitors never get. The script reads the tags Sanity's preview already
+  puts on the page to name each problem's field, strips them before
+  checking, and sends results to the Studio's panel in the browser, never
+  to a server.
+- **Not taken:** two lists (most problems would be in both, and answered
+  twice) and a panel inside the preview (two panels for one document).
+- **Proven, then built**, in the Presentation tool with a test website
+  (`dev/preview-site`) on the test project:
+  - The preview reaches the panel (postMessage to the Studio's window,
+    which frames the preview), in about 150 ms per check.
+  - Every content finding named its document and field. A table, whose
+    cells carry the tags, takes the field of what it holds.
+  - The page's keys matched the fields' for the heading, the image (Sanity's
+    image addresses differ only in their query), the link and the table, so
+    the four were listed once. The pale grey line of the site's design was
+    the one new finding.
+- **The pack is now named in both checks**, as in WordPress. Without it the
+  engine did not apply the pack's profiles, and the page check reported
+  AAA rules (enhanced contrast, target size) as problems.
+- **New words:** "Website design", what it means on a card, and "Checked in
+  the fields and on the preview page", in five languages. The panel's
+  `site` property ('theme' or 'website') chooses between the theme wording
+  (WordPress) and the website wording (headless).
+
 ## 2026-11-16: The panel in the Studio's own colours, light or dark
 
 The maintainer chose from three mock-ups (always light, our own dark

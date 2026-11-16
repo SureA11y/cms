@@ -34,7 +34,8 @@ import {
   fill,
   uiStrings
 } from '@surea11y/panel';
-import { checkerFor } from './checker.js';
+import { checkerFor, receivePage } from './checker.js';
+import { MESSAGE_SOURCE } from './preview-protocol.js';
 import { pathToString, stringToPath } from './paths.js';
 import { connectReviews, loadHidden, removeAnswers, saveAnswer, saveHidden } from './reviews.js';
 import { ALT_FIELDS } from './content.js';
@@ -43,7 +44,44 @@ export const INSPECTOR_NAME = 'surea11y';
 const API_VERSION = '2025-02-19';
 const LOCALES = ['en', 'es', 'de', 'fr', 'ja'];
 
-let settings = { altFields: ALT_FIELDS, fieldLines: true };
+let settings = { altFields: ALT_FIELDS, fieldLines: true, previewOrigins: [] };
+
+/**
+ * Results from the preview page's script (preview.js). Only from the
+ * origins the plugin is told the preview is on; anything else is ignored.
+ */
+let listening = false;
+function listenToPreviews() {
+  if (listening || typeof window === 'undefined') return;
+  listening = true;
+  window.addEventListener('message', (event) => {
+    if (!settings.previewOrigins.includes(event.origin)) return;
+    const data = event.data;
+    if (!data || data.source !== MESSAGE_SOURCE || data.version !== 1 || data.type !== 'results')
+      return;
+    if (!Array.isArray(data.findings) || !Array.isArray(data.documents)) return;
+    receivePage(
+      data.documents.filter((d) => typeof d === 'string'),
+      {
+        findings: data.findings.filter(
+          (f) => f && typeof f.key === 'string' && typeof f.group === 'string'
+        ),
+        source: event.source,
+        origin: event.origin,
+        url: typeof data.url === 'string' ? data.url : ''
+      }
+    );
+  });
+}
+
+/** Asks the preview page to show a place. */
+function showOnPreview(page, selector) {
+  if (!page || !page.source || !selector) return;
+  page.source.postMessage(
+    { source: MESSAGE_SOURCE, version: 1, type: 'show', selector },
+    page.origin
+  );
+}
 
 /** The Studio's language, as one the panel speaks (English otherwise). */
 function useLocale() {
@@ -109,7 +147,7 @@ function useChecker(documentId) {
   const last = useRef(null);
   useSyncExternalStore(subscribe, () => {
     if (!checker) return 0;
-    const snap = `${checker.state}|${checker.findings.length}|${checker.current}|${Object.keys(checker.reviews).length}|${checker.marked.length}|${checker.openCount()}`;
+    const snap = `${checker.page ? 'p' : ''}|${checker.state}|${checker.findings.length}|${checker.current}|${Object.keys(checker.reviews).length}|${checker.marked.length}|${checker.openCount()}`;
     if (snap !== last.current) {
       last.current = snap;
       version.current++;
@@ -305,6 +343,7 @@ function Inspector(props) {
     if (!el) return;
     el.locale = locale;
     el.canReview = true;
+    el.site = 'website';
     el.reviewer = (user && user.name) || '';
     el.questionFor = questionLoader(locale);
   }, [locale, user]);
@@ -342,6 +381,15 @@ function Inspector(props) {
     const onShow = (event) => {
       const itemId = event.detail && event.detail.itemId;
       if (!itemId) return;
+      const finding = event.detail.finding;
+      // The website's design: shown on the preview page only.
+      if (itemId.startsWith('preview:')) {
+        showOnPreview(checker.page, itemId.slice('preview:'.length));
+        return;
+      }
+      // Content: the form moves to the field, and the preview to the place.
+      if (finding && checker.preview[finding.key])
+        showOnPreview(checker.page, checker.preview[finding.key]);
       const path = stringToPath(itemId);
       checker.current = itemId;
       checker.notify();
@@ -412,6 +460,16 @@ function Inspector(props) {
         'data-surea11y-inspector': '',
         style: { flex: 1, minHeight: 0, overflow: 'auto', padding: 16 }
       },
+      checker && checker.page
+        ? h(
+            'p',
+            {
+              className: 'surea11y-checked',
+              style: { margin: '0 0 12px', fontSize: 13, color: 'var(--card-muted-fg-color)' }
+            },
+            t.checkedBoth
+          )
+        : null,
       h('div', { ref: host }),
       settings.fieldLines
         ? h(
@@ -489,13 +547,20 @@ export const accessibilityInspector = defineDocumentInspector({
  *   (default `['alt', 'altText', 'alternativeText']`);
  * - `fieldLines`: show a line under each field with a finding (default
  *   true; each person can still turn it off in the panel).
+ * - `previewOrigins`: the addresses the site's preview runs on, whose
+ *   preview script (`@surea11y/sanity/preview`) may send results; others
+ *   are ignored.
  */
 export const surea11y = definePlugin((options = {}) => {
   settings = {
     altFields:
       Array.isArray(options.altFields) && options.altFields.length ? options.altFields : ALT_FIELDS,
-    fieldLines: options.fieldLines !== false
+    fieldLines: options.fieldLines !== false,
+    previewOrigins: Array.isArray(options.previewOrigins)
+      ? options.previewOrigins.map((o) => new URL(o).origin)
+      : []
   };
+  listenToPreviews();
   return {
     name: '@surea11y/sanity',
     document: {

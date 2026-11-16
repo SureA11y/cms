@@ -257,6 +257,11 @@ fs.mkdirSync(sanityOut, { recursive: true });
 const asModule = (file) =>
   `export default ${JSON.stringify(fs.readFileSync(path.join(out, file), 'utf8'))};\n`;
 fs.writeFileSync(path.join(sanityOut, 'engine.js'), asModule('engine.js'));
+// The pack a check names, so the engine applies its profiles.
+fs.writeFileSync(
+  path.join(sanityOut, 'pack.js'),
+  `export const PACK = ${JSON.stringify(`${pack.name}@${pack.version}`)};\n`
+);
 for (const locale of ['en', 'es', 'de', 'fr', 'ja']) {
   fs.writeFileSync(path.join(sanityOut, `review.${locale}.js`), asModule(`review.${locale}.js`));
 }
