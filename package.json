@@ -26,6 +26,7 @@
     "wp:content": "wp-env run cli wp plugin activate surea11y && wp-env run cli wp eval-file wp-content/surea11y-dev/demo-content.php && wp-env run cli wp eval-file wp-content/surea11y-tests/content.php"
   },
   "devDependencies": {
+    "@contentful/live-preview": "4.10.27",
     "@eslint/js": "^10.0.1",
     "@surea11y/pack-en301549": "1.1.0",
     "@wordpress/env": "12.0.0",

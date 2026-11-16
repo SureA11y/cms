@@ -1,0 +1,202 @@
+{
+  "sys": {
+    "id": "surea11yTestArticle",
+    "type": "Entry",
+    "contentType": {
+      "sys": {
+        "type": "Link",
+        "linkType": "ContentType",
+        "id": "article"
+      }
+    }
+  },
+  "fields": {
+    "title": "Opening hours over the holidays",
+    "mainImage": {
+      "sys": {
+        "id": "surea11yHero",
+        "type": "Asset"
+      },
+      "fields": {
+        "title": "Hero",
+        "description": "IMG_2041.jpg",
+        "file": {
+          "url": "//images.ctfassets.net/ug0epb7hrk42/surea11yHero/532c6ac1cac28e6bb9c5c0471d811005/IMG_2041.png",
+          "details": {
+            "size": 18755,
+            "image": {
+              "width": 640,
+              "height": 360
+            }
+          },
+          "fileName": "IMG_2041.png",
+          "contentType": "image/png"
+        }
+      }
+    },
+    "body": {
+      "nodeType": "document",
+      "data": {},
+      "content": [
+        {
+          "nodeType": "heading-2",
+          "data": {},
+          "content": [
+            {
+              "nodeType": "text",
+              "value": "From 23 December",
+              "marks": [],
+              "data": {}
+            }
+          ]
+        },
+        {
+          "nodeType": "paragraph",
+          "data": {},
+          "content": [
+            {
+              "nodeType": "text",
+              "value": "All branches close at 15:00. For the full list of branches, ",
+              "marks": [],
+              "data": {}
+            },
+            {
+              "nodeType": "hyperlink",
+              "data": {
+                "uri": "https://library.example/branches"
+              },
+              "content": [
+                {
+                  "nodeType": "text",
+                  "value": "click here",
+                  "marks": [],
+                  "data": {}
+                }
+              ]
+            },
+            {
+              "nodeType": "text",
+              "value": ".",
+              "marks": [],
+              "data": {}
+            }
+          ]
+        },
+        {
+          "nodeType": "heading-4",
+          "data": {},
+          "content": [
+            {
+              "nodeType": "text",
+              "value": "Children's library",
+              "marks": [],
+              "data": {}
+            }
+          ]
+        },
+        {
+          "nodeType": "paragraph",
+          "data": {},
+          "content": [
+            {
+              "nodeType": "text",
+              "value": "The reading room stays open until 17:00.",
+              "marks": [],
+              "data": {}
+            }
+          ]
+        },
+        {
+          "nodeType": "table",
+          "data": {},
+          "content": [
+            {
+              "nodeType": "table-row",
+              "data": {},
+              "content": [
+                {
+                  "nodeType": "table-cell",
+                  "data": {},
+                  "content": [
+                    {
+                      "nodeType": "paragraph",
+                      "data": {},
+                      "content": [
+                        {
+                          "nodeType": "text",
+                          "value": "Branch",
+                          "marks": [],
+                          "data": {}
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "nodeType": "table-cell",
+                  "data": {},
+                  "content": [
+                    {
+                      "nodeType": "paragraph",
+                      "data": {},
+                      "content": [
+                        {
+                          "nodeType": "text",
+                          "value": "24 Dec",
+                          "marks": [],
+                          "data": {}
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "nodeType": "table-row",
+              "data": {},
+              "content": [
+                {
+                  "nodeType": "table-cell",
+                  "data": {},
+                  "content": [
+                    {
+                      "nodeType": "paragraph",
+                      "data": {},
+                      "content": [
+                        {
+                          "nodeType": "text",
+                          "value": "Central",
+                          "marks": [],
+                          "data": {}
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "nodeType": "table-cell",
+                  "data": {},
+                  "content": [
+                    {
+                      "nodeType": "paragraph",
+                      "data": {},
+                      "content": [
+                        {
+                          "nodeType": "text",
+                          "value": "10–14",
+                          "marks": [],
+                          "data": {}
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

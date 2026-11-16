@@ -2,6 +2,49 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: The preview check in Contentful: in our editor tab, beside the live preview
+
+From three mock-ups (one list in our panel, the preview inside our tab, a
+panel inside the preview page), the maintainer took the recommendation, one
+list in our panel, after a test on the test space. The test changed where
+that panel is.
+
+- **What the test showed**, with a test website (`dev/contentful/preview-site`,
+  Contentful's live preview package, inspector mode tags) hosted on Netlify
+  and a probe in the app:
+  - Live preview hides the entry sidebar. Beside the preview, Contentful
+    shows only the left-most editor tab.
+  - With our editor tab first, it sits beside the preview, and the two
+    frames reach each other both ways through Contentful's page
+    (postMessage from frame to frame). Inspector mode and live updates
+    keep working.
+  - Contentful's app hosting can't hold the test website: it serves an
+    app's files only inside Contentful, with signed addresses.
+  - The preview opened in a new browser tab was not proven: the test page
+    there still ran the first probe. Browsers open new-tab links without a
+    link back to the opener unless the site asks otherwise, so we don't
+    count on it [unverified].
+- **So the page check lives in our editor tab**, put first by the team,
+  beside Contentful's live preview: one list, as in Sanity, each card saying
+  "Your content" with its field, or "Website design". A team that keeps
+  only the sidebar gets the field check, as today.
+- **What a site adds:** one call in its preview mode. The fields come from
+  inspector mode's `data-contentful-*` tags, or from content source maps
+  (Premium only); a page without tags still matches what the fields also
+  found, and labels the rest "On the page".
+- **Origins:** the app accepts messages only from the preview address set on
+  its configuration screen; the preview script answers only the frame that
+  asked.
+- **The tab's narrow layout**, beside the preview (about 600 px), from three
+  mock-ups (a switch, fields with a summary bar opening the list, one
+  column); the maintainer took the recommendation, the switch. Below 760 px
+  the tab shows one view at a time, "Fields" or "Accessibility" (the panel),
+  each with its count. Show switches to Fields, frames the field and puts
+  the cursor in it; Details on a line switches back. Both views stay
+  mounted, so nothing typed is lost. Not taken: the summary bar (its list
+  covers the form, as the dialog did) and one column (the form below a
+  long list).
+
 ## 2026-11-16: How the Contentful app is built
 
 - **The sidebar app first**, `packages/contentful`, `@surea11y/contentful`,
