@@ -80,6 +80,11 @@ Options:
 Languages: English, Spanish, German, French and Japanese, following the
 Studio's language. Other languages show English.
 
+Colours: the panel and the lines under fields take the Studio's own
+background, text and line colours, light or dark, including a custom Studio
+theme. The group colours (to fix, likely, need a person, probably fine) are
+the panel's own, in a light or dark set that keeps WCAG 2.2 AA contrast.
+
 Licence: MPL-2.0.
 
 ## Developing

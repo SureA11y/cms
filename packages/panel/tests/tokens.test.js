@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { TOKENS, CONTRAST_PAIRS, tokenCss } from '../src/ui/tokens.js';
+import { TOKENS, DARK_TOKENS, CONTRAST_PAIRS, tokenCss } from '../src/ui/tokens.js';
 
 function luminance(hex) {
   const n = hex.replace('#', '');
@@ -21,6 +21,17 @@ test('every token pair keeps its WCAG contrast', () => {
     if (ratio < min) failures.push(`${fg} on ${bg}: ${ratio.toFixed(2)} < ${min}`);
   }
   assert.deepEqual(failures, []);
+});
+
+test('the dark colours keep the same contrast, pair by pair', () => {
+  const dark = { ...TOKENS, ...DARK_TOKENS };
+  const failures = [];
+  for (const [fg, bg, min] of CONTRAST_PAIRS) {
+    const ratio = contrast(dark[fg], dark[bg]);
+    if (ratio < min) failures.push(`${fg} on ${bg}: ${ratio.toFixed(2)} < ${min}`);
+  }
+  assert.deepEqual(failures, []);
+  for (const name of Object.keys(DARK_TOKENS)) assert.ok(name in TOKENS, `${name} is a token`);
 });
 
 test('the tokens become custom properties', () => {

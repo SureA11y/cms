@@ -26,4 +26,4 @@ export { createQuestionLoader } from './questions.js';
 export { readOutline, pathSelector } from './outline.js';
 export { createScheduler } from './scheduler.js';
 export { toCards, countPlaces, cardKey } from './cards.js';
-export { TOKENS, CONTRAST_PAIRS, tokenCss } from './ui/tokens.js';
+export { TOKENS, DARK_TOKENS, CONTRAST_PAIRS, tokenCss } from './ui/tokens.js';

@@ -398,7 +398,8 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
       an optional line under each field with a finding (see the decision
       "Where the checker sits in Sanity Studio"). `packages/sanity`; tested
       in a real Studio (`tests/e2e/sanity-studio.test.mjs`).
-- [ ] Sanity: the Studio's dark theme for the panel and the field lines.
+- [x] Sanity: the Studio's dark theme for the panel and the field lines
+      (the Studio's own colours; see the decision of 2026-11-16).
 - [ ] Sanity: publish `@surea11y/sanity` on npm and list it on Sanity's
       plugin directory (needs core released first, as for WordPress).
 - [ ] Sanity: a preview script for sites using its live preview (mode B),

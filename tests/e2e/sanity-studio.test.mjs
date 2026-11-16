@@ -16,10 +16,11 @@ const { SANITY_STUDIO_URL, CHROMIUM, HTTPS_PROXY, SANITY_TOKEN } = process.env;
 const skip = !SANITY_STUDIO_URL && 'SANITY_STUDIO_URL is not set';
 const REVIEW_ID = `surea11y.review.${article._id}`;
 
-async function studio(browser) {
+async function studio(browser, colorScheme = 'light') {
   const context = await browser.newContext({
     ignoreHTTPSErrors: !!HTTPS_PROXY,
-    viewport: { width: 1440, height: 1000 }
+    viewport: { width: 1440, height: 1000 },
+    colorScheme
   });
   // Live updates as one short reply each, not a held-open stream. Through a
   // proxy the browser has six connections per host, and the Studio's
@@ -169,5 +170,59 @@ test(
     await page.reload();
     await openArticle(page);
     await page.getByRole('button', { name: 'Accessibility (2)' }).waitFor({ timeout: 30000 });
+  }
+);
+
+test(
+  "in a dark Studio, the panel and the lines take the Studio's own dark colours",
+  { skip },
+  async (t) => {
+    seed();
+    removeReviews();
+    const browser = await chromium.launch({
+      executablePath: CHROMIUM,
+      ...(HTTPS_PROXY ? { proxy: { server: HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } } : {})
+    });
+    t.after(() => browser.close());
+    const { page } = await studio(browser, 'dark');
+    await openArticle(page);
+    await openPanel(page);
+    const colours = await page.evaluate(() => {
+      const el = document.querySelector('surea11y-results');
+      const host = getComputedStyle(el);
+      const card = getComputedStyle(el.shadowRoot.querySelector('li.card'));
+      const line = getComputedStyle(document.querySelector('.surea11y-field-line'));
+      return {
+        studio: host.getPropertyValue('--card-bg-color').trim(),
+        surface: card.backgroundColor,
+        text: card.color,
+        line: line.backgroundColor,
+        lineText: line.color
+      };
+    });
+    assert.equal(colours.studio, '#13141b', 'the Studio is dark');
+    assert.equal(colours.surface, 'rgb(19, 20, 27)', "cards on the Studio's own background");
+    assert.equal(colours.text, 'rgb(228, 229, 233)', "in the Studio's own text colour");
+    assert.equal(colours.line, 'rgb(58, 45, 25)', 'the line on the dark tint of its group');
+    assert.equal(colours.lineText, 'rgb(228, 229, 233)');
+    // And the engine finds nothing in our interface, dark.
+    await page.addScriptTag({
+      content: fs.readFileSync('plugins/wordpress/build/engine.js', 'utf8')
+    });
+    const own = await page.evaluate(() => {
+      const failures = [];
+      for (const sel of ['[data-surea11y-inspector]', '.surea11y-field-line']) {
+        const r = window.a11ycore.runa11yCoreInPage(
+          location.href,
+          sel,
+          { profile: 'wcag22-aa' },
+          null
+        );
+        for (const c of r.checksResults)
+          if (c.outcome === 'fail') failures.push(`${sel} ${c.ruleId}`);
+      }
+      return failures;
+    });
+    assert.deepEqual(own, []);
   }
 );

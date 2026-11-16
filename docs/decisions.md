@@ -2,6 +2,28 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: The panel in the Studio's own colours, light or dark
+
+The maintainer chose from three mock-ups (always light, our own dark
+palette, the Studio's own colours) and took the Studio's own colours.
+
+- **Surfaces, text and lines follow the Studio.** The panel reads Sanity
+  UI's custom properties (`--card-bg-color`, `--card-fg-color`,
+  `--card-muted-fg-color`, `--card-border-color` and three more), so it
+  looks part of the Studio, light or dark, and a team's own Studio theme
+  carries over. Each falls back to the panel's own colour outside a Studio.
+- **Group colours and the accent stay ours**, in a light or a dark set as
+  the Studio is. The dark set (`DARK_TOKENS` in the panel, so any host can
+  use it) has lighter group colours and darker tints.
+- **Contrast is checked three ways:** the dark set on its own, pair by pair
+  as the light set; the mapping against Sanity's default light and dark
+  themes (the lowest pair is muted text on a tint, 4.9:1); and in a real dark
+  Studio, where the engine finds no failures in the panel or the lines.
+- **Not checked:** custom Studio themes. A theme with low-contrast greys
+  would give the panel the same greys.
+- **Not taken:** always light (a bright block in a dark editor) and our own
+  dark palette (a dark panel that still looked borrowed).
+
 ## 2026-11-16: How the Sanity plugin is built
 
 - **The engine travels as text, loaded when first needed.** The build writes
@@ -29,8 +51,8 @@ A running log, newest first. Each entry says what was decided and why.
   Studio's live-update streams with a short reply: through this
   environment's proxy the browser speaks HTTP/1.1, six connections per
   host, and the streams took them all.
-- **Not yet:** the Studio's dark theme (the panel stays light), and the
-  check of the live preview page.
+- **Not yet:** the check of the live preview page. (The Studio's dark
+  theme followed the same day.)
 
 ## 2026-11-16: Where the checker sits in Sanity Studio
 
