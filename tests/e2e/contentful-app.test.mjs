@@ -5,14 +5,16 @@
 // me" kept after a reload, and a new check after an edit.
 //
 // Runs when CONTENTFUL_APP_URL is set (the test page, for example
-// http://localhost:3336); skipped otherwise. It needs the space's content
+// http://localhost:3336); skipped otherwise. The live preview test also
+// needs CONTENTFUL_PREVIEW_URL (the test website, dev/contentful/preview-site,
+// for example http://127.0.0.1:3337). It needs the space's content
 // management token: CONTENTFUL_TOKEN, or a proxy that adds it.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright-core';
 import { api, ENTRY, seed } from '../../dev/contentful/seed.mjs';
 
-const { CONTENTFUL_APP_URL, CHROMIUM, HTTPS_PROXY } = process.env;
+const { CONTENTFUL_APP_URL, CONTENTFUL_PREVIEW_URL, CHROMIUM, HTTPS_PROXY } = process.env;
 const skip = !CONTENTFUL_APP_URL && 'CONTENTFUL_APP_URL is not set';
 const REVIEW = `sa11y-${ENTRY}`;
 
@@ -268,6 +270,65 @@ test(
       .click();
     assert.equal(await findingsBtn.getAttribute('aria-pressed'), 'true');
     assert.ok(await page.locator('[data-surea11y-inspector]').isVisible());
+    assert.deepEqual(errors, []);
+  }
+);
+
+test(
+  "the live preview's page checked with the fields: one list, the website's design named, Show on the page",
+  { skip: skip || (!CONTENTFUL_PREVIEW_URL && 'CONTENTFUL_PREVIEW_URL is not set') },
+  async (t) => {
+    seed();
+    removeReview();
+    const browser = await chromium.launch({
+      executablePath: CHROMIUM,
+      ...(HTTPS_PROXY ? { proxy: { server: HTTPS_PROXY, bypass: 'localhost,127.0.0.1' } } : {})
+    });
+    t.after(() => browser.close());
+    const context = await browser.newContext({
+      ignoreHTTPSErrors: !!HTTPS_PROXY,
+      viewport: { width: 1300, height: 1000 }
+    });
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto(
+      `${CONTENTFUL_APP_URL}/?view=tab&preview=${encodeURIComponent(CONTENTFUL_PREVIEW_URL)}`
+    );
+    // The page answers: said above the panel.
+    await page.locator('.surea11y-checked').waitFor({ timeout: 60000 });
+    const list = await page.evaluate(() =>
+      document
+        .querySelector('surea11y-results')
+        .findings.map((f) => ({ key: f.key, label: f.itemLabel, outside: !!f.outside }))
+    );
+    // Each problem once: the page's copies of the fields' findings are merged.
+    assert.equal(new Set(list.map((f) => f.key)).size, list.length);
+    assert.equal(list.filter((f) => /^heading-order/.test(f.key)).length, 1);
+    // The pale grey line is the website's design, found only on the page.
+    const design = list.filter((f) => f.outside);
+    assert.ok(design.some((f) => /^contrast-minimum/.test(f.key)));
+    assert.ok(design.every((f) => f.label === 'Website design'));
+    const preview = page.frames().find((f) => f.url().startsWith(CONTENTFUL_PREVIEW_URL));
+    const outlined = (selector) =>
+      preview.waitForFunction(
+        (sel) => document.querySelector(sel)?.style.outline.includes('3px'),
+        selector,
+        { timeout: 5000 }
+      );
+    // Show on a website-design card: the preview page shows the place.
+    await page
+      .locator('surea11y-results li.card', { hasText: 'contrast' })
+      .getByRole('button', { name: 'Show' })
+      .click();
+    await outlined('p.credit');
+    // Show on a content card: the field, and the place on the page.
+    await page
+      .locator('surea11y-results li.card', { hasText: 'skipping a level' })
+      .getByRole('button', { name: 'Show' })
+      .click();
+    await page.locator('.surea11y-field-current[data-field="body"]').waitFor({ timeout: 5000 });
+    await outlined('h4');
     assert.deepEqual(errors, []);
   }
 );

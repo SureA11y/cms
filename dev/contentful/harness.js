@@ -150,7 +150,12 @@ const sdk = {
   },
   notifier: { success() {}, error() {} },
   access: { can: async () => true },
-  parameters: { installation: {}, instance: {} },
+  // ?preview=<address>: the test website's address, as set on the
+  // configuration screen, framed beside the tab as Contentful's live preview.
+  parameters: {
+    installation: params.get('preview') ? { previewOrigins: [params.get('preview')] } : {},
+    instance: {}
+  },
   editor: {
     editorInterface: { controls: [] },
     getLocaleSettings: () => ({ mode: 'single', focused: 'en-US', active: ['en-US'] }),
@@ -174,8 +179,19 @@ const sdk = {
   window: { startAutoResizer() {} }
 };
 if (params.get('view') === 'tab') {
-  document.getElementById('app').style.width = 'auto';
-  mountEditorTab(sdk, document.getElementById('app'));
+  const app = document.getElementById('app');
+  app.style.width = 'auto';
+  if (params.get('preview')) {
+    // Beside the live preview: the tab at about 600 px, the preview after it.
+    document.body.style.cssText = 'margin:0;display:flex;height:100vh';
+    app.style.cssText = 'width:600px;flex:none;overflow:auto;padding:0';
+    const frame = document.createElement('iframe');
+    frame.title = 'Live preview';
+    frame.src = `${params.get('preview')}/?app=${encodeURIComponent(location.origin)}`;
+    frame.style.cssText = 'flex:1;border:0;border-inline-start:1px solid #ccc;height:100vh';
+    document.body.append(frame);
+  }
+  mountEditorTab(sdk, app);
 } else {
   window.app = mount(sdk, document.getElementById('app'));
 }
