@@ -110,5 +110,8 @@
   "phoneCheck": "Comprobar con ancho de móvil",
   "phoneChecking": "Comprobando con ancho de móvil…",
   "phoneDone": "Comprobado con ancho de móvil (320 píxeles): {{n}} encontrados.",
-  "phoneError": "La comprobación con ancho de móvil no terminó."
+  "phoneError": "La comprobación con ancho de móvil no terminó.",
+  "moreInField": "{{n}} más en este campo",
+  "details": "Detalles",
+  "fieldLines": "Mostrar los hallazgos bajo cada campo"
 }

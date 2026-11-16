@@ -6,14 +6,23 @@
   "license": "MPL-2.0",
   "type": "module",
   "main": "src/index.js",
-  "files": ["src/", "LICENSE"],
+  "files": [
+    "src/",
+    "dist/",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node --test"
   },
   "dependencies": {
-    "@portabletext/to-html": "6.0.0"
+    "@portabletext/to-html": "6.0.0",
+    "@surea11y/panel": "0.1.0"
   },
   "engines": {
     "node": ">=22.12"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "sanity": "^6"
   }
 }

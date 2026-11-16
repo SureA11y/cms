@@ -69,6 +69,9 @@ test('a document becomes items in the form order, one per block, each named by i
     'body[_key=="k7"]'
   ]);
   assert.equal(labels.mainImage, 'Main image');
+  const { fields } = documentItems(article, schema);
+  assert.equal(fields.mainImage, 'mainImage', 'an image is its own field');
+  assert.equal(fields['body[_key=="k7"]'], 'body', 'a block is in the body');
   assert.equal(labels['body[_key=="k1"]'], 'Body: Heading 2');
   assert.equal(labels['body[_key=="k4"]'], 'Body: List');
   assert.equal(labels['body[_key=="k7"]'], 'Body: Table');

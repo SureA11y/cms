@@ -110,5 +110,8 @@
   "phoneCheck": "Vérifier en largeur de téléphone",
   "phoneChecking": "Vérification en largeur de téléphone…",
   "phoneDone": "Vérifié en largeur de téléphone (320 pixels) : {{n}} trouvé(s).",
-  "phoneError": "La vérification en largeur de téléphone n’a pas abouti."
+  "phoneError": "La vérification en largeur de téléphone n’a pas abouti.",
+  "moreInField": "{{n}} de plus dans ce champ",
+  "details": "Détails",
+  "fieldLines": "Afficher les constats sous chaque champ"
 }

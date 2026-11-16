@@ -81,6 +81,9 @@ export function scriptSources(urls, base) {
  * - `styles`: the style sheets' HTML (`<link>` and `<style>`) the content is
  *   drawn with, such as the editor canvas's.
  * - `bodyClass`, `lang`, `dir`, `width`: how the content is laid out.
+ * - `scriptOrigins`: where the policy lets scripts come from, when not the
+ *   engine's own addresses; `['blob:']` for scripts the host made from
+ *   text it bundled (only code of the page itself can make a blob: address).
  */
 export function createSandbox(hostDocument, options) {
   const {
@@ -90,7 +93,8 @@ export function createSandbox(hostDocument, options) {
     bodyClass = '',
     lang = 'en',
     dir = 'ltr',
-    width = 800
+    width = 800,
+    scriptOrigins = null
   } = options;
   const frame = hostDocument.createElement('iframe');
   frame.setAttribute('aria-hidden', 'true');
@@ -100,7 +104,9 @@ export function createSandbox(hostDocument, options) {
   frame.className = 'surea11y-sandbox';
   frame.style.cssText = `position:fixed;left:-20000px;top:0;width:${Number(width) || 800}px;height:900px;border:0;visibility:hidden;pointer-events:none;`;
   const scriptUrls = [engineUrl, ...Object.values(localeUrls)].filter(Boolean);
-  const origins = scriptSources(scriptUrls, hostDocument.baseURI);
+  const origins = Array.isArray(scriptOrigins)
+    ? scriptOrigins
+    : scriptSources(scriptUrls, hostDocument.baseURI);
   const scripts = scriptUrls.map((src) => `<script src="${escapeAttr(src)}"></script>`).join('');
   frame.srcdoc =
     '<!doctype html>' +

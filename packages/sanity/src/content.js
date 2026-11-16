@@ -131,20 +131,23 @@ function fieldsOf(type, value) {
  * - `altFields`: where images keep their alternative text.
  * - `imageUrl(value)`: an image's address, for the check's <img src>.
  *
- * Returns `{ items, labels, order }`: `items` as the panel's sandbox takes
- * them; `labels` by item id ("Body: Table", "Main image"); `order`, the ids
- * in the form's order.
+ * Returns `{ items, labels, fields, order }`: `items` as the panel's sandbox
+ * takes them; `labels` by item id ("Body: Table", "Main image"); `fields`
+ * by item id, the field each is in ('body' for a block of the body, the
+ * image's own path for an image); `order`, the ids in the form's order.
  */
 export function documentItems(doc, schemaType = null, { altFields = ALT_FIELDS, imageUrl } = {}) {
   const options = { altFields, imageUrl };
   const items = [];
   const labels = {};
+  const fields = {};
 
-  const add = (path, html, label) => {
+  const add = (path, html, label, field = path) => {
     if (!html) return;
     const id = pathToString(path);
     items.push({ id, html });
     labels[id] = label;
+    fields[id] = pathToString(field);
   };
 
   function portableText(blocks, path, fieldTitle) {
@@ -157,7 +160,12 @@ export function documentItems(doc, schemaType = null, { altFields = ALT_FIELDS, 
         let end = i;
         while (end + 1 < blocks.length && isBlock(blocks[end + 1]) && blocks[end + 1].listItem)
           end++;
-        add(at, renderBlocks(blocks.slice(i, end + 1), options), `${fieldTitle}: ${LABELS.list}`);
+        add(
+          at,
+          renderBlocks(blocks.slice(i, end + 1), options),
+          `${fieldTitle}: ${LABELS.list}`,
+          path
+        );
         i = end;
         continue;
       }
@@ -166,7 +174,7 @@ export function documentItems(doc, schemaType = null, { altFields = ALT_FIELDS, 
         : isImage(block)
           ? LABELS.image
           : LABELS[block._type] || '';
-      add(at, renderBlocks([block], options), kind ? `${fieldTitle}: ${kind}` : fieldTitle);
+      add(at, renderBlocks([block], options), kind ? `${fieldTitle}: ${kind}` : fieldTitle, path);
     }
   }
 
@@ -199,5 +207,5 @@ export function documentItems(doc, schemaType = null, { altFields = ALT_FIELDS, 
     if (value === undefined || value === null) continue;
     walk(value, field.type || null, [field.name], titleOf(field));
   }
-  return { items, labels, order: items.map((i) => i.id) };
+  return { items, labels, fields, order: items.map((i) => i.id) };
 }

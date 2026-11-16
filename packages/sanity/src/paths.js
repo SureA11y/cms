@@ -27,3 +27,10 @@ export function stringToPath(text) {
   }
   return path;
 }
+
+/** A document's id without its draft or release prefix. */
+export function publishedId(id) {
+  return String(id || '')
+    .replace(/^drafts\./, '')
+    .replace(/^versions\.[^.]+\./, '');
+}
