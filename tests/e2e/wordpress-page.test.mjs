@@ -330,9 +330,34 @@ test('"Edit in the editor" opens the editor on that finding', { skip }, async (t
   assert.match(href, /[?&]surea11y-finding=[0-9a-z]+$/);
   await card.getByRole('link', { name: 'Edit in the editor' }).click();
   await page.waitForURL(/post\.php/);
-  await page.waitForFunction(() => document.querySelector('surea11y-results')?.current, null, {
-    timeout: 30000
-  });
+  // This has failed now and then, and not when run alone: if it times out,
+  // say what the editor showed (which sidebar, which dialog, the finding's
+  // card) so the next failure names its cause.
+  await page
+    .waitForFunction(() => document.querySelector('surea11y-results')?.current, null, {
+      timeout: 30000
+    })
+    .catch(async (error) => {
+      const state = await page.evaluate(() => {
+        const el = document.querySelector('surea11y-results');
+        const edit = window.wp.data.select('core/edit-post');
+        return {
+          url: location.href,
+          sidebar: edit.getActiveGeneralSidebar ? edit.getActiveGeneralSidebar() : null,
+          results: el ? el.state : 'not open',
+          card: el
+            ? el.cards
+                .filter((c) => c.ruleId === 'p-as-heading')
+                .map((c) => ({ group: c.group, settled: !!c.settled, places: c.places.length }))
+            : null,
+          dialogs: [...document.querySelectorAll('.components-modal__header-heading')].map(
+            (h) => h.textContent
+          )
+        };
+      });
+      error.message += `\nEditor state: ${JSON.stringify(state)}`;
+      throw error;
+    });
   const shown = await page.evaluate(() => {
     const el = document.querySelector('surea11y-results');
     const card = el.cards.find((c) => c.key === el.current.cardKey);

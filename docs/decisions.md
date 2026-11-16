@@ -2,6 +2,32 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: Headless: Sanity first, fields then preview
+
+The maintainer took the recommendations of the headless research
+(`docs/research/2026-11-16-headless.md`), aiming for the best checker on
+each platform rather than the quickest one.
+
+- **Sanity first.** Its plugins run inside the editor, so our panel sits
+  next to the form and takes the editor to the field. Its preview tags
+  text with the document and field path on every plan. Nobody checks
+  content inside its editor today.
+- **Both modes, in this order.** First the content fields in the editor
+  (mode A): it needs nothing from the website, knows the exact field of
+  each problem and works for every customer. Then the real preview page
+  (mode B), for sites that use Sanity's live preview: it adds the theme,
+  contrast and headings across components. One release is not "the best"
+  without the page, so mode B follows in the same phase, not later.
+- **Contentful second, as a private app first.** Any organisation can
+  install a private app on any plan; the partner Marketplace (code review,
+  source in Contentful's public repository) can follow once the app has
+  users.
+- **Storyblok last, and only with a clear lead.** It shipped a free
+  built-in checker on 2026-10-23, in its visual editor. Ours would have to
+  be better where it is weakest: the field rather than the block, the form
+  editor as well as the visual one, questions and stored answers, and
+  evidence for EN 301 549. Revisit after Sanity and Contentful.
+
 ## 2026-11-16: A less flat panel
 
 - **What.** The maintainer chose between three mock-ups (today's look,
