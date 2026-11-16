@@ -10,6 +10,14 @@
     "reviewed": "Vérifiés, corrects",
     "marked": "Masqués par vous"
   },
+  "badges": {
+    "problem": "À corriger",
+    "likely": "Problème probable",
+    "review": "Demande une personne",
+    "probably-fine": "Probablement correct",
+    "reviewed": "Vérifié, correct",
+    "marked": "Masqué par vous"
+  },
   "tiles": {
     "problem": "À corriger",
     "likely": "Problèmes probables",
@@ -85,8 +93,8 @@
   "marker": "{{group}} : {{summary}}",
   "viewLabel": "Afficher",
   "viewFindings": "Constats",
-  "viewHeadings": "Titres ({{n}})",
-  "viewImages": "Images ({{n}})",
+  "viewHeadings": "Titres",
+  "viewImages": "Images",
   "headingsTitle": "Titres",
   "imagesTitle": "Images",
   "headingsHelp": "Les titres dans l’ordre, comme un lecteur d’écran les liste. Chaque niveau doit suivre celui du dessus, et chaque titre doit dire de quoi parle sa section.",

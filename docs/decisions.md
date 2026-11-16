@@ -2,6 +2,29 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: A less flat panel
+
+- **What.** The maintainer chose between three mock-ups (today's look,
+  "accents" and "clearer hierarchy") and took a mix. From "accents", the
+  top: tiles and cards with a stripe in their group's colour, empty tiles
+  that step back, one segmented control for the views, a quieter arrow bar.
+  From "clearer hierarchy", the cards: a label naming the card's group, the
+  host's fixes ("Edit the alternative text") as actions with an icon
+  instead of boxed buttons, and the answer guide as two tinted boxes with a tick and a cross. Each
+  view name now has its count on a second line, in a monospace system
+  font, so the names line up; Findings shows its count too.
+- **Why.** Every part had the same white box and grey line; colour was only
+  in small icons, and a tile with 0 looked like one with 22.
+- **Not taken.** Mock-up C put "Hide for me" always under More. It stays
+  one click on the card, as before; More appears only when a card has two
+  ways to set it aside.
+- **Quality.** Group colours on their tints keep 4.5:1 (the token contrast
+  test covers them). Every group keeps its icon and word, so colour is
+  never the only cue; in Windows high-contrast mode the stripes, labels and
+  boxes show in system colours. Screen readers still hear "Headings (13)".
+  The panel is 20.9 KB of its 22 KB budget. The engine finds no failures on
+  the panel.
+
 ## 2026-11-15: Overrides for the vulnerable packages under wp-env
 
 - **What.** Dependabot and `npm audit` reported four advisories, all under

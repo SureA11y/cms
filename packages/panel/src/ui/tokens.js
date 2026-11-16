@@ -40,6 +40,7 @@ export const TOKENS = {
   'marked-tint': '#f0f0f0',
 
   // Shape.
+  shadow: '0 1px 2px rgba(0, 0, 0, .06)',
   radius: '6px',
   'radius-small': '4px',
   'radius-round': '999px',

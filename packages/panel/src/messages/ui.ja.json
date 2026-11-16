@@ -10,6 +10,14 @@
     "reviewed": "確認済み・問題なし",
     "marked": "自分だけ非表示"
   },
+  "badges": {
+    "problem": "修正が必要",
+    "likely": "可能性が高い問題",
+    "review": "人の確認が必要",
+    "probably-fine": "おそらく問題なし",
+    "reviewed": "確認済み・問題なし",
+    "marked": "自分だけ非表示"
+  },
   "tiles": {
     "problem": "修正が必要",
     "likely": "可能性が高い問題",
@@ -85,8 +93,8 @@
   "marker": "{{group}}：{{summary}}",
   "viewLabel": "表示する内容",
   "viewFindings": "検出結果",
-  "viewHeadings": "見出し（{{n}}）",
-  "viewImages": "画像（{{n}}）",
+  "viewHeadings": "見出し",
+  "viewImages": "画像",
   "headingsTitle": "見出し",
   "imagesTitle": "画像",
   "headingsHelp": "スクリーンリーダーが一覧にする順の見出しです。各レベルは上のレベルに続き、各見出しはそのセクションの内容を表す必要があります。",

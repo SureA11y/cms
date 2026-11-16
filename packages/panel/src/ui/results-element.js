@@ -68,50 +68,66 @@ summary { cursor: pointer; color: var(--sa11y-accent); }
 .technical { margin-top: var(--sa11y-space-1); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: var(--sa11y-font-size-small); color: var(--sa11y-text-muted); overflow-wrap: anywhere; }
 
 .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sa11y-space-2); }
-.tile { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: var(--sa11y-space-2) var(--sa11y-space-3); min-height: 64px; border-radius: var(--sa11y-radius); border: 1px solid var(--sa11y-border); background: var(--sa11y-surface); text-align: start; }
+.tile { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: var(--sa11y-space-2) var(--sa11y-space-3); min-height: 64px; border-radius: var(--sa11y-radius); border: 1px solid var(--sa11y-border); border-inline-start: 4px solid var(--sa11y-g); background: var(--sa11y-surface); box-shadow: var(--sa11y-shadow); text-align: start; }
+.tile .count { color: var(--sa11y-g); }
+.tile[data-empty] { background: var(--sa11y-surface-subtle); border-inline-start-color: var(--sa11y-border); box-shadow: none; color: var(--sa11y-text-muted); }
+.tile[data-empty] .count { color: var(--sa11y-text-muted); }
+.tile:hover { border-color: var(--sa11y-border-strong); border-inline-start-color: var(--sa11y-g); }
 .tile-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .count { font-size: var(--sa11y-font-size-count); font-weight: 600; line-height: 1.1; }
-.tile[aria-pressed="true"] { border-width: 2px; }
+.tile[aria-pressed="true"] { border-width: 2px; border-inline-start-width: 4px; }
 
 .filter { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sa11y-space-1); }
 .filter[hidden] { display: none; }
 
-.nav { display: flex; align-items: center; gap: var(--sa11y-space-2); padding: var(--sa11y-space-1); border: 1px solid var(--sa11y-border); border-radius: var(--sa11y-radius); }
+.nav { display: flex; align-items: center; gap: var(--sa11y-space-2); padding: var(--sa11y-space-1); border-radius: var(--sa11y-radius); background: var(--sa11y-surface-subtle); }
 .nav-button { width: var(--sa11y-button-height); height: var(--sa11y-button-height); display: flex; align-items: center; justify-content: center; padding: 0; border-radius: var(--sa11y-radius-small); border: 1px solid var(--sa11y-border-strong); background: var(--sa11y-surface); }
 .nav-label { flex-grow: 1; text-align: center; font-weight: 600; }
 
 section { display: flex; flex-direction: column; gap: var(--sa11y-space-2); }
 h2, h3, h4, h5 { margin: 0; font-size: 1em; }
-.group-toggle { width: 100%; display: flex; align-items: center; gap: var(--sa11y-space-2); border: 0; background: transparent; padding: var(--sa11y-space-1) 0; min-height: var(--sa11y-button-height); text-align: start; font-weight: 600; }
+.group-toggle { width: 100%; display: flex; align-items: center; gap: var(--sa11y-space-2); border: 0; border-bottom: 2px solid var(--sa11y-g, var(--sa11y-border)); background: transparent; padding: var(--sa11y-space-1) 0; min-height: var(--sa11y-button-height); text-align: start; font-weight: 600; }
 .group-name { flex-grow: 1; }
+.group-toggle .group-icon { display: inline-flex; }
 .chevron { transition: transform .15s; }
 .group-toggle[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 @media (prefers-reduced-motion: reduce) { .chevron { transition: none; } }
 .help { color: var(--sa11y-text-muted); margin-top: calc(-1 * var(--sa11y-space-1)); }
 ul, ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sa11y-space-2); }
 
-.card { padding: var(--sa11y-space-3); border-radius: var(--sa11y-radius); border: 1px solid var(--sa11y-border); background: var(--sa11y-surface); }
-.card[aria-current="true"] { border-width: 2px; }
+.card { padding: var(--sa11y-space-3); border-radius: var(--sa11y-radius); border: 1px solid var(--sa11y-border); border-inline-start: 4px solid var(--sa11y-g, var(--sa11y-border)); background: var(--sa11y-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
+.card[aria-current="true"] { border-width: 2px; border-inline-start-width: 4px; }
 .current-label { font-size: var(--sa11y-font-size-small); font-weight: 600; color: var(--sa11y-accent); margin-bottom: var(--sa11y-space-1); }
 .tags { display: flex; flex-wrap: wrap; gap: var(--sa11y-space-1); margin-bottom: var(--sa11y-space-1); }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 1px 8px 1px 6px; border-radius: var(--sa11y-radius-round); background: var(--sa11y-g-tint); color: var(--sa11y-g); }
 .tag { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: var(--sa11y-radius-small); background: var(--sa11y-surface-tag); color: var(--sa11y-text-muted); }
 .summary { font-size: var(--sa11y-font-size-title); font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
 .hint { margin-top: var(--sa11y-space-2); }
 .where { margin-top: var(--sa11y-space-2); font-style: italic; color: var(--sa11y-text-muted); }
-.actions { display: flex; flex-wrap: wrap; gap: var(--sa11y-space-2); margin-top: var(--sa11y-space-3); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--sa11y-space-1) var(--sa11y-space-2); margin-top: var(--sa11y-space-3); }
+.button.fix { display: inline-flex; align-items: center; gap: var(--sa11y-space-1); border-color: transparent; background: transparent; padding: 0 var(--sa11y-space-1); font-weight: 600; }
+.button.fix:hover { text-decoration: underline; }
+.button.more { border-color: transparent; background: transparent; color: var(--sa11y-text-muted); padding: 0 var(--sa11y-space-2); }
+.button.more:hover { color: var(--sa11y-text); text-decoration: underline; }
 .more-actions { margin-top: var(--sa11y-space-2); padding-top: var(--sa11y-space-2); border-top: 1px solid var(--sa11y-border); }
 
 ${GROUP_ORDER.concat('reviewed', 'marked')
   .map((g) => [g, g === 'probably-fine' || g === 'reviewed' ? 'fine' : g])
   .map(
-    ([g, token]) => `[data-group="${g}"] .group-icon { color: var(--sa11y-${token}); }
+    ([
+      g,
+      token
+    ]) => `[data-group="${g}"] { --sa11y-g: var(--sa11y-${token}); --sa11y-g-tint: var(--sa11y-${token}-tint); }
+[data-group="${g}"] .group-icon { color: var(--sa11y-${token}); }
 .tile[data-group="${g}"][aria-pressed="true"], .card[data-group="${g}"][aria-current="true"] { border-color: var(--sa11y-${token}); background: var(--sa11y-${token}-tint); }`
   )
   .join('\n')}
 
-.views { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sa11y-space-1); }
-.view { min-height: var(--sa11y-button-height); padding: 2px var(--sa11y-space-1); line-height: 1.25; border-radius: var(--sa11y-radius-small); border: 1px solid var(--sa11y-border-strong); background: var(--sa11y-surface); }
-.view[aria-pressed="true"] { border: 2px solid var(--sa11y-accent); color: var(--sa11y-accent); font-weight: 600; }
+.views { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; padding: 2px; border: 1px solid var(--sa11y-border-strong); border-radius: var(--sa11y-radius); background: var(--sa11y-surface-subtle); }
+.view { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: var(--sa11y-button-height); padding: 4px var(--sa11y-space-1); line-height: 1.25; border-radius: var(--sa11y-radius-small); border: 2px solid transparent; background: transparent; }
+.view[aria-pressed="true"] { border-color: var(--sa11y-accent); background: var(--sa11y-surface); color: var(--sa11y-accent); font-weight: 600; box-shadow: var(--sa11y-shadow); }
+.view-count { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: var(--sa11y-font-size-small); font-weight: 400; font-variant-numeric: tabular-nums; color: var(--sa11y-text-muted); }
+.view[aria-pressed="true"] .view-count { color: var(--sa11y-accent); }
 .entry { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sa11y-space-1) var(--sa11y-space-2); padding: var(--sa11y-space-2) var(--sa11y-space-3); border-radius: var(--sa11y-radius); border: 1px solid var(--sa11y-border); background: var(--sa11y-surface); }
 .entry-text { flex: 1 1 0; min-width: 6em; overflow-wrap: anywhere; }
 .entry-text em { color: var(--sa11y-text-muted); }
@@ -127,7 +143,12 @@ ${GROUP_ORDER.concat('reviewed', 'marked')
 .question-head { font-weight: 600; }
 ol.steps { list-style: decimal; display: block; padding-inline-start: 1.4em; }
 ol.steps li + li { margin-top: var(--sa11y-space-1); }
-.when { color: var(--sa11y-text-muted); }
+.when { display: flex; gap: var(--sa11y-space-2); padding: var(--sa11y-space-2) var(--sa11y-space-3); border-radius: var(--sa11y-radius); border: 1px solid transparent; }
+.when .icon { margin-top: 3px; }
+.when[data-kind="fine"] { background: var(--sa11y-fine-tint); }
+.when[data-kind="fine"] .icon { color: var(--sa11y-fine); }
+.when[data-kind="problem"] { background: var(--sa11y-problem-tint); }
+.when[data-kind="problem"] .icon { color: var(--sa11y-problem); }
 .review-meta { margin-top: var(--sa11y-space-2); color: var(--sa11y-text-muted); }
 .note { margin-top: var(--sa11y-space-1); padding: var(--sa11y-space-1) var(--sa11y-space-2); border-inline-start: 3px solid var(--sa11y-border); white-space: pre-wrap; overflow-wrap: anywhere; }
 .review-form { display: flex; flex-direction: column; gap: var(--sa11y-space-1); margin-top: var(--sa11y-space-3); }
@@ -136,6 +157,9 @@ ol.steps li + li { margin-top: var(--sa11y-space-1); }
 .review-form textarea:focus-visible { outline: var(--sa11y-focus-width) solid var(--sa11y-focus); outline-offset: 1px; }
 
 @media (forced-colors: active) {
+  .tile, .card { border-inline-start-color: CanvasText; }
+  .when, .badge { border: 1px solid CanvasText; }
+  .group-toggle { border-bottom-color: CanvasText; }
   .tile[aria-pressed="true"], .card[aria-current="true"] { border-color: Highlight; }
 }
 `;
@@ -458,7 +482,7 @@ export class ResultsElement extends HTMLElement {
     }
 
     this._list.textContent = '';
-    if (views) this._list.append(this._renderViews(doc, t));
+    if (views) this._list.append(this._renderViews(doc, t, counts));
     if (!listing) this._list.append(this._renderOutline(doc, t, this._view));
     else if (kind === 'found' || (kind === 'nothing' && cards.length))
       this._renderList(doc, t, cards, counts);
@@ -476,6 +500,7 @@ export class ResultsElement extends HTMLElement {
         tile.dataset.group = g;
         tile.dataset.focus = `tile:${g}`;
         tile.setAttribute('aria-pressed', String(this._only === g));
+        if (!counts[g]) tile.dataset.empty = '';
         const top = el(doc, 'span', 'tile-top');
         const ic = el(doc, 'span', 'group-icon');
         ic.append(icon(doc, g, 20));
@@ -548,18 +573,26 @@ export class ResultsElement extends HTMLElement {
     }
   }
 
-  /** Findings, Headings, Images: toggle buttons, one pressed. */
-  _renderViews(doc, t) {
+  /**
+   * Findings, Headings, Images: toggle buttons, one pressed. Each name has
+   * its count on a line of its own, so the names line up; the brackets are
+   * there for screen readers ("Headings (13)").
+   */
+  _renderViews(doc, t, counts) {
     const bar = el(doc, 'div', 'views');
     bar.setAttribute('role', 'group');
     bar.setAttribute('aria-label', t.viewLabel);
-    const names = {
-      findings: t.viewFindings,
-      headings: fill(t.viewHeadings, { n: this._outline.headings.length }),
-      images: fill(t.viewImages, { n: this._outline.images.length })
+    const views = {
+      findings: [t.viewFindings, GROUP_ORDER.reduce((n, g) => n + (counts[g] || 0), 0)],
+      headings: [t.viewHeadings, this._outline.headings.length],
+      images: [t.viewImages, this._outline.images.length]
     };
     for (const v of ['findings', 'headings', 'images']) {
-      const b = el(doc, 'button', 'view', names[v]);
+      const [name, n] = views[v];
+      const b = el(doc, 'button', 'view');
+      const count = el(doc, 'span', 'view-count');
+      count.append(el(doc, 'span', 'sr-only', ' ('), String(n), el(doc, 'span', 'sr-only', ')'));
+      b.append(el(doc, 'span', 'view-name', name), count);
       b.type = 'button';
       b.dataset.focus = `view:${v}`;
       b.setAttribute('aria-pressed', String(this._view === v));
@@ -717,11 +750,15 @@ export class ResultsElement extends HTMLElement {
       card.itemLabel,
       card.places.length > 1 ? fill(t.places, { n: card.places.length }) : ''
     ].filter(Boolean);
-    if (tags.length) {
-      const box = el(doc, 'p', 'tags');
-      for (const tag of tags) box.append(el(doc, 'span', 'tag', tag));
-      li.append(box);
-    }
+    const box = el(doc, 'p', 'tags');
+    const badge = el(doc, 'span', 'badge');
+    badge.append(
+      icon(doc, card.group === 'reviewed' ? 'probably-fine' : card.group, 14),
+      doc.createTextNode(t.badges[card.group] || t.groups[card.group])
+    );
+    box.append(badge);
+    for (const tag of tags) box.append(el(doc, 'span', 'tag', tag));
+    li.append(box);
     const summary = el(doc, 'p', 'summary', card.summary);
     summary.id = id;
     li.append(summary);
@@ -827,7 +864,10 @@ export class ResultsElement extends HTMLElement {
         typeof this._actionsFor === 'function' ? this._actionsFor(card, this._current) || [] : [];
       for (const action of extra) {
         if (action && action.label && typeof action.run === 'function') {
-          add(action.label, 'button', `act:${action.id || action.label}`, () => action.run(card));
+          add(action.label, 'button fix', `act:${action.id || action.label}`, () =>
+            action.run(card)
+          );
+          actions.lastChild.prepend(icon(doc, 'edit', 16));
         }
       }
       if (this._editUrl && !card.outside) {
@@ -841,9 +881,9 @@ export class ResultsElement extends HTMLElement {
         a.dataset.focus = `card:${hash(card.key)}:edit`;
         actions.append(a);
       }
-      // Setting a finding aside: shown at once when it is the only such
-      // action, behind "More" when there are two, so a card shows at most
-      // four buttons and what fixes it comes first.
+      // Setting a finding aside: shown at once, one click, when it is the
+      // only such action; behind "More" when there are two, so a card shows
+      // at most four buttons and what fixes it comes first.
       const later = [];
       if (this._canReview && (card.confirmed || card.unsure)) {
         later.push([t.reopen, 'button', 'reopen', () => this._reopen(card)]);
@@ -924,13 +964,23 @@ export class ResultsElement extends HTMLElement {
       const fineId = `${summaryId}-fine`;
       const problemId = `${summaryId}-problem`;
       if (q && q.passWhen) {
-        const p = el(doc, 'p', 'when', fill(t.fineWhen, { text: q.passWhen }));
+        const p = el(doc, 'p', 'when');
+        p.append(
+          icon(doc, 'probably-fine', 16),
+          el(doc, 'span', '', fill(t.fineWhen, { text: q.passWhen }))
+        );
         p.id = fineId;
+        p.dataset.kind = 'fine';
         group.append(p);
       }
       if (q && q.failWhen) {
-        const p = el(doc, 'p', 'when', fill(t.problemWhen, { text: q.failWhen }));
+        const p = el(doc, 'p', 'when');
+        p.append(
+          icon(doc, 'no', 16),
+          el(doc, 'span', '', fill(t.problemWhen, { text: q.failWhen }))
+        );
         p.id = problemId;
+        p.dataset.kind = 'problem';
         group.append(p);
       }
       const noteId = `${summaryId}-note`;

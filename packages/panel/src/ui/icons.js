@@ -11,6 +11,8 @@ const PATHS = {
   previous: ['m15 6-6 6 6 6'],
   next: ['m9 6 6 6-6 6'],
   chevron: ['m6 9 6 6 6-6'],
+  edit: ['M4 20h4L19 9l-4-4L4 16v4z'],
+  no: ['circle:12,12,9', 'm9 9 6 6M15 9l-6 6'],
   empty: ['M6 3h8l4 4v14H6z', 'M14 3v4h4M9 12h6M9 16h4'],
   spinner: ['M21 12a9 9 0 1 1-6.2-8.6'],
   // Small marks for the markers beside the content.
