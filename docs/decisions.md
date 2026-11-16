@@ -2,6 +2,26 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: Where the checker sits in Contentful
+
+From three mock-ups (a panel in the sidebar, an editor tab of our own, a
+summary with a dialog), the maintainer asked for the best and left the
+choice to the recommendation: the sidebar as the base, the tab as an option.
+
+- **The sidebar panel is the base.** A section of the entry's sidebar, under
+  Publish. It works in every space with Contentful's own editor, including
+  the field apps a team already has. Cards name the field and where in it,
+  since an app can't move the form to a field. An image's alternative text
+  is its description in Media, so the fix opens the image.
+- **An editor tab of our own is the option on top**, once proven: the
+  entry's fields drawn with Contentful's published field editors, a line
+  under each field with a finding, and Show moving to the field. Not the
+  base: it is a second editor, chosen per content type, and could miss other
+  apps' field editors a team relies on.
+- **Not taken:** the panel in a dialog, which covers the form.
+- **Answers** are kept in the space, in a content type of the app's own; the
+  live preview check follows later, as in Sanity.
+
 ## 2026-11-16: The preview check in Sanity: one panel, one list
 
 The maintainer chose from three mock-ups (one list, two lists, a panel
