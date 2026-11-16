@@ -2,6 +2,37 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: Where the checker sits in Sanity Studio
+
+The maintainer chose from four mock-ups (a side panel, a tab of its own, a
+line under each field, the live preview) and took the recommendation.
+
+- **A side panel next to the form** is the main place. An "Accessibility"
+  button with a count in the document's header opens it, the way Sanity's
+  own validation panel opens (a document inspector). Show moves the form to
+  the field and frames it. Each card names its field. It is the same panel
+  as in WordPress.
+- **A line under each field** with a finding, as an extra that editors can
+  turn off. It is seen while writing; the side panel has the details,
+  questions and views.
+- **The live preview** (markers on the real page, the same panel beside it)
+  follows once the preview script exists, in the same phase.
+- **Not taken: a tab of its own.** It hides the form, so fixing means
+  switching back and forth.
+
+How it is built:
+
+- **`packages/sanity`, `@surea11y/sanity`, MPL-2.0** like the panel. Sanity
+  sets no licence for plugins, and MPL-2.0 keeps changes to our files open
+  while letting any Studio use it.
+- **The document is checked as the published page would have it, in
+  order.** Each Portable Text block (a run of list items counts as one) and
+  each image is an item whose id is its field path, so a finding names its
+  field and Show can move the form to it. Strings such as the title and
+  slug are left out: the website decides how they appear.
+- **Alt text** is read from the image's own field: `alt`, `altText` or
+  `alternativeText` by default, configurable.
+
 ## 2026-11-16: Headless: Sanity first, fields then preview
 
 The maintainer took the recommendations of the headless research

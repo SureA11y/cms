@@ -392,7 +392,9 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
       script (mode B). Storyblok shipped a free built-in checker on
       2026-10-23.
 - [ ] Sanity: a Studio plugin with the panel as a side panel, checking the
-      content fields (mode A), answers kept in a document type of ours.
+      content fields (mode A), answers kept in a document type of ours, and
+      an optional line under each field with a finding (see the decision
+      "Where the checker sits in Sanity Studio").
 - [ ] Sanity: a preview script for sites using its live preview (mode B),
       mapping problems to fields through Sanity's own tags.
 - [ ] Contentful, as a private app; then Storyblok, only with a clear lead

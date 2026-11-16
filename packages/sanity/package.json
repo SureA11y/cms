@@ -1,0 +1,19 @@
+{
+  "name": "@surea11y/sanity",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SureA11y for Sanity Studio: an accessibility checker for the people who write the content, beside the form",
+  "license": "MPL-2.0",
+  "type": "module",
+  "main": "src/index.js",
+  "files": ["src/", "LICENSE"],
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@portabletext/to-html": "6.0.0"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

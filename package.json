@@ -4,7 +4,8 @@
   "description": "SureA11y for CMS: the shared panel, the CMS pack and the CMS plugins",
   "workspaces": [
     "packages/pack-cms",
-    "packages/panel"
+    "packages/panel",
+    "packages/sanity"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
