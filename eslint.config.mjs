@@ -13,6 +13,7 @@ export default [
       'vendor/**',
       'plugins/*/build/**',
       'packages/*/dist/**',
+      'packages/*/build/**',
       'dev/*/dist/**',
       'prototypes/**'
     ]
