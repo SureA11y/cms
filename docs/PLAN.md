@@ -390,8 +390,13 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
       See `docs/research/2026-11-16-headless.md`. It recommends Sanity
       first: content fields checked in the editor (mode A), then a preview
       script (mode B). Storyblok shipped a free built-in checker on
-      2026-10-23. Waiting on the maintainer's choice.
-- [ ] First adapter for the platform the investigation favours.
+      2026-10-23.
+- [ ] Sanity: a Studio plugin with the panel as a side panel, checking the
+      content fields (mode A), answers kept in a document type of ours.
+- [ ] Sanity: a preview script for sites using its live preview (mode B),
+      mapping problems to fields through Sanity's own tags.
+- [ ] Contentful, as a private app; then Storyblok, only with a clear lead
+      over its built-in checker.
 
 ### Phase 5: Drupal
 
@@ -527,5 +532,6 @@ and can be shared with other SureA11y products.
 ## Open
 
 - [ ] Confirm the `surea11y` slug on WordPress.org and Drupal.org.
-- [ ] Choose the headless platform after the Phase 4 investigation.
+- [x] Choose the headless platform after the Phase 4 investigation:
+      Sanity first, then Contentful, then Storyblok (see `docs/decisions.md`).
 - [ ] Whether, and when, this repository becomes public.
