@@ -26,8 +26,14 @@ A running log, newest first. Each entry says what was decided and why.
   then the browser's, then English: the panel's words, the engine's
   messages and the "how to check" steps, in the five languages the panel
   has. Added the same day.
-- **Not yet:** an editor tab with lines under fields (the option on top),
-  the live preview check, and the Marketplace.
+- **The editor tab** followed the same day, proven and checked by the
+  maintainer in the real editor: Contentful's field editors, each given a
+  field-level SDK built from the entry editor's; lines under fields; Show
+  moving to the field. It needs React 18 (Contentful's editors don't run on
+  19), so the repository pins React 18.3.1, and Lingui started in English
+  with its message compiler, as the web app does. It is 980 KB compressed,
+  loaded only in the tab.
+- **Not yet:** the live preview check, and the Marketplace.
 
 ## 2026-11-16: Where the checker sits in Contentful
 

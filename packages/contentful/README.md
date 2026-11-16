@@ -22,6 +22,19 @@ does not claim legal compliance.
 - **Check it** shows how to check a finding by hand and asks whether it is
   fine. **Hide for me** sets a finding aside for one person.
 
+### The editor tab (optional)
+
+A team can also add an editor tab, next to Contentful's own "Editor", per
+content type (the content type's Entry editors settings, or the editor
+interface's `editors`). It draws the entry's fields with Contentful's own
+field editors (`@contentful/default-field-editors`), with a line under each
+field with a finding, and the panel beside them. Because the tab draws the
+form, **Show** moves to the field and puts the cursor in it.
+
+- It draws Contentful's built-in field editors only: a field whose editor
+  is another app looks different there. The sidebar stays the base.
+- It is about 980 KB compressed, loaded only when the tab is opened.
+
 ## What is checked
 
 The entry's content, as the page will have it:
