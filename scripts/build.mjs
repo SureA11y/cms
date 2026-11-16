@@ -246,30 +246,33 @@ for (const locale of ['de', 'es', 'fr', 'ja']) {
   );
 }
 
-// The Sanity plugin takes the same engine and steps, as modules that export
-// each script's text: the plugin imports one only when a check first needs
-// it, and runs it from a blob: address in its sandbox. A bundler (the
-// Studio's) then keeps them out of the Studio's own bundle, in files of
-// their own, without needing to know where the package's assets live.
-const sanityOut = path.join(root, 'packages/sanity/dist');
-fs.rmSync(sanityOut, { recursive: true, force: true });
-fs.mkdirSync(sanityOut, { recursive: true });
+// The Sanity plugin and the Contentful app take the same engine and steps,
+// as modules that export each script's text: the code imports one only when
+// a check first needs it, and runs it from a blob: address in its sandbox.
+// A bundler (the Studio's, the app's) then keeps them out of the main
+// bundle, in files of their own, without needing to know where the
+// package's assets live.
 const asModule = (file) =>
   `export default ${JSON.stringify(fs.readFileSync(path.join(out, file), 'utf8'))};\n`;
-fs.writeFileSync(path.join(sanityOut, 'engine.js'), asModule('engine.js'));
-// The pack a check names, so the engine applies its profiles.
-fs.writeFileSync(
-  path.join(sanityOut, 'pack.js'),
-  `export const PACK = ${JSON.stringify(`${pack.name}@${pack.version}`)};\n`
-);
-for (const locale of ['en', 'es', 'de', 'fr', 'ja']) {
-  fs.writeFileSync(path.join(sanityOut, `review.${locale}.js`), asModule(`review.${locale}.js`));
-}
-for (const locale of ['de', 'es', 'fr', 'ja']) {
+for (const target of ['packages/sanity/dist', 'packages/contentful/dist']) {
+  const dir = path.join(root, target);
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, 'engine.js'), asModule('engine.js'));
+  // The pack a check names, so the engine applies its profiles.
   fs.writeFileSync(
-    path.join(sanityOut, `engine.i18n.${locale}.js`),
-    asModule(`engine.i18n.${locale}.js`)
+    path.join(dir, 'pack.js'),
+    `export const PACK = ${JSON.stringify(`${pack.name}@${pack.version}`)};\n`
   );
+  for (const locale of ['en', 'es', 'de', 'fr', 'ja']) {
+    fs.writeFileSync(path.join(dir, `review.${locale}.js`), asModule(`review.${locale}.js`));
+  }
+  for (const locale of ['de', 'es', 'fr', 'ja']) {
+    fs.writeFileSync(
+      path.join(dir, `engine.i18n.${locale}.js`),
+      asModule(`engine.i18n.${locale}.js`)
+    );
+  }
 }
 
 for (const f of fs.readdirSync(out)) {

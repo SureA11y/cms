@@ -2,6 +2,50 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: How the Contentful app is built
+
+- **The sidebar app first**, `packages/contentful`, `@surea11y/contentful`,
+  MPL-2.0. An entry's Rich Text blocks and Media images are the items, named
+  "field#block" ("body#2"), so each card names its field and block.
+- **No Show.** Contentful's apps can't move the form to a field, so the
+  panel's new `canShow` property (default true) leaves out Show and the
+  arrows; cards name the field instead.
+- **Alternative text is the asset's description**, set once in Media, and
+  the card about it opens the image (`navigator.openAsset`).
+- **Answers** are kept in entries of the app's own content type
+  `surea11yReview`, one per checked entry, never published. The app's
+  configuration screen creates it and puts the panel in every content
+  type's sidebar, under Publish.
+- **The engine** travels as text and runs from a `blob:` address, as in
+  Sanity; the build now writes the engine files for both packages.
+- **Tested** on the maintainer's test space: on a test page with a
+  stand-in for the App SDK backed by the space's real data (Contentful's
+  editor needs a person's login), and installed as a private app, hosted by
+  Contentful, where the maintainer checked it in the real editor.
+- **Not yet:** an editor tab with lines under fields (the option on top),
+  the live preview check, languages other than English, and the
+  Marketplace.
+
+## 2026-11-16: Where the checker sits in Contentful
+
+From three mock-ups (a panel in the sidebar, an editor tab of our own, a
+summary with a dialog), the maintainer asked for the best and left the
+choice to the recommendation: the sidebar as the base, the tab as an option.
+
+- **The sidebar panel is the base.** A section of the entry's sidebar, under
+  Publish. It works in every space with Contentful's own editor, including
+  the field apps a team already has. Cards name the field and where in it,
+  since an app can't move the form to a field. An image's alternative text
+  is its description in Media, so the fix opens the image.
+- **An editor tab of our own is the option on top**, once proven: the
+  entry's fields drawn with Contentful's published field editors, a line
+  under each field with a finding, and Show moving to the field. Not the
+  base: it is a second editor, chosen per content type, and could miss other
+  apps' field editors a team relies on.
+- **Not taken:** the panel in a dialog, which covers the form.
+- **Answers** are kept in the space, in a content type of the app's own; the
+  live preview check follows later, as in Sanity.
+
 ## 2026-11-16: The preview check in Sanity: one panel, one list
 
 The maintainer chose from three mock-ups (one list, two lists, a panel

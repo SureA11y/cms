@@ -65,6 +65,8 @@ docs/                  plan, decisions, research
 packages/pack-cms/     @surea11y/pack-cms         LICENSE: MPL-2.0
 packages/sanity/       @surea11y/sanity           LICENSE: MPL-2.0 (Sanity Studio plugin)
 dev/sanity-studio/     a Studio for developing and testing it (not shipped)
+dev/preview-site/      a website with Sanity's live preview, for testing (not shipped)
+packages/contentful/   @surea11y/contentful       LICENSE: MPL-2.0 (Contentful app)
 prototypes/            throwaway experiments, such as Phase 0
 ```
 
@@ -405,8 +407,13 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
 - [x] Sanity: a preview script for sites using its live preview (mode B),
       mapping problems to fields through Sanity's own tags, merged with
       the fields' check in one list (see the decision of 2026-11-16).
-- [ ] Contentful, as a private app; then Storyblok, only with a clear lead
-      over its built-in checker.
+- [x] Contentful, as a private app: a panel in the entry's sidebar
+      (`packages/contentful`; see the decisions "Where the checker sits in
+      Contentful" and "How the Contentful app is built"). Tested on the
+      maintainer's test space and checked by the maintainer in the editor.
+- [ ] Contentful: an editor tab of our own with lines under fields, once
+      proven; the live preview check; languages other than English.
+- [ ] Storyblok, only with a clear lead over its built-in checker.
 
 ### Phase 5: Drupal
 

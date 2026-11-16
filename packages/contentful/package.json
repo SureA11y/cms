@@ -1,0 +1,25 @@
+{
+  "name": "@surea11y/contentful",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SureA11y for Contentful: an accessibility checker for the people who write the content, in the entry's sidebar",
+  "license": "MPL-2.0",
+  "type": "module",
+  "main": "src/index.js",
+  "files": [
+    "src/",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@contentful/rich-text-html-renderer": "17.2.3",
+    "@contentful/rich-text-types": "17.2.7",
+    "@contentful/app-sdk": "5.0.0"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

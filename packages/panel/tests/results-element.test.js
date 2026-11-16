@@ -532,3 +532,13 @@ test('reviews set by the host show who and when; without permission there is no 
   assert.ok(!buttonIn(tableCard(el), "Yes, it's fine"));
   el.remove();
 });
+
+test('a host that cannot show a place gets no Show buttons and no arrows', () => {
+  const el = make();
+  assert.ok($$(el, 'button').some((b) => b.textContent === 'Show'));
+  el.canShow = false;
+  assert.ok(!$$(el, 'button').some((b) => b.textContent === 'Show'));
+  assert.equal($$(el, '.nav').length, 0);
+  assert.ok($$(el, 'li.card').length > 0, 'the cards stay');
+  el.remove();
+});
