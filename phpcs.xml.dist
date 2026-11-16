@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<ruleset name="SureA11y">
+	<description>WordPress's coding standards for the plugin, with the security and database checks WordPress.org's Plugin Check runs, and PHP 7.4 compatibility.</description>
+
+	<file>plugins/wordpress</file>
+	<exclude-pattern>plugins/wordpress/build/*</exclude-pattern>
+	<arg name="extensions" value="php"/>
+	<arg value="s"/>
+
+	<rule ref="WordPress-Extra"/>
+	<rule ref="WordPress.Security"/>
+	<rule ref="WordPress.DB"/>
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="surea11y"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- The plugin's minimum (Requires PHP in surea11y.php). -->
+	<config name="testVersion" value="7.4-"/>
+	<rule ref="PHPCompatibilityWP"/>
+</ruleset>

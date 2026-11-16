@@ -156,7 +156,9 @@ export class ResultsElement extends HTMLElement {
     this._editUrl = '';
     this._locale = 'en';
     this._only = null; // the group the tiles filter to
-    this._closed = new Set(['reviewed', 'marked']);
+    // Folded until opened: what needs nothing now. "Probably fine" is the
+    // checker's own all-clear; its count stays on its tile.
+    this._closed = new Set(['probably-fine', 'reviewed', 'marked']);
     this._reviews = {};
     this._canReview = false;
     this._reviewer = '';

@@ -19,6 +19,119 @@ A running log, newest first. Each entry says what was decided and why.
   end-to-end tests were run with the overrides.
 - **Remove them** once Playground raises its pins.
 
+## 2026-11-15: Interface fixes from the stress tests
+
+- **The page checker on a phone.** WordPress's toolbar shows only its own
+  chosen items below 782 pixels, so "Check accessibility" vanished on
+  phones. It now shows there as an icon the size of WordPress's own, its
+  words kept for screen readers.
+- **The page panel off the screen.** A page wider than the phone's screen
+  (a long web address in the text, say) is laid out wider than the screen,
+  and the fixed panel was placed against that layout, half off the screen.
+  The panel now takes the visible area's right edge and width when the
+  layout is wider than it or it is narrow, and follows zoom and scrolling
+  (`visualViewport`). Checked at 390 by 844: everything in view, the
+  engine's own checks pass on the panel.
+- **"Probably fine" starts folded.** It is the checker's own all-clear; open
+  by default it put every probably-fine card between the editor and what
+  needs work (on a 600-block post, hundreds more tab stops). Its count stays
+  on its tile, a tile opens it, and showing a place in it unfolds it.
+- **Checked and fine.** The panel alone in five languages at 280, 320 and
+  600 pixels with 300 findings: nothing overflows its box, nothing scrolls
+  sideways, the engine's WCAG 2.2 AA checks pass, under 25 ms to draw.
+
+## 2026-11-15: Markers placed in one pass, after a stress test froze the editor
+
+- **Found.** On a 600-block post with 671 findings, typing with the sidebar
+  open froze the editor for up to 973 ms after a pause, and 375 ms while
+  typing; with the checker off, the editor's own pauses were under 190 ms.
+  The check itself took 81 ms, and the panel alone draws 300 cards in under
+  25 ms. The time went in the markers beside the blocks: for each one,
+  reading its block's position after moving the last marker made the
+  browser lay the whole canvas out again.
+- **Fixed.** The markers read every position first, then move every marker:
+  one layout a time. They aren't drawn again when the cards and the place
+  shown haven't changed; then they are only moved, in the next frame.
+- **Measured after.** The pause after typing went from 973 to 319 ms (the
+  check and the sidebar's 224 cards, once, after typing stops), and nothing
+  while typing beyond the editor's own.
+
+## 2026-11-15: A lock per post, after a stress test lost answers
+
+- **Found.** 40 answers sent at the same moment by two people on one post:
+  32 kept. Each answer reads the post's answers, adds to them and writes
+  them back; two at once, and the later write erased the earlier. Records
+  were safe (each is its own post); summaries and "Hide for me" had the same
+  shape of risk.
+- **Fixed.** `surea11y_with_lock()` (`includes/lock.php`): a lock per post
+  around every change of its answers, records and summary, and per person
+  around "Hide for me". Taken with an `INSERT IGNORE` into the options
+  table, as WordPress's own upgrader does, so the database lets one request
+  through; reads inside start from what is stored, not a cached copy. A
+  lock older than 30 seconds is taken as left behind; a request that waits
+  more than 10 seconds gets a 409 "try again" instead of losing data.
+- **Checked.** The same stress three times: 40 of 40 kept, no lock left
+  behind. An end-to-end test now sends 20 answers from two people at once
+  and expects all 20.
+
+## 2026-11-15: WordPress's coding standards in CI
+
+- **What.** `composer lint:php` runs PHP_CodeSniffer with WordPress-Extra,
+  the security and database sniffs WordPress.org's Plugin Check uses, the
+  i18n check for the `surea11y` text domain, and PHP 7.4 compatibility
+  (`phpcs.xml.dist`); CI runs it on every pull request. The tools are
+  development dependencies in `composer.json`, never shipped.
+- **Plugin Check itself.** Its static rules (`plugin-review.xml`, version
+  2.2.0) were run here without its four sniffs of its own: no finding. The
+  full tool needs WP-CLI or its admin screen in a WordPress; run it once
+  before submitting.
+- **What it found.** Layout only (alignment, function-call formatting),
+  fixed with `phpcbf`, and two parameters named `$list`, a reserved word,
+  renamed.
+
+## 2026-11-15: Security review before the release (Phase 3)
+
+Read every PHP file of the plugin and the browser code that handles the
+site's data. What holds, and what changed.
+
+- **Held.** Every REST route checks who may use it (the checker's own
+  capability and `edit_post`, `edit_theme_options` for rendering
+  templates, the review capability for answers); the REST API's cookie
+  nonce keeps other sites out. Input is cleaned and capped (keys 1,000
+  characters, notes 500, 50 keys a request, 300 findings a record, 20
+  records a post, 200 blocks and 1 MB a render). The one SQL query with
+  input is prepared. Output is escaped; CSV cells a spreadsheet would read
+  as a formula start with an apostrophe; the configuration is JSON in a
+  data script with `<`, `>` and `&` escaped. Content is only parsed in
+  inert templates and checked in a frame whose own policy runs no inline
+  handlers, frames or requests. WordPress sends no-cache headers to
+  logged-in people, so the page checker's configuration (with a REST nonce
+  and reviewers' names) isn't cached for others.
+- **Changed: the sandbox runs only the engine's own files.** Its policy
+  allowed scripts from the whole site's origin; it now names each script's
+  address (`scriptSources`), so no other script of the site could run in
+  it even if content smuggled one in.
+- **Changed: records can't be reached through WordPress.** The record post
+  type now has capabilities nobody is given, so no screen or API can edit,
+  read or delete a record; and the routes accept only real content (not a
+  record or a revision), through `surea11y_checkable()`.
+- **Changed: "Hide for me" is capped per person.** The editor preferences
+  it lives in go with every editor a person opens; at most 200 posts are
+  kept (those with the highest IDs, in the editor and on the server alike).
+- **Added: uninstall.** Deleting the plugin removes its settings, reviews,
+  summaries, records and each person's "Hide for me" entry, on every site
+  of a network. Deactivating keeps everything. The readme says to export
+  the records first.
+- **Added: privacy.** Suggested text for the site's privacy policy, and
+  WordPress's personal data export and erasure: the export lists a
+  person's answers and the records they made or answered in; erasure keeps
+  the answers as evidence and removes the person's account and notes.
+- **Not changed, on purpose.** Anyone who can edit a post may add records
+  of it; the last 20 are kept, and a record repeating the last isn't, so
+  the worst case is 20 records of 300 findings. Rendering templates runs
+  their blocks as WordPress does for visitors, for people who can already
+  edit them.
+
 ## 2026-11-15: Core ships inside each plugin release; sites get a new core by updating the plugin
 
 - **Bundled, not loaded.** The build puts core and the CMS pack into the

@@ -19,12 +19,14 @@ define( 'SUREA11Y_VERSION', '0.1.0' );
 define( 'SUREA11Y_FILE', __FILE__ );
 
 require_once __DIR__ . '/includes/settings.php';
+require_once __DIR__ . '/includes/lock.php';
 require_once __DIR__ . '/includes/reviews.php';
 require_once __DIR__ . '/includes/hidden.php';
 require_once __DIR__ . '/includes/evidence.php';
 require_once __DIR__ . '/includes/overview.php';
 require_once __DIR__ . '/includes/columns.php';
 require_once __DIR__ . '/includes/site-editor.php';
+require_once __DIR__ . '/includes/privacy.php';
 
 /**
  * The locales the engine has messages for, besides English, each with its
@@ -54,11 +56,11 @@ function surea11y_is_built() {
  */
 function surea11y_config( $profile, $post_id = 0 ) {
 	$settings = surea11y_settings();
-	$build   = plugins_url( 'build/', __FILE__ );
-	$dir     = plugin_dir_path( __FILE__ ) . 'build/';
-	$version = (string) filemtime( $dir . 'engine.js' );
-	$locale  = strtolower( substr( determine_locale(), 0, 2 ) );
-	$locales = array();
+	$build    = plugins_url( 'build/', __FILE__ );
+	$dir      = plugin_dir_path( __FILE__ ) . 'build/';
+	$version  = (string) filemtime( $dir . 'engine.js' );
+	$locale   = strtolower( substr( determine_locale(), 0, 2 ) );
+	$locales  = array();
 	// How to check a finding by hand: English, which brings the helper that
 	// reads them, then the person's language. Loaded on the first question.
 	$review = array( $build . 'review.en.js?ver=' . $version );
@@ -67,9 +69,9 @@ function surea11y_config( $profile, $post_id = 0 ) {
 		$review[]           = $build . 'review.' . $locale . '.js?ver=' . $version;
 	}
 	return array(
-		'engineUrl'  => $build . 'engine.js?ver=' . $version,
-		'localeUrls' => $locales,
-		'locale'     => $locale,
+		'engineUrl'     => $build . 'engine.js?ver=' . $version,
+		'localeUrls'    => $locales,
+		'locale'        => $locale,
 		'profile'       => $profile,
 		'packs'         => array( '@surea11y/pack-cms@' . surea11y_pack_version() ),
 		'disabledRules' => $settings['disabled_rules'],
@@ -201,7 +203,20 @@ function surea11y_enqueue_page_assets() {
 	}
 	$panel = surea11y_register_panel();
 	wp_enqueue_script( 'surea11y-page', plugins_url( 'src/page.js', __FILE__ ), array( $panel ), SUREA11Y_VERSION, true );
-	$user = wp_get_current_user();
+	// On a phone, WordPress's toolbar shows only its own chosen items:
+	// show "Check accessibility" there too, as an icon the size of theirs,
+	// its words kept for screen readers.
+	wp_add_inline_style(
+		'admin-bar',
+		'@media screen and (max-width: 782px) {'
+		. '#wpadminbar li#wp-admin-bar-surea11y { display: block; }'
+		. '#wpadminbar #wp-admin-bar-surea11y > .ab-item { width: 52px; padding: 0; justify-content: center; }'
+		. '#wpadminbar #wp-admin-bar-surea11y .ab-icon { margin: 0; width: 52px; height: 46px; }'
+		. '#wpadminbar #wp-admin-bar-surea11y .ab-icon:before { font: normal 32px/46px dashicons; width: 52px; text-align: center; top: 0; }'
+		. '#wpadminbar #wp-admin-bar-surea11y .ab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }'
+		. '}'
+	);
+	$user                       = wp_get_current_user();
 	$GLOBALS['surea11y_config'] = array_merge(
 		surea11y_config( 'cms-page', $post_id ),
 		array(

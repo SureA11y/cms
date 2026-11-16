@@ -17,7 +17,7 @@ function escapeAttr(value) {
  * rendered inside an admin page: inline handlers (`onerror`), `javascript:`
  * URLs and frames must not run, and nothing may be fetched that the editor
  * hasn't already loaded from the site or its media. Scripts come only from
- * where the engine is served.
+ * the engine's own files (`scriptSources`).
  */
 export function sandboxPolicy(scriptOrigins = ["'self'"]) {
   return [
@@ -54,6 +54,26 @@ export function renderItems(container, items) {
 }
 
 /**
+ * The script sources the sandbox's policy allows: each script's own address,
+ * without its query (`?ver=…`), so no other script of the site can run in
+ * the frame. An address that can't be read falls back to the frame's origin.
+ */
+export function scriptSources(urls, base) {
+  return [
+    ...new Set(
+      urls.map((u) => {
+        try {
+          const url = new URL(u, base);
+          return url.origin + url.pathname;
+        } catch {
+          return "'self'";
+        }
+      })
+    )
+  ];
+}
+
+/**
  * Creates a sandbox in `hostDocument`.
  *
  * - `engineUrl`: the browser bundle with the CMS pack (built by
@@ -80,17 +100,7 @@ export function createSandbox(hostDocument, options) {
   frame.className = 'surea11y-sandbox';
   frame.style.cssText = `position:fixed;left:-20000px;top:0;width:${Number(width) || 800}px;height:900px;border:0;visibility:hidden;pointer-events:none;`;
   const scriptUrls = [engineUrl, ...Object.values(localeUrls)].filter(Boolean);
-  const origins = [
-    ...new Set(
-      scriptUrls.map((u) => {
-        try {
-          return new URL(u, hostDocument.baseURI).origin;
-        } catch {
-          return "'self'";
-        }
-      })
-    )
-  ];
+  const origins = scriptSources(scriptUrls, hostDocument.baseURI);
   const scripts = scriptUrls.map((src) => `<script src="${escapeAttr(src)}"></script>`).join('');
   frame.srcdoc =
     '<!doctype html>' +

@@ -436,10 +436,22 @@
 		const all = data.select( 'core/preferences' ).get( PREFS, 'fine' ) || {};
 		return all[ postKey() ] || [];
 	}
+	// The preferences go with every editor this person opens: keep at most
+	// 200 posts, those with the highest IDs (the newest posts), as
+	// includes/hidden.php does.
+	const MAX_MARKED_POSTS = 200;
 	function saveMarked( keys ) {
 		const all = Object.assign( {}, data.select( 'core/preferences' ).get( PREFS, 'fine' ) || {} );
-		all[ postKey() ] = keys.slice( -MAX_MARKED );
-		data.dispatch( 'core/preferences' ).set( PREFS, 'fine', all );
+		delete all[ postKey() ];
+		if ( keys.length ) {
+			all[ postKey() ] = keys.slice( -MAX_MARKED );
+		}
+		const kept = {};
+		Object.keys( all )
+			.sort( ( a, b ) => Number( a ) - Number( b ) )
+			.slice( -MAX_MARKED_POSTS )
+			.forEach( ( id ) => ( kept[ id ] = all[ id ] ) );
+		data.dispatch( 'core/preferences' ).set( PREFS, 'fine', kept );
 	}
 
 	/* ---------- the checker ---------- */

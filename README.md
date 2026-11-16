@@ -30,6 +30,7 @@ does not change what visitors see, and does not claim legal compliance.
 | --- | --- |
 | [`docs/ideas.md`](docs/ideas.md) | The idea as first discussed: where checks can run, what makes it different, open risks |
 | [`docs/decisions.md`](docs/decisions.md) | Decisions made so far, with the reasoning |
+| [`docs/editors/`](docs/editors/) | For editors: how to use the checker, and what each finding means |
 | [`docs/research/`](docs/research/) | Analysis of our engine and of existing CMS accessibility checkers |
 | [`packages/pack-cms/`](packages/pack-cms/) | `@surea11y/pack-cms`: core's rules sorted into content and theme profiles, and checks authors need |
 | [`packages/panel/`](packages/panel/) | `@surea11y/panel`: the results panel every CMS integration embeds |
@@ -118,6 +119,20 @@ npm run test:e2e:local
 
 `test:e2e:local` takes the site's address and login from
 `tests/e2e/wp-env.env`. See [`tests/e2e/README.md`](tests/e2e/README.md).
+
+## Checks
+
+What CI runs on every pull request, and how to run it here:
+
+| Command | What it checks |
+| --- | --- |
+| `npm run lint` | JavaScript (ESLint) |
+| `npm run format:check` | Formatting (Prettier) |
+| `npm test` | Unit tests of the packages |
+| `npm run size` | Size budgets, after `npm run build` |
+| `composer install` then `composer lint:php` | The plugin's PHP: WordPress's coding standards, the security and database checks WordPress.org's Plugin Check runs, PHP 7.4 compatibility (`phpcs.xml.dist`) |
+| `npm run test:e2e:local` | End to end, in a real WordPress (see above) |
+| `npm run package` | The plugin's zip for WordPress.org, in `dist/` (refuses an unreleased core) |
 
 ## Related repositories
 

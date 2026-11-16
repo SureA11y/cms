@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { renderItems, sandboxPolicy } from '../src/sandbox.js';
+import { renderItems, sandboxPolicy, scriptSources } from '../src/sandbox.js';
 
 test('items are rendered as siblings, each top-level element marked with its id', () => {
   const doc = new JSDOM('<main></main>').window.document;
@@ -41,4 +41,22 @@ test("the sandbox's policy blocks inline scripts, frames and requests", () => {
   assert.doesNotMatch(policy, /script-src[^;]*unsafe-inline/);
   assert.match(policy, /frame-src 'none'/);
   assert.match(policy, /connect-src 'none'/);
+});
+
+test('scripts are allowed by their own address, not the whole site', () => {
+  const sources = scriptSources(
+    [
+      'https://example.test/wp-content/plugins/surea11y/build/engine.js?ver=1',
+      '/wp-content/plugins/surea11y/build/engine.i18n.es.js?ver=1'
+    ],
+    'https://example.test/wp-admin/post.php'
+  );
+  assert.deepEqual(sources, [
+    'https://example.test/wp-content/plugins/surea11y/build/engine.js',
+    'https://example.test/wp-content/plugins/surea11y/build/engine.i18n.es.js'
+  ]);
+  assert.match(
+    sandboxPolicy(sources),
+    /script-src https:\/\/example\.test\/wp-content\/plugins\/surea11y\/build\/engine\.js /
+  );
 });

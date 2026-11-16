@@ -12,7 +12,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-const SUREA11Y_MAX_HIDDEN = 500; // Per post and person, as in the editor.
+const SUREA11Y_MAX_HIDDEN       = 500; // Per post and person, as in the editor.
+const SUREA11Y_MAX_HIDDEN_POSTS = 200; // Posts per person.
 
 /** The user meta the editor's preferences are kept in, for this site. */
 function surea11y_preferences_meta_key() {
@@ -59,8 +60,16 @@ function surea11y_set_hidden( $post_id, $keys, $hidden ) {
 	if ( ! isset( $prefs['surea11y']['fine'] ) || ! is_array( $prefs['surea11y']['fine'] ) ) {
 		$prefs['surea11y']['fine'] = array();
 	}
-	$prefs['surea11y']['fine'][ (string) $post_id ] = $now;
-	$prefs['_modified']                             = gmdate( 'Y-m-d\TH:i:s.000\Z' );
+	unset( $prefs['surea11y']['fine'][ (string) $post_id ] );
+	if ( $now ) {
+		$prefs['surea11y']['fine'][ (string) $post_id ] = $now;
+	}
+	// The preferences go with every editor this person opens: keep at most
+	// SUREA11Y_MAX_HIDDEN_POSTS posts, those with the highest IDs (the newest
+	// posts), as the editor does.
+	ksort( $prefs['surea11y']['fine'], SORT_NUMERIC );
+	$prefs['surea11y']['fine'] = array_slice( $prefs['surea11y']['fine'], -SUREA11Y_MAX_HIDDEN_POSTS, null, true );
+	$prefs['_modified']        = gmdate( 'Y-m-d\TH:i:s.000\Z' );
 	update_user_meta( $user_id, $meta, $prefs );
 	return $now;
 }
@@ -72,7 +81,7 @@ function surea11y_set_hidden( $post_id, $keys, $hidden ) {
  * @return bool
  */
 function surea11y_hidden_permission( $request ) {
-	return surea11y_can_see() && current_user_can( 'edit_post', (int) $request['id'] );
+	return surea11y_can_see() && surea11y_checkable( (int) $request['id'] ) && current_user_can( 'edit_post', (int) $request['id'] );
 }
 
 /** The route: POST { keys, hidden } returns { hidden: [keys] }. */
@@ -116,5 +125,12 @@ function surea11y_change_hidden( $request ) {
 	if ( ! $keys ) {
 		return new WP_Error( 'surea11y_no_keys', __( 'No finding to hide.', 'surea11y' ), array( 'status' => 400 ) );
 	}
-	return rest_ensure_response( array( 'hidden' => surea11y_set_hidden( (int) $request['id'], $keys, (bool) $request['hidden'] ) ) );
+	$hidden = surea11y_with_lock(
+		'user-' . get_current_user_id(),
+		function () use ( $request, $keys ) {
+			wp_cache_delete( get_current_user_id(), 'user_meta' );
+			return surea11y_set_hidden( (int) $request['id'], $keys, (bool) $request['hidden'] );
+		}
+	);
+	return is_wp_error( $hidden ) ? $hidden : rest_ensure_response( array( 'hidden' => $hidden ) );
 }

@@ -336,10 +336,12 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
 - [ ] Security review and a full pass of the quality gates.
 - [ ] Confirm the `surea11y` slug; submit for review.
 - [ ] A release step: with core at a published version (not `setup:core`),
-      run `npm run build` and the tests, raise `Version:` in `surea11y.php`
-      and `Stable tag:` in `readme.txt`, and package `plugins/wordpress/`
-      with its `build/` folder (not in git) for the WordPress.org
-      repository. Each core release that sites need goes out this way; see
+      run the tests, raise the version (`Version:` and `SUREA11Y_VERSION` in
+      `surea11y.php`, `Stable tag:` in `readme.txt`), and run
+      `npm run package`: it checks the three versions agree and core is a
+      release, builds, checks the size budgets, and writes
+      `dist/surea11y-<version>.zip` (the `surea11y/` folder with `build/`,
+      without the developer README) for the WordPress.org repository. Each core release that sites need goes out this way; see
       the decision "Core ships inside each plugin release".
       - **Core must be released first.** The plugin needs rules that are on
         core's main branch but not in 1.17.0 (the CMS pack uses
@@ -350,9 +352,32 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
         is pinned at 1.1.0, which needs `@surea11y/core ~1.17.0`. Raising
         core to 1.18 or later needs a version of the pack that accepts it,
         updated in the same change, or npm won't install the two together.
-- [ ] Translations through translate.wordpress.org.
-- [ ] Documentation for editors (what each message means, how to fix it) and
-      a clear "this is not an overlay" statement.
+- [x] Security review (2026-11-15, see `docs/decisions.md`): sandbox limited
+      to the engine's own files, records out of reach of WordPress's screens
+      and API, capped preferences, uninstall, privacy export, erasure and
+      policy text.
+- [x] WordPress's coding standards and Plugin Check's static rules: clean,
+      and in CI (`composer lint:php`).
+- [x] `npm run package`: the zip for WordPress.org, checked.
+- [x] readme.txt for WordPress.org: description, installation, FAQ (not an
+      overlay, nothing sent, what is stored, deleting), screenshots list,
+      source and third-party code.
+- [ ] Before submitting (needs the maintainer): the WordPress.org username(s)
+      for `Contributors:`; the four screenshots in the plugin's SVN `assets/`;
+      a public link to the source of `build/` (WordPress.org requires
+      readable source for compressed code, and this repository is private);
+      running the full Plugin Check in a WordPress once.
+- [ ] Translations through translate.wordpress.org. The plugin's PHP and
+      editor strings use WordPress's functions and will be translated there;
+      the panel's words (cards, questions, rule titles) come from the panel's
+      own files in five languages and won't. Decide whether WordPress's
+      translations feed the panel too.
+- [x] Documentation for editors (what each message means, how to fix it) and
+      a clear "this is not an overlay" statement: `docs/editors/README.md`
+      (the guide) and `docs/editors/messages.md` (every rule, made by
+      `scripts/editor-docs.mjs` from the build and the panel's messages,
+      checked in CI).
+- [ ] The editors' documentation on a public site, linked from the plugin.
 - [ ] Decide whether the repository becomes public.
 
 **Exit:** approved and listed.

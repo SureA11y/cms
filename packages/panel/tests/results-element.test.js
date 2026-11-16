@@ -134,6 +134,26 @@ test('a marker shows its card from any view, filter or folded group', () => {
   el.remove();
 });
 
+test('"Probably fine" starts folded, with its count on its tile; a tile opens it', () => {
+  const el = make([
+    ...findings,
+    {
+      key: 'pf',
+      ruleId: 'img-alt-quality',
+      group: 'probably-fine',
+      summary: 'Probably fine.',
+      itemId: 'b8'
+    }
+  ]);
+  const toggle = $(el, 'section[data-group="probably-fine"] .group-toggle');
+  assert.equal(toggle.getAttribute('aria-expanded'), 'false');
+  assert.equal($(el, 'section[data-group="probably-fine"] ul'), null);
+  assert.match($$(el, '.tile')[3].textContent, /^1/);
+  $$(el, '.tile')[3].click();
+  assert.ok($(el, 'section[data-group="probably-fine"] ul'));
+  el.remove();
+});
+
 test('groups fold and unfold with a disclosure button', () => {
   const el = make();
   const toggle = $(el, 'section[data-group="likely"] .group-toggle');

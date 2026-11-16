@@ -34,7 +34,14 @@ jobs:
       - run: node scripts/build.mjs
       - name: Size budgets
         run: npm run size
+      - name: Editors' reference up to date
+        run: node scripts/editor-docs.mjs --check
       - name: PHP syntax
         run: for f in $(git ls-files 'plugins/*.php'); do php -l "$f" || exit 1; done
+      # WordPress's coding standards, with the security and database checks
+      # WordPress.org's Plugin Check runs, and PHP 7.4 compatibility
+      # (phpcs.xml.dist).
+      - name: PHP coding standards
+        run: composer install --no-interaction --no-progress && composer lint:php
       - name: Editor script syntax
         run: node --check plugins/wordpress/src/editor.js && node --check plugins/wordpress/src/page.js

@@ -79,6 +79,35 @@ export function createPagePanel(doc, { title, locale = 'en', onClose = () => {} 
   root.append(style, panel);
   doc.body.append(host);
 
+  /*
+   * Kept within what the screen shows. A page wider than a phone's screen
+   * (a long web address in the text, say) makes the browser lay it out wider
+   * than the screen, and a fixed panel is placed against that layout: part
+   * of it ends up off the screen. When the layout is wider than the visible
+   * area, or that area is narrow, the panel takes the visible area's right
+   * edge and width instead, and follows it when the person zooms or scrolls.
+   */
+  const win = doc.defaultView;
+  const NARROW = 600;
+  function fit() {
+    const vv = win && win.visualViewport;
+    if (!vv) return;
+    const layout = doc.documentElement.clientWidth;
+    if (layout <= vv.width + 1 && vv.width >= NARROW) {
+      panel.style.left = panel.style.width = panel.style.right = panel.style.maxWidth = '';
+      return;
+    }
+    const width = Math.min(380, vv.width);
+    panel.style.right = 'auto';
+    panel.style.width = `${width}px`;
+    panel.style.maxWidth = 'none';
+    panel.style.left = `${vv.offsetLeft + vv.width - width}px`;
+  }
+  if (win && win.visualViewport) {
+    win.visualViewport.addEventListener('resize', () => !panel.hidden && fit());
+    win.visualViewport.addEventListener('scroll', () => !panel.hidden && fit());
+  }
+
   let opener = null;
   function open(from) {
     opener = from || doc.activeElement;
@@ -89,6 +118,7 @@ export function createPagePanel(doc, { title, locale = 'en', onClose = () => {} 
       bar ? `${bar.getBoundingClientRect().bottom}px` : '0px'
     );
     panel.hidden = false;
+    fit();
     heading.focus();
   }
   function hide() {
