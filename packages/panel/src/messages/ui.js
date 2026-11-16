@@ -16,6 +16,15 @@ export const UI = {
       reviewed: 'Reviewed, fine',
       marked: 'Hidden by you'
     },
+    // One finding's group, on its card.
+    badges: {
+      problem: 'To fix',
+      likely: 'Likely problem',
+      review: 'Needs a person',
+      'probably-fine': 'Probably fine',
+      reviewed: 'Reviewed, fine',
+      marked: 'Hidden by you'
+    },
     tiles: {
       problem: 'To fix',
       likely: 'Likely problems',
@@ -94,8 +103,8 @@ export const UI = {
     errorDetails: 'Details for your administrator',
     viewLabel: 'What to show',
     viewFindings: 'Findings',
-    viewHeadings: 'Headings ({{n}})',
-    viewImages: 'Images ({{n}})',
+    viewHeadings: 'Headings',
+    viewImages: 'Images',
     headingsTitle: 'Headings',
     imagesTitle: 'Images',
     headingsHelp:

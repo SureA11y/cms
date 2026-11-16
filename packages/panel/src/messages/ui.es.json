@@ -10,6 +10,14 @@
     "reviewed": "Revisados, están bien",
     "marked": "Ocultos por ti"
   },
+  "badges": {
+    "problem": "Por corregir",
+    "likely": "Problema probable",
+    "review": "Necesita una persona",
+    "probably-fine": "Probablemente bien",
+    "reviewed": "Revisado, está bien",
+    "marked": "Oculto por ti"
+  },
   "tiles": {
     "problem": "Por corregir",
     "likely": "Problemas probables",
@@ -85,8 +93,8 @@
   "marker": "{{group}}: {{summary}}",
   "viewLabel": "Qué mostrar",
   "viewFindings": "Hallazgos",
-  "viewHeadings": "Encabezados ({{n}})",
-  "viewImages": "Imágenes ({{n}})",
+  "viewHeadings": "Encabezados",
+  "viewImages": "Imágenes",
   "headingsTitle": "Encabezados",
   "imagesTitle": "Imágenes",
   "headingsHelp": "Los encabezados en orden, como los lista un lector de pantalla. Cada nivel debe seguir al de arriba, y cada encabezado debe decir de qué trata su sección.",

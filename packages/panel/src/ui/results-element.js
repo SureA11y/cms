@@ -86,24 +86,29 @@ summary { cursor: pointer; color: var(--sa11y-accent); }
 
 section { display: flex; flex-direction: column; gap: var(--sa11y-space-2); }
 h2, h3, h4, h5 { margin: 0; font-size: 1em; }
-.group-toggle { width: 100%; display: flex; align-items: center; gap: var(--sa11y-space-2); border: 0; background: transparent; padding: var(--sa11y-space-1) 0; min-height: var(--sa11y-button-height); text-align: start; font-weight: 600; }
+.group-toggle { width: 100%; display: flex; align-items: center; gap: var(--sa11y-space-2); border: 0; border-bottom: 2px solid var(--sa11y-g, var(--sa11y-border)); background: transparent; padding: var(--sa11y-space-1) 0; min-height: var(--sa11y-button-height); text-align: start; font-weight: 600; }
 .group-name { flex-grow: 1; }
-.group-toggle .group-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--sa11y-radius-round); background: var(--sa11y-g-tint); }
+.group-toggle .group-icon { display: inline-flex; }
 .chevron { transition: transform .15s; }
 .group-toggle[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 @media (prefers-reduced-motion: reduce) { .chevron { transition: none; } }
 .help { color: var(--sa11y-text-muted); margin-top: calc(-1 * var(--sa11y-space-1)); }
 ul, ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sa11y-space-2); }
 
-.card { padding: var(--sa11y-space-3); border-radius: var(--sa11y-radius); border: 1px solid var(--sa11y-border); border-inline-start: 4px solid var(--sa11y-g, var(--sa11y-border)); background: var(--sa11y-surface); box-shadow: var(--sa11y-shadow); }
+.card { padding: var(--sa11y-space-3); border-radius: var(--sa11y-radius); border: 1px solid var(--sa11y-border); border-inline-start: 4px solid var(--sa11y-g, var(--sa11y-border)); background: var(--sa11y-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
 .card[aria-current="true"] { border-width: 2px; border-inline-start-width: 4px; }
 .current-label { font-size: var(--sa11y-font-size-small); font-weight: 600; color: var(--sa11y-accent); margin-bottom: var(--sa11y-space-1); }
 .tags { display: flex; flex-wrap: wrap; gap: var(--sa11y-space-1); margin-bottom: var(--sa11y-space-1); }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 1px 8px 1px 6px; border-radius: var(--sa11y-radius-round); background: var(--sa11y-g-tint); color: var(--sa11y-g); }
 .tag { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: var(--sa11y-radius-small); background: var(--sa11y-surface-tag); color: var(--sa11y-text-muted); }
 .summary { font-size: var(--sa11y-font-size-title); font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
 .hint { margin-top: var(--sa11y-space-2); }
 .where { margin-top: var(--sa11y-space-2); font-style: italic; color: var(--sa11y-text-muted); }
 .actions { display: flex; flex-wrap: wrap; gap: var(--sa11y-space-2); margin-top: var(--sa11y-space-3); }
+.button.fix { display: inline-flex; align-items: center; gap: var(--sa11y-space-1); border-color: transparent; background: transparent; padding: 0 var(--sa11y-space-1); font-weight: 600; }
+.button.fix:hover { text-decoration: underline; }
+.button.more { border-color: transparent; background: transparent; color: var(--sa11y-text-muted); padding: 0 var(--sa11y-space-2); }
+.button.more:hover { color: var(--sa11y-text); text-decoration: underline; }
 .more-actions { margin-top: var(--sa11y-space-2); padding-top: var(--sa11y-space-2); border-top: 1px solid var(--sa11y-border); }
 
 ${GROUP_ORDER.concat('reviewed', 'marked')
@@ -119,8 +124,10 @@ ${GROUP_ORDER.concat('reviewed', 'marked')
   .join('\n')}
 
 .views { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; padding: 2px; border: 1px solid var(--sa11y-border-strong); border-radius: var(--sa11y-radius); background: var(--sa11y-surface-subtle); }
-.view { min-height: var(--sa11y-button-height); padding: 2px var(--sa11y-space-1); line-height: 1.25; border-radius: var(--sa11y-radius-small); border: 2px solid transparent; background: transparent; }
+.view { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: var(--sa11y-button-height); padding: 4px var(--sa11y-space-1); line-height: 1.25; border-radius: var(--sa11y-radius-small); border: 2px solid transparent; background: transparent; }
 .view[aria-pressed="true"] { border-color: var(--sa11y-accent); background: var(--sa11y-surface); color: var(--sa11y-accent); font-weight: 600; box-shadow: var(--sa11y-shadow); }
+.view-count { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: var(--sa11y-font-size-small); font-weight: 400; font-variant-numeric: tabular-nums; color: var(--sa11y-text-muted); }
+.view[aria-pressed="true"] .view-count { color: var(--sa11y-accent); }
 .entry { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sa11y-space-1) var(--sa11y-space-2); padding: var(--sa11y-space-2) var(--sa11y-space-3); border-radius: var(--sa11y-radius); border: 1px solid var(--sa11y-border); background: var(--sa11y-surface); }
 .entry-text { flex: 1 1 0; min-width: 6em; overflow-wrap: anywhere; }
 .entry-text em { color: var(--sa11y-text-muted); }
@@ -136,9 +143,12 @@ ${GROUP_ORDER.concat('reviewed', 'marked')
 .question-head { font-weight: 600; }
 ol.steps { list-style: decimal; display: block; padding-inline-start: 1.4em; }
 ol.steps li + li { margin-top: var(--sa11y-space-1); }
-.when { padding: var(--sa11y-space-2) var(--sa11y-space-3); border-radius: var(--sa11y-radius-small); border-inline-start: 4px solid var(--sa11y-border-strong); background: var(--sa11y-surface-subtle); }
-.when[data-kind="fine"] { border-inline-start-color: var(--sa11y-fine); background: var(--sa11y-fine-tint); }
-.when[data-kind="problem"] { border-inline-start-color: var(--sa11y-problem); background: var(--sa11y-problem-tint); }
+.when { display: flex; gap: var(--sa11y-space-2); padding: var(--sa11y-space-2) var(--sa11y-space-3); border-radius: var(--sa11y-radius); border: 1px solid transparent; }
+.when .icon { margin-top: 3px; }
+.when[data-kind="fine"] { background: var(--sa11y-fine-tint); }
+.when[data-kind="fine"] .icon { color: var(--sa11y-fine); }
+.when[data-kind="problem"] { background: var(--sa11y-problem-tint); }
+.when[data-kind="problem"] .icon { color: var(--sa11y-problem); }
 .review-meta { margin-top: var(--sa11y-space-2); color: var(--sa11y-text-muted); }
 .note { margin-top: var(--sa11y-space-1); padding: var(--sa11y-space-1) var(--sa11y-space-2); border-inline-start: 3px solid var(--sa11y-border); white-space: pre-wrap; overflow-wrap: anywhere; }
 .review-form { display: flex; flex-direction: column; gap: var(--sa11y-space-1); margin-top: var(--sa11y-space-3); }
@@ -147,7 +157,9 @@ ol.steps li + li { margin-top: var(--sa11y-space-1); }
 .review-form textarea:focus-visible { outline: var(--sa11y-focus-width) solid var(--sa11y-focus); outline-offset: 1px; }
 
 @media (forced-colors: active) {
-  .tile, .card, .when { border-inline-start-color: CanvasText; }
+  .tile, .card { border-inline-start-color: CanvasText; }
+  .when, .badge { border: 1px solid CanvasText; }
+  .group-toggle { border-bottom-color: CanvasText; }
   .tile[aria-pressed="true"], .card[aria-current="true"] { border-color: Highlight; }
 }
 `;
@@ -470,7 +482,7 @@ export class ResultsElement extends HTMLElement {
     }
 
     this._list.textContent = '';
-    if (views) this._list.append(this._renderViews(doc, t));
+    if (views) this._list.append(this._renderViews(doc, t, counts));
     if (!listing) this._list.append(this._renderOutline(doc, t, this._view));
     else if (kind === 'found' || (kind === 'nothing' && cards.length))
       this._renderList(doc, t, cards, counts);
@@ -561,18 +573,26 @@ export class ResultsElement extends HTMLElement {
     }
   }
 
-  /** Findings, Headings, Images: toggle buttons, one pressed. */
-  _renderViews(doc, t) {
+  /**
+   * Findings, Headings, Images: toggle buttons, one pressed. Each name has
+   * its count on a line of its own, so the names line up; the brackets are
+   * there for screen readers ("Headings (13)").
+   */
+  _renderViews(doc, t, counts) {
     const bar = el(doc, 'div', 'views');
     bar.setAttribute('role', 'group');
     bar.setAttribute('aria-label', t.viewLabel);
-    const names = {
-      findings: t.viewFindings,
-      headings: fill(t.viewHeadings, { n: this._outline.headings.length }),
-      images: fill(t.viewImages, { n: this._outline.images.length })
+    const views = {
+      findings: [t.viewFindings, GROUP_ORDER.reduce((n, g) => n + (counts[g] || 0), 0)],
+      headings: [t.viewHeadings, this._outline.headings.length],
+      images: [t.viewImages, this._outline.images.length]
     };
     for (const v of ['findings', 'headings', 'images']) {
-      const b = el(doc, 'button', 'view', names[v]);
+      const [name, n] = views[v];
+      const b = el(doc, 'button', 'view');
+      const count = el(doc, 'span', 'view-count');
+      count.append(el(doc, 'span', 'sr-only', ' ('), String(n), el(doc, 'span', 'sr-only', ')'));
+      b.append(el(doc, 'span', 'view-name', name), count);
       b.type = 'button';
       b.dataset.focus = `view:${v}`;
       b.setAttribute('aria-pressed', String(this._view === v));
@@ -730,11 +750,15 @@ export class ResultsElement extends HTMLElement {
       card.itemLabel,
       card.places.length > 1 ? fill(t.places, { n: card.places.length }) : ''
     ].filter(Boolean);
-    if (tags.length) {
-      const box = el(doc, 'p', 'tags');
-      for (const tag of tags) box.append(el(doc, 'span', 'tag', tag));
-      li.append(box);
-    }
+    const box = el(doc, 'p', 'tags');
+    const badge = el(doc, 'span', 'badge');
+    badge.append(
+      icon(doc, card.group === 'reviewed' ? 'probably-fine' : card.group, 14),
+      doc.createTextNode(t.badges[card.group] || t.groups[card.group])
+    );
+    box.append(badge);
+    for (const tag of tags) box.append(el(doc, 'span', 'tag', tag));
+    li.append(box);
     const summary = el(doc, 'p', 'summary', card.summary);
     summary.id = id;
     li.append(summary);
@@ -840,7 +864,10 @@ export class ResultsElement extends HTMLElement {
         typeof this._actionsFor === 'function' ? this._actionsFor(card, this._current) || [] : [];
       for (const action of extra) {
         if (action && action.label && typeof action.run === 'function') {
-          add(action.label, 'button', `act:${action.id || action.label}`, () => action.run(card));
+          add(action.label, 'button fix', `act:${action.id || action.label}`, () =>
+            action.run(card)
+          );
+          actions.lastChild.prepend(icon(doc, 'edit', 16));
         }
       }
       if (this._editUrl && !card.outside) {
@@ -854,16 +881,15 @@ export class ResultsElement extends HTMLElement {
         a.dataset.focus = `card:${hash(card.key)}:edit`;
         actions.append(a);
       }
-      // Setting a finding aside: shown at once when it is the only such
-      // action, behind "More" when there are two, so a card shows at most
-      // four buttons and what fixes it comes first.
+      // Setting a finding aside: always behind "More", so what fixes it
+      // comes first and stands out.
       const later = [];
       if (this._canReview && (card.confirmed || card.unsure)) {
         later.push([t.reopen, 'button', 'reopen', () => this._reopen(card)]);
       }
       if (this._canMark && card.group !== 'problem')
         later.push([t.hideForMe, 'link', 'fine', () => this._mark(card, true)]);
-      if (later.length > 1) {
+      if (later.length) {
         const open = this._moreOpen.has(card.key);
         const moreId = `${id}-more`;
         add(t.more, 'button more', 'more', () => {
@@ -937,13 +963,21 @@ export class ResultsElement extends HTMLElement {
       const fineId = `${summaryId}-fine`;
       const problemId = `${summaryId}-problem`;
       if (q && q.passWhen) {
-        const p = el(doc, 'p', 'when', fill(t.fineWhen, { text: q.passWhen }));
+        const p = el(doc, 'p', 'when');
+        p.append(
+          icon(doc, 'probably-fine', 16),
+          el(doc, 'span', '', fill(t.fineWhen, { text: q.passWhen }))
+        );
         p.id = fineId;
         p.dataset.kind = 'fine';
         group.append(p);
       }
       if (q && q.failWhen) {
-        const p = el(doc, 'p', 'when', fill(t.problemWhen, { text: q.failWhen }));
+        const p = el(doc, 'p', 'when');
+        p.append(
+          icon(doc, 'no', 16),
+          el(doc, 'span', '', fill(t.problemWhen, { text: q.failWhen }))
+        );
         p.id = problemId;
         p.dataset.kind = 'problem';
         group.append(p);

@@ -10,6 +10,14 @@
     "reviewed": "Geprüft, in Ordnung",
     "marked": "Von Ihnen ausgeblendet"
   },
+  "badges": {
+    "problem": "Zu beheben",
+    "likely": "Wahrscheinliches Problem",
+    "review": "Braucht einen Menschen",
+    "probably-fine": "Wahrscheinlich in Ordnung",
+    "reviewed": "Geprüft, in Ordnung",
+    "marked": "Von Ihnen ausgeblendet"
+  },
   "tiles": {
     "problem": "Zu beheben",
     "likely": "Wahrscheinliche Probleme",
@@ -85,8 +93,8 @@
   "marker": "{{group}}: {{summary}}",
   "viewLabel": "Anzeigen",
   "viewFindings": "Befunde",
-  "viewHeadings": "Überschriften ({{n}})",
-  "viewImages": "Bilder ({{n}})",
+  "viewHeadings": "Überschriften",
+  "viewImages": "Bilder",
   "headingsTitle": "Überschriften",
   "imagesTitle": "Bilder",
   "headingsHelp": "Die Überschriften der Reihe nach, wie ein Screenreader sie auflistet. Jede Ebene sollte auf die darüber folgen, und jede Überschrift sollte sagen, worum es in ihrem Abschnitt geht.",

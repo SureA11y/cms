@@ -99,7 +99,7 @@ test('the list offers Findings, Headings and Images, and Show names the block', 
   assert.deepEqual(
     views.map((b) => [b.textContent, b.getAttribute('aria-pressed')]),
     [
-      ['Findings', 'true'],
+      ['Findings (0)', 'true'],
       ['Headings (2)', 'false'],
       ['Images (1)', 'false']
     ]
