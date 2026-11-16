@@ -51,17 +51,24 @@ function frames(win, list = []) {
   }
   return list;
 }
+// Contentful's page: the one framing this preview (live preview), or the
+// one that opened it in a new tab.
+const host = () => (window.top !== window ? window.top : window.opener);
 function count() {
   try {
-    return frames(window.top).length;
+    const h = host();
+    if (!h) return 'none (no Contentful page framed or opened this one)';
+    return `${frames(h).length} (${window.top !== window ? 'framed' : 'opened in a new tab'})`;
   } catch (e) {
     return `unknown (${e.name})`;
   }
 }
 function hello() {
   try {
-    for (const f of frames(window.top))
-      if (f !== window) f.postMessage({ surea11y: 'hello', from: 'preview' }, '*');
+    const h = host();
+    if (h)
+      for (const f of frames(h))
+        if (f !== window) f.postMessage({ surea11y: 'hello', from: 'preview' }, '*');
   } catch (e) {
     log.push(`Could not list frames: ${e.name}`);
   }
@@ -77,5 +84,4 @@ window.addEventListener('message', (event) => {
   show();
 });
 hello();
-setTimeout(hello, 2000);
-setTimeout(hello, 6000);
+setInterval(hello, 3000);
