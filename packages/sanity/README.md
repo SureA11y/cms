@@ -82,9 +82,10 @@ The engine is loaded from a `blob:` address. A site whose Content Security
 Policy blocks that can serve the engine file itself and pass its address as
 `engineUrl`.
 
-The Studio shows the preview, the form and this panel side by side. On a
-screen narrower than about 1700 pixels they don't all fit; close the form or
-widen the window.
+In the Presentation tool, the Studio shows the preview, the form and this
+panel side by side, and gives the preview most of the width. The panel can
+start partly off the right edge, even on a 1920-pixel screen: drag the
+divider between the preview and the form to the left to make room.
 
 ## Privacy
 
