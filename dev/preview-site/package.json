@@ -1,0 +1,15 @@
+{
+  "name": "surea11y-sanity-preview-site",
+  "private": true,
+  "description": "A small website with Sanity's live preview, for testing the preview check; not shipped",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild site.js --bundle --format=esm --define:process.env.NODE_ENV='\"production\"' --outfile=dist/site.js --log-level=warning",
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "@portabletext/to-html": "6.0.0",
+    "@sanity/client": "8.14.1",
+    "@sanity/visual-editing": "^6.2.0"
+  }
+}

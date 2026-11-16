@@ -113,5 +113,8 @@
   "phoneError": "Die Prüfung in Smartphone-Breite wurde nicht abgeschlossen.",
   "moreInField": "{{n}} weitere in diesem Feld",
   "details": "Details",
-  "fieldLines": "Befunde unter jedem Feld zeigen"
+  "fieldLines": "Befunde unter jedem Feld zeigen",
+  "websiteDesign": "Design der Website",
+  "inWebsite": "Im Design der Website, nicht in Ihrem Inhalt: Wer die Website betreut, kann es beheben.",
+  "checkedBoth": "In den Feldern und auf der Vorschauseite geprüft."
 }

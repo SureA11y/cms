@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "@portabletext/to-html": "6.0.0",
-    "@surea11y/panel": "0.1.0"
+    "@surea11y/panel": "0.1.0",
+    "@vercel/stega": "1.1.0"
   },
   "engines": {
     "node": ">=22.12"
@@ -24,5 +25,18 @@
   "peerDependencies": {
     "react": "^19",
     "sanity": "^6"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./preview": "./src/preview.js",
+    "./package.json": "./package.json"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "sanity": {
+      "optional": true
+    }
   }
 }
