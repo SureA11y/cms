@@ -15,6 +15,7 @@ export default [
       'packages/*/dist/**',
       'packages/*/build/**',
       'dev/*/dist/**',
+      'dev/*/*/dist/**',
       'prototypes/**'
     ]
   },

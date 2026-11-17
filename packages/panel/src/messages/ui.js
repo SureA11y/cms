@@ -114,6 +114,8 @@ export const UI = {
     inWebsite:
       "In the website's design, not in your content: whoever looks after the website can fix it.",
     checkedBoth: 'Checked in the fields and on the preview page.',
+    // A page finding on a preview page with no tags to name its field.
+    onPage: 'On the page',
     viewFindings: 'Findings',
     viewHeadings: 'Headings',
     viewImages: 'Images',

@@ -19,6 +19,10 @@ import { entryItems, linkedAssets } from './content.js';
 import { PACK } from '../dist/pack.js';
 import { loadAnswers, saveAnswer, removeAnswers, loadHidden, saveHidden } from './reviews.js';
 import { engineLocaleUrls, loadPanelWords, pickLocale, questionLoader, WORDS } from './language.js';
+import { mergeFindings } from './merge.js';
+import { previewOriginsOf } from './origins.js';
+import { assetFieldsOf } from './content.js';
+import { MESSAGE_SOURCE, VERSION, framesIn } from './preview-protocol.js';
 
 // The fields are checked without the website's styles, so colours can't be.
 const LEFT_OUT = ['contrast-minimum', 'contrast-computable', 'link-in-text-block'];
@@ -49,12 +53,21 @@ function assetIn(asset, locale) {
 /**
  * Options, for the editor tab: `canShow` and `onShow(itemId, field)` when the
  * host can show a place (the tab draws the form itself); `onResults(findings,
- * fieldOf)` after each check, for the lines under fields.
+ * fieldOf, { page })` after each check, for the lines under fields;
+ * `preview`, to check the live preview's page with the fields when the site
+ * runs the preview script and its address is set on the configuration
+ * screen.
  */
 export function mount(
   sdk,
   root,
-  { doc = root.ownerDocument, canShow = false, onShow = null, onResults = null } = {}
+  {
+    doc = root.ownerDocument,
+    canShow = false,
+    onShow = null,
+    onResults = null,
+    preview = false
+  } = {}
 ) {
   const locale = sdk.locales.default;
   const entryId = sdk.ids.entry;
@@ -79,6 +92,11 @@ export function mount(
   const assets = {};
   let labels = {};
   let fieldOf = {};
+  let ownFieldOf = {};
+  let own = []; // the fields' findings
+  let page = null; // the preview page's results, while it answers
+  let onPreview = {}; // finding key → where it is on the preview page
+  const names = Object.fromEntries(fields.map((f) => [f.id, f.name]));
 
   defineResultsElement();
   const results = doc.createElement('surea11y-results');
@@ -118,16 +136,42 @@ export function mount(
     );
   }
 
+  const tell = () => onResults && onResults(results.findings, fieldOf, { page: !!page });
+
+  /** The fields' findings and the preview page's, as one list. */
+  function merge() {
+    const words = uiStrings(lang);
+    const out = mergeFindings(entryId, own, page, {
+      labels,
+      fieldOf: ownFieldOf,
+      names,
+      assetFields: assetFieldsOf(values()),
+      websiteLabel: words.websiteDesign,
+      pageLabel: words.onPage
+    });
+    fieldOf = out.fieldOf;
+    onPreview = out.preview;
+    results.findings = out.findings;
+    tell();
+  }
+
   async function check() {
     await languageReady;
     const v = values();
     await fetchAssets(v);
     const out = entryItems(v, fields, assets);
     labels = out.labels;
+    ownFieldOf = out.fields;
     fieldOf = out.fields;
     if (!hasContent(out.items)) {
-      results.empty = true;
-      results.findings = [];
+      own = [];
+      if (page) {
+        results.empty = false;
+        merge();
+      } else {
+        results.empty = true;
+        results.findings = [];
+      }
       return;
     }
     results.state = 'scanning';
@@ -143,8 +187,8 @@ export function mount(
       });
       results.empty = false;
       results.outline = scan.outline;
-      results.findings = scan.findings.map((f) => ({ ...f, itemLabel: labels[f.itemId] || '' }));
-      if (onResults) onResults(results.findings, fieldOf);
+      own = scan.findings.map((f) => ({ ...f, itemLabel: labels[f.itemId] || '' }));
+      merge();
     } catch (error) {
       results.error = error && error.message ? error.message : String(error);
     }
@@ -203,13 +247,82 @@ export function mount(
   results.addEventListener('surea11y-retry', () => scheduler.now());
   results.addEventListener('surea11y-show', (event) => {
     const itemId = event.detail && event.detail.itemId;
-    if (onShow && itemId) onShow(itemId, fieldOf[itemId]);
+    if (!itemId) return;
+    const finding = event.detail.finding;
+    // Only on the preview page (the website's design, or the page alone).
+    if (itemId.startsWith('preview:')) {
+      showOnPreview(itemId.slice('preview:'.length));
+      return;
+    }
+    // Content: the form moves to the field, and the preview to the place.
+    if (finding && onPreview[finding.key]) showOnPreview(onPreview[finding.key]);
+    if (onShow) onShow(itemId, fieldOf[itemId]);
   });
   // Hidden and answered findings change what the lines under fields show.
-  const resend = () => onResults && onResults(results.findings, fieldOf, results.cards);
-  results.addEventListener('surea11y-mark', resend);
-  results.addEventListener('surea11y-review', resend);
-  results.addEventListener('surea11y-reopen', resend);
+  results.addEventListener('surea11y-mark', tell);
+  results.addEventListener('surea11y-review', tell);
+  results.addEventListener('surea11y-reopen', tell);
+
+  // The live preview's page, when the site runs the preview script.
+  const win = doc.defaultView;
+  const origins = preview ? previewOriginsOf(sdk) : [];
+  function showOnPreview(selector) {
+    if (!page || !selector) return;
+    page.source.postMessage(
+      { source: MESSAGE_SOURCE, version: VERSION, type: 'show', selector },
+      page.origin
+    );
+  }
+  function hello() {
+    // The preview closed or moved away: back to the fields alone.
+    if (page && page.source.closed) {
+      page = null;
+      merge();
+    }
+    let frames;
+    try {
+      frames = framesIn(win.top);
+    } catch {
+      return;
+    }
+    for (const f of frames) {
+      if (f === win) continue;
+      for (const origin of origins) {
+        try {
+          f.postMessage(
+            { source: MESSAGE_SOURCE, version: VERSION, type: 'hello', entryId },
+            origin
+          );
+        } catch {
+          // a frame that went away
+        }
+      }
+    }
+  }
+  const onMessage = (event) => {
+    if (!origins.includes(event.origin) || !event.source) return;
+    const data = event.data;
+    if (!data || data.source !== MESSAGE_SOURCE || data.version !== VERSION) return;
+    if (data.type !== 'results' || !Array.isArray(data.findings)) return;
+    page = {
+      source: event.source,
+      origin: event.origin,
+      tagged: !!data.tagged,
+      findings: data.findings.filter(
+        (f) => f && typeof f.key === 'string' && typeof f.group === 'string'
+      )
+    };
+    if (results.state !== 'scanning') {
+      results.empty = false;
+      merge();
+    }
+  };
+  let helloTimer = null;
+  if (origins.length && win) {
+    win.addEventListener('message', onMessage);
+    hello();
+    helloTimer = win.setInterval(hello, 3000);
+  }
 
   if (sdk.window && sdk.window.startAutoResizer) sdk.window.startAutoResizer();
   scheduler.now();
@@ -219,6 +332,8 @@ export function mount(
     stop() {
       for (const s of stops) if (typeof s === 'function') s();
       scheduler.cancel();
+      if (helloTimer) win.clearInterval(helloTimer);
+      if (win) win.removeEventListener('message', onMessage);
       results.remove();
     },
     t

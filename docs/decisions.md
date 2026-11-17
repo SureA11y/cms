@@ -2,6 +2,43 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-16: How the Contentful preview check is built
+
+The maintainer asked for the rest to be built on the recommendations. What
+was chosen, and why:
+
+- **The preview script**, `@surea11y/contentful/preview`, as in Sanity: one
+  call in the site's preview mode. It checks the page with the `cms-page`
+  profile and the pack, and sends plain findings.
+- **Who says hello.** The tab knows the preview's address (set on the
+  configuration screen) and every few seconds says hello to each frame on
+  Contentful's page, addressed to that origin only, so the browser drops it
+  for every other frame. The preview answers only the frame that said
+  hello, and only if it is an app hosted by Contentful (`*.ctfcloud.net`,
+  the address seen on the test space) or an address the site names
+  (`appOrigins`). The tab accepts results only from its preview addresses.
+  Chosen over the preview calling out first: the preview can't know the
+  app's random address, and the tab already knows the preview's.
+- **The fields' names** come from inspector mode's attributes, read on all
+  plans, and from Content Source Maps' hidden characters (Premium), taken
+  out while checking. An asset's tag counts for the field of this entry
+  that links the asset. Another entry's content is left out: it has its
+  own check.
+- **Untagged findings:** the website's design on a page that has tags; "On
+  the page" on a page without any, since there they may be content. New
+  words in five languages.
+- **Show** moves to the field and shows the place on the page; a
+  website-design card shows the place only. When the preview closes, the
+  tab goes back to the fields alone.
+- **The sidebar does not listen:** Contentful hides it during live preview.
+- **Tested** on the test page with the test website beside the tab (one
+  list, the pale line as website design, Show in both), with unit tests
+  for the merge, the addresses and Content Source Maps' addresses. Not yet
+  checked by the maintainer in the real editor: the test website on
+  Netlify needs the new build.
+- **Not taken:** markers on the preview page (Show's outline is enough for
+  now) and a preview opened in a new browser tab (not proven).
+
 ## 2026-11-16: The preview check in Contentful: in our editor tab, beside the live preview
 
 From three mock-ups (one list in our panel, the preview inside our tab, a

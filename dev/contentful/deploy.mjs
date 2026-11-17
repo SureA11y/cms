@@ -81,8 +81,11 @@ curl('PUT', org(`app_definitions/${def.sys.id}`), {
   headers: { 'X-Contentful-Version': String(current.sys.version) }
 });
 
-// 3. Installed in the space.
-curl('PUT', env(`app_installations/${def.sys.id}`), { body: { parameters: {} } });
+// 3. Installed in the space, with the test website's preview address when
+// PREVIEW_ORIGINS is set (comma-separated), as its configuration screen
+// would keep it.
+const previewOrigins = (process.env.PREVIEW_ORIGINS || '').split(',').filter(Boolean);
+curl('PUT', env(`app_installations/${def.sys.id}`), { body: { parameters: { previewOrigins } } });
 
 // 4. Its content type for answers (what its configuration screen does).
 const reviewType = 'surea11yReview';
@@ -120,12 +123,15 @@ const sidebar = (
   ]
 ).filter((w) => w.widgetId !== def.sys.id);
 sidebar.splice(1, 0, { widgetId: def.sys.id, widgetNamespace: 'app' });
-// 6. And, for trying it, the editor tab next to Contentful's own editor.
+// 6. And, for trying it, the editor tab next to Contentful's own editor:
+// first when there is a preview address, so it sits beside the live preview.
+const tab = { widgetId: def.sys.id, widgetNamespace: 'app' };
 const editors = [
   { widgetId: 'default-editor', widgetNamespace: 'editor-builtin' },
-  ...(ei.editors || []).filter((e) => e.widgetId !== def.sys.id && e.widgetId !== 'default-editor'),
-  { widgetId: def.sys.id, widgetNamespace: 'app' }
+  ...(ei.editors || []).filter((e) => e.widgetId !== def.sys.id && e.widgetId !== 'default-editor')
 ];
+if (previewOrigins.length) editors.unshift(tab);
+else editors.push(tab);
 curl('PUT', env('content_types/article/editor_interface'), {
   body: {
     controls: ei.controls,
