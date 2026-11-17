@@ -135,6 +135,7 @@ export function enableSureA11yPreview({
       // A tab (new, or reloaded) asks: it gets the results from now on.
       if (!app || app.source !== event.source) {
         app = { source: event.source, origin: event.origin };
+        send({ type: 'ready' }); // heard: the tab can say the page is being checked
         schedule();
       }
       return;

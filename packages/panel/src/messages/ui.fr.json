@@ -119,5 +119,7 @@
   "websiteDesign": "Design du site",
   "inWebsite": "Dans le design du site, pas dans votre contenu : la personne qui gère le site peut le corriger.",
   "onPage": "Sur la page",
+  "previewChecking": "Vérification de la page d’aperçu…",
+  "previewError": "La page d’aperçu n’a pas pu être vérifiée.",
   "checkedBoth": "Vérifié dans les champs et sur la page d’aperçu."
 }

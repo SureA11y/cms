@@ -181,7 +181,8 @@ const sdk = {
 if (params.get('view') === 'tab') {
   const app = document.getElementById('app');
   app.style.width = 'auto';
-  if (params.get('preview')) {
+  // ?frame=0: the preview is framed elsewhere (as on Contentful's page).
+  if (params.get('preview') && params.get('frame') !== '0') {
     // Beside the live preview: the tab at about 600 px, the preview after it.
     document.body.style.cssText = 'margin:0;display:flex;height:100vh';
     app.style.cssText = 'width:600px;flex:none;overflow:auto;padding:0';

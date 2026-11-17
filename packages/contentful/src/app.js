@@ -96,6 +96,8 @@ export function mount(
   let own = []; // the fields' findings
   let page = null; // the preview page's results, while it answers
   let onPreview = {}; // finding key → where it is on the preview page
+  let previewState = null; // null, 'checking' (the page answered) or 'error'
+  let previewError = '';
   const names = Object.fromEntries(fields.map((f) => [f.id, f.name]));
 
   defineResultsElement();
@@ -136,7 +138,13 @@ export function mount(
     );
   }
 
-  const tell = () => onResults && onResults(results.findings, fieldOf, { page: !!page });
+  const tell = () =>
+    onResults &&
+    onResults(results.findings, fieldOf, {
+      page: !!page,
+      previewState: page ? 'done' : previewState,
+      previewError
+    });
 
   /** The fields' findings and the preview page's, as one list. */
   function merge() {
@@ -275,8 +283,10 @@ export function mount(
   }
   function hello() {
     // The preview closed or moved away: back to the fields alone.
-    if (page && page.source.closed) {
+    if ((page || previewState) && previewSource && previewSource.closed) {
       page = null;
+      previewState = null;
+      previewSource = null;
       merge();
     }
     let frames;
@@ -303,7 +313,24 @@ export function mount(
     if (!origins.includes(event.origin) || !event.source) return;
     const data = event.data;
     if (!data || data.source !== MESSAGE_SOURCE || data.version !== VERSION) return;
+    previewSource = event.source;
+    if (data.type === 'ready') {
+      if (!page) {
+        previewState = 'checking';
+        tell();
+      }
+      return;
+    }
+    if (data.type === 'error') {
+      previewState = 'error';
+      previewError = typeof data.message === 'string' ? data.message.slice(0, 300) : '';
+      page = null;
+      merge();
+      return;
+    }
     if (data.type !== 'results' || !Array.isArray(data.findings)) return;
+    previewState = null;
+    previewError = '';
     page = {
       source: event.source,
       origin: event.origin,
@@ -318,6 +345,7 @@ export function mount(
     }
   };
   let helloTimer = null;
+  let previewSource = null;
   if (origins.length && win) {
     win.addEventListener('message', onMessage);
     hello();

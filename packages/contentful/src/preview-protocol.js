@@ -6,7 +6,8 @@
 //   seconds, to every frame on the page, addressed to the preview's origin
 //   only (the browser drops it for any other frame); then { type: 'show',
 //   selector } and { type: 'check' }.
-// Preview → tab (only the frame that said hello): { type: 'results', url,
+// Preview → tab (only the frame that said hello): { type: 'ready' } at once,
+//   then { type: 'results', url,
 //   entries, tagged, findings, scanMs } or { type: 'error', message }.
 export const MESSAGE_SOURCE = 'surea11y-contentful-preview';
 export const VERSION = 1;
