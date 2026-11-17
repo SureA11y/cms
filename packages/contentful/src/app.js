@@ -22,7 +22,7 @@ import { engineLocaleUrls, loadPanelWords, pickLocale, questionLoader, WORDS } f
 import { mergeFindings } from './merge.js';
 import { previewOriginsOf } from './origins.js';
 import { assetFieldsOf } from './content.js';
-import { MESSAGE_SOURCE, VERSION, framesIn } from './preview-protocol.js';
+import { MESSAGE_SOURCE, VERSION } from './preview-protocol.js';
 
 // The fields are checked without the website's styles, so colours can't be.
 const LEFT_OUT = ['contrast-minimum', 'contrast-computable', 'link-in-text-block'];
@@ -281,38 +281,27 @@ export function mount(
       page.origin
     );
   }
-  function hello() {
-    // The preview closed or moved away: back to the fields alone.
+  // The preview went away (closed, or moved to another page): the fields alone.
+  function watch() {
     if ((page || previewState) && previewSource && previewSource.closed) {
       page = null;
       previewState = null;
       previewSource = null;
       merge();
     }
-    let frames;
-    try {
-      frames = framesIn(win.top);
-    } catch {
-      return;
-    }
-    for (const f of frames) {
-      if (f === win) continue;
-      for (const origin of origins) {
-        try {
-          f.postMessage(
-            { source: MESSAGE_SOURCE, version: VERSION, type: 'hello', entryId },
-            origin
-          );
-        } catch {
-          // a frame that went away
-        }
-      }
-    }
   }
   const onMessage = (event) => {
     if (!origins.includes(event.origin) || !event.source) return;
     const data = event.data;
     if (!data || data.source !== MESSAGE_SOURCE || data.version !== VERSION) return;
+    // A preview on one of the addresses says it is there: hello, to it only.
+    if (data.type === 'here') {
+      event.source.postMessage(
+        { source: MESSAGE_SOURCE, version: VERSION, type: 'hello', entryId },
+        event.origin
+      );
+      return;
+    }
     previewSource = event.source;
     if (data.type === 'ready') {
       if (!page) {
@@ -348,8 +337,7 @@ export function mount(
   let previewSource = null;
   if (origins.length && win) {
     win.addEventListener('message', onMessage);
-    hello();
-    helloTimer = win.setInterval(hello, 3000);
+    helloTimer = win.setInterval(watch, 3000);
   }
 
   if (sdk.window && sdk.window.startAutoResizer) sdk.window.startAutoResizer();

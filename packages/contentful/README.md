@@ -75,8 +75,12 @@ What it needs:
 2. **The preview's address** on the app's configuration screen ("Preview
    addresses"). The tab accepts results from those addresses only.
 
-The results go from the preview's frame to the tab's frame through the
-browser (postMessage), never to a server. The script includes the engine,
+The preview says it is there to the frames on Contentful's page (a message
+with nothing in it); the tab answers only a preview on its addresses, and
+the results go from the preview's frame to the tab's frame through the
+browser (postMessage), never to a server. Above the panel, the tab says
+"Checking the preview page…", then "Checked in the fields and on the
+preview page", or why the page couldn't be checked. The script includes the engine,
 about 530 KB compressed, loaded on the first check.
 
 ## What is checked

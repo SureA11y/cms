@@ -6,9 +6,9 @@
 //   if (draftMode) enableSureA11yPreview();
 //
 // It answers the SureA11y editor tab beside Contentful's live preview: the
-// tab says hello to the frames on Contentful's page, and the script sends
-// its results to that frame only, through the browser (postMessage), never
-// to a server. It names each problem's field from inspector mode's
+// script says it is there to the frames on Contentful's page, the tab says
+// hello, and the script sends its results to that frame only, through the
+// browser (postMessage), never to a server. It names each problem's field from inspector mode's
 // `data-contentful-*` attributes or from Content Source Maps' hidden
 // characters, which it takes out of the page while checking and puts back
 // in the same step.
@@ -16,7 +16,7 @@
 import { loadEngine, messagesFor, scanPage } from '@surea11y/panel';
 import { PACK } from '../dist/pack.js';
 import { fieldOf, untag } from './preview-tags.js';
-import { MESSAGE_SOURCE, VERSION } from './preview-protocol.js';
+import { MESSAGE_SOURCE, VERSION, framesIn } from './preview-protocol.js';
 
 export { parseContentfulHref, untag, fieldOf } from './preview-tags.js';
 export { MESSAGE_SOURCE };
@@ -127,6 +127,27 @@ export function enableSureA11yPreview({
   };
   const observer = new MutationObserver(schedule);
 
+  // Until a tab answers (or after it went away), say a preview is here.
+  function announce() {
+    if (app && !app.source.closed) return;
+    app = null;
+    let frames;
+    try {
+      // The page that frames the preview, and every frame in it.
+      frames = [window.top, ...framesIn(window.top)];
+    } catch {
+      return;
+    }
+    for (const f of frames) {
+      if (f === window) continue;
+      try {
+        f.postMessage({ source: MESSAGE_SOURCE, version: VERSION, type: 'here' }, '*');
+      } catch {
+        // a frame that went away
+      }
+    }
+  }
+
   const onMessage = (event) => {
     const data = event.data;
     if (!data || data.source !== MESSAGE_SOURCE || data.version !== VERSION) return;
@@ -145,8 +166,11 @@ export function enableSureA11yPreview({
     if (data.type === 'show' && typeof data.selector === 'string') show(doc, data.selector);
   };
   window.addEventListener('message', onMessage);
+  announce();
+  const announcer = setInterval(announce, 3000);
   return () => {
     stopped = true;
+    clearInterval(announcer);
     clearTimeout(timer);
     observer.disconnect();
     window.removeEventListener('message', onMessage);
