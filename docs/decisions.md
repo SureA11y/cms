@@ -40,9 +40,9 @@ was chosen, and why:
 - **The sidebar does not listen:** Contentful hides it during live preview.
 - **Tested** on the test page with the test website beside the tab (one
   list, the pale line as website design, Show in both), with unit tests
-  for the merge, the addresses and Content Source Maps' addresses. Not yet
-  checked by the maintainer in the real editor: the test website on
-  Netlify needs the new build.
+  for the merge, the addresses and Content Source Maps' addresses, and
+  checked by the maintainer in the real editor on 2026-11-19, with the
+  test website on Netlify.
 - **Not taken:** markers on the preview page (Show's outline is enough for
   now) and a preview opened in a new browser tab (not proven).
 
