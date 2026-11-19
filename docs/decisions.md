@@ -2,6 +2,27 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-19: The Dependabot alerts were in the test Studio only
+
+GitHub reported 13 alerts on main (6 high, 7 moderate). All come from
+`dev/sanity-studio/package-lock.json`, the Sanity Studio used only to
+develop and test the plugin: Sanity's command-line tools pull in js-yaml,
+smol-toml, minimatch and postcss versions with known problems (prototype
+pollution and denial of service on crafted YAML or TOML, an XSS in CSS
+output, file reads through source maps). Nothing shipped is affected: the
+root lockfile, which holds the panel, the WordPress, Sanity and Contentful
+packages, and `dev/preview-site` audit clean.
+
+- **Fixed anyway**, so main has no open alerts and the test Studio stays
+  current: `styled-components` 6.1.19 → 6.6.0, and npm overrides pinning
+  js-yaml 3.15.2, minimatch 11.0.9, postcss 8.5.33 and smol-toml 1.9.1.
+  `npm audit` reports 0, and `sanity build` passes.
+- **Not taken:** npm's suggested fix, Sanity 6.1.0, a downgrade: every
+  recent Sanity release brings the same command-line tools.
+- **Next time:** Dependabot alerts can't be read from the development
+  sessions (no access), so `npm audit` in each tracked lockfile is the way
+  to find them: the root, `dev/sanity-studio` and `dev/preview-site`.
+
 ## 2026-11-19: The WordPress.org account is `surea11y`
 
 The maintainer created a project account, `surea11y`
