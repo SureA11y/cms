@@ -366,8 +366,12 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
 - [x] readme.txt for WordPress.org: description, installation, FAQ (not an
       overlay, nothing sent, what is stored, deleting), screenshots list,
       source and third-party code.
-- [ ] Before submitting (needs the maintainer): the WordPress.org username(s)
-      for `Contributors:`; the four screenshots in the plugin's SVN `assets/`;
+- [x] The WordPress.org account: `surea11y`
+      (https://profiles.wordpress.org/surea11y/), created by the maintainer
+      on 2026-11-19; it matches `Contributors: surea11y` in readme.txt and
+      will submit and own the plugin.
+- [ ] Before submitting (needs the maintainer): two-factor authentication on
+      the `surea11y` account; the four screenshots in the plugin's SVN `assets/`;
       a public link to the source of `build/` (WordPress.org requires
       readable source for compressed code, and this repository is private);
       running the full Plugin Check in a WordPress once.

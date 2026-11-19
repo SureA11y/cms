@@ -2,6 +2,14 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-19: The WordPress.org account is `surea11y`
+
+The maintainer created a project account, `surea11y`
+(https://profiles.wordpress.org/surea11y/), rather than using a personal
+one, so the plugin isn't tied to a person. It submits and owns the plugin on
+WordPress.org and is the name in `readme.txt`'s `Contributors:` line, which
+already said `surea11y`. More authors can be added to that line later.
+
 ## 2026-11-16: How the Contentful preview check is built
 
 The maintainer asked for the rest to be built on the recommendations. What
