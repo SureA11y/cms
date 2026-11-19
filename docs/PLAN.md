@@ -418,8 +418,8 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
       live preview (see the decisions "The preview check in Contentful" and
       "How the Contentful preview check is built"): the preview script
       (`@surea11y/contentful/preview`), one list, Show on the page.
-- [ ] Contentful: the maintainer's check of the preview check in the real
-      editor, with the test website on Netlify.
+- [x] Contentful: the maintainer's check of the preview check in the real
+      editor, with the test website on Netlify (2026-11-19).
 - [ ] Storyblok, only with a clear lead over its built-in checker.
 
 ### Phase 5: Drupal

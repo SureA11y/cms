@@ -2,11 +2,14 @@
 // postMessage between frames on Contentful's page (the live preview's frame
 // and the app's frame are siblings there).
 //
-// Tab → preview: { source, version, type: 'hello', entryId } every few
-//   seconds, to every frame on the page, addressed to the preview's origin
-//   only (the browser drops it for any other frame); then { type: 'show',
-//   selector } and { type: 'check' }.
-// Preview → tab (only the frame that said hello): { type: 'results', url,
+// Preview → every frame on the page: { source, version, type: 'here' } every
+//   few seconds until a tab answers. It carries nothing else, so it can go to
+//   any frame (addressed to '*': no frame logs an error for it).
+// Tab → that preview only, addressed to its origin, when the origin is one
+//   of the preview addresses: { type: 'hello', entryId }; then { type:
+//   'show', selector } and { type: 'check' }.
+// Preview → tab (only the frame that said hello): { type: 'ready' } at once,
+//   then { type: 'results', url,
 //   entries, tagged, findings, scanMs } or { type: 'error', message }.
 export const MESSAGE_SOURCE = 'surea11y-contentful-preview';
 export const VERSION = 1;

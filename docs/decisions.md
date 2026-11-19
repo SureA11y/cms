@@ -10,15 +10,22 @@ was chosen, and why:
 - **The preview script**, `@surea11y/contentful/preview`, as in Sanity: one
   call in the site's preview mode. It checks the page with the `cms-page`
   profile and the pack, and sends plain findings.
-- **Who says hello.** The tab knows the preview's address (set on the
-  configuration screen) and every few seconds says hello to each frame on
-  Contentful's page, addressed to that origin only, so the browser drops it
-  for every other frame. The preview answers only the frame that said
-  hello, and only if it is an app hosted by Contentful (`*.ctfcloud.net`,
-  the address seen on the test space) or an address the site names
-  (`appOrigins`). The tab accepts results only from its preview addresses.
-  Chosen over the preview calling out first: the preview can't know the
-  app's random address, and the tab already knows the preview's.
+- **Who says hello.** The preview says it is there to every frame on
+  Contentful's page, every few seconds until a tab answers; that message
+  carries nothing else, so it can go to any frame. The tab answers only a
+  preview on one of its preview addresses (set on the configuration
+  screen), with a hello addressed to that preview alone. The preview
+  answers only that frame, and only if it is an app hosted by Contentful
+  (`*.ctfcloud.net`, the address seen on the test space) or an address the
+  site names (`appOrigins`). Changed after the maintainer's first try in
+  the real editor: at first the tab said hello to every frame, addressed
+  to the preview's origin, and Chrome logged an error for every frame
+  whose origin differed, every 3 seconds. The preview can't know the app's
+  random address, so its first message can't be addressed; one that
+  carries nothing needs no address.
+- **The tab says where the page is**: "Checking the preview page…" once
+  the preview answers, the reason when the check fails, then "Checked in
+  the fields and on the preview page". New words in five languages.
 - **The fields' names** come from inspector mode's attributes, read on all
   plans, and from Content Source Maps' hidden characters (Premium), taken
   out while checking. An asset's tag counts for the field of this entry
@@ -33,9 +40,9 @@ was chosen, and why:
 - **The sidebar does not listen:** Contentful hides it during live preview.
 - **Tested** on the test page with the test website beside the tab (one
   list, the pale line as website design, Show in both), with unit tests
-  for the merge, the addresses and Content Source Maps' addresses. Not yet
-  checked by the maintainer in the real editor: the test website on
-  Netlify needs the new build.
+  for the merge, the addresses and Content Source Maps' addresses, and
+  checked by the maintainer in the real editor on 2026-11-19, with the
+  test website on Netlify.
 - **Not taken:** markers on the preview page (Show's outline is enough for
   now) and a preview opened in a new browser tab (not proven).
 

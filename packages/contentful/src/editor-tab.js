@@ -188,7 +188,9 @@ function EditorTab({ sdk }) {
     fieldOf: {},
     settled: new Set(),
     current: null,
-    page: false
+    page: false,
+    previewState: null,
+    previewError: ''
   });
   const words = uiStrings((app.current && app.current.results.locale) || 'en');
   const outer = useRef(null);
@@ -206,12 +208,16 @@ function EditorTab({ sdk }) {
   }, []);
 
   useEffect(() => {
-    const onResults = (findings, fieldOf, { page = false } = {}) => {
+    const onResults = (
+      findings,
+      fieldOf,
+      { page = false, previewState = null, previewError = '' } = {}
+    ) => {
       const cards = app.current ? app.current.results.cards : [];
       const settled = new Set(
         cards.filter((c) => c.settled).flatMap((c) => c.places.map((p) => p.key))
       );
-      setState((s) => ({ ...s, findings, fieldOf, settled, page }));
+      setState((s) => ({ ...s, findings, fieldOf, settled, page, previewState, previewError }));
     };
     const onShow = (itemId, field) => {
       const el = fieldEls.current[field];
@@ -305,15 +311,27 @@ function EditorTab({ sdk }) {
       h(
         'div',
         { hidden: !showPanel, style: { position: narrow ? 'static' : 'sticky', top: 16 } },
-        // Said once the live preview's page answers.
-        state.page
+        // Where the live preview's page is: checked, being checked, or not.
+        state.previewState
           ? h(
               'p',
               {
-                className: 'surea11y-checked',
-                style: { margin: '0 0 12px', fontSize: 13, color: '#50575e' }
+                className:
+                  state.previewState === 'done'
+                    ? 'surea11y-checked'
+                    : `surea11y-preview-${state.previewState}`,
+                role: 'status',
+                style: {
+                  margin: '0 0 12px',
+                  fontSize: 13,
+                  color: state.previewState === 'error' ? '#b32d2e' : '#50575e'
+                }
               },
-              words.checkedBoth
+              state.previewState === 'done'
+                ? words.checkedBoth
+                : state.previewState === 'checking'
+                  ? words.previewChecking
+                  : `${words.previewError}${state.previewError ? ` (${state.previewError})` : ''}`
             )
           : null,
         h('aside', { ref: panel, 'data-surea11y-inspector': '' })

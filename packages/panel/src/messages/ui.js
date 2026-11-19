@@ -116,6 +116,8 @@ export const UI = {
     checkedBoth: 'Checked in the fields and on the preview page.',
     // A page finding on a preview page with no tags to name its field.
     onPage: 'On the page',
+    previewChecking: 'Checking the preview page…',
+    previewError: "The preview page couldn't be checked.",
     viewFindings: 'Findings',
     viewHeadings: 'Headings',
     viewImages: 'Images',

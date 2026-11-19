@@ -119,5 +119,7 @@
   "websiteDesign": "Design der Website",
   "inWebsite": "Im Design der Website, nicht in Ihrem Inhalt: Wer die Website betreut, kann es beheben.",
   "onPage": "Auf der Seite",
+  "previewChecking": "Die Vorschauseite wird geprüft …",
+  "previewError": "Die Vorschauseite konnte nicht geprüft werden.",
   "checkedBoth": "In den Feldern und auf der Vorschauseite geprüft."
 }
