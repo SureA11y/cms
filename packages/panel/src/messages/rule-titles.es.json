@@ -134,5 +134,7 @@
   "valid-lang": "Los ajustes de idioma de partes de la página son válidos",
   "video-caption": "Los vídeos tienen subtítulos",
   "video-poster-text-alternative-present": "Las imágenes de vista previa de los vídeos tienen una alternativa de texto",
-  "widget-keyboard-focusable": "Los controles se alcanzan con el teclado"
+  "widget-keyboard-focusable": "Los controles se alcanzan con el teclado",
+  "form-group-name-present": "Los grupos de opciones tienen un nombre",
+  "symbol-graphic-contrast": "Los símbolos usados como imágenes, como las estrellas, destacan sobre el fondo"
 }

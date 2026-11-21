@@ -134,5 +134,7 @@
   "valid-lang": "Language settings on parts of the page are valid",
   "video-caption": "Videos have captions",
   "video-poster-text-alternative-present": "Video preview images have a text alternative",
-  "widget-keyboard-focusable": "Controls can be reached with the keyboard"
+  "widget-keyboard-focusable": "Controls can be reached with the keyboard",
+  "form-group-name-present": "Groups of choices have a name",
+  "symbol-graphic-contrast": "Symbols used as images, like stars, stand out from their background"
 }

@@ -134,5 +134,7 @@
   "valid-lang": "Spracheinstellungen für Teile der Seite sind gültig",
   "video-caption": "Videos haben Untertitel",
   "video-poster-text-alternative-present": "Vorschaubilder von Videos haben eine Textalternative",
-  "widget-keyboard-focusable": "Bedienelemente sind mit der Tastatur erreichbar"
+  "widget-keyboard-focusable": "Bedienelemente sind mit der Tastatur erreichbar",
+  "form-group-name-present": "Gruppen von Auswahlmöglichkeiten haben einen Namen",
+  "symbol-graphic-contrast": "Als Bilder verwendete Symbole wie Sterne heben sich vom Hintergrund ab"
 }
