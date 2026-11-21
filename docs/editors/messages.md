@@ -2,7 +2,7 @@
 
 <!-- Made by scripts/editor-docs.mjs from the build and the panel's messages. Do not edit by hand. -->
 
-Every rule the checker runs, 136 in all, by the name the plugin
+Every rule the checker runs, 138 in all, by the name the plugin
 shows. The checker puts each finding in one of four groups: **to fix**
 (it is sure), **likely problem** (the evidence points to one: confirm it),
 **needs a person** (only a person can tell: answer the question) and
@@ -12,7 +12,7 @@ The 12 rules editors meet most have their messages written for
 editors, listed with what to do. The others are rarer, and their messages
 are the engine's own.
 
-## In your content (112)
+## In your content (114)
 
 Fixed in the post or page, by whoever writes it.
 
@@ -444,6 +444,10 @@ WCAG 3.3.8 (AA) · EN 301 549 9.3.3.8 · Rule `password-paste-enabled`
 
 WCAG 1.1.1 (A) · EN 301 549 9.1.1.1 · Rule `progressbar-name-present`
 
+#### Radio buttons and checkboxes that share a name should be in a named group
+
+WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `form-group-name-present`
+
 #### Scrolling areas can be scrolled with the keyboard
 
 WCAG 2.1.1 (A), 2.1.3 (AAA) · EN 301 549 9.2.1.1 · Rule `scrollable-region-focusable`
@@ -471,6 +475,10 @@ WCAG 1.4.2 (A) · EN 301 549 9.1.4.2 · Rule `no-autoplay-audio`
 #### Status messages are announced
 
 WCAG 4.1.3 (AA) · EN 301 549 9.4.1.3 · Rule `live-region-announcements`
+
+#### Symbols used as a graphic should have a contrast of at least 3:1
+
+WCAG 1.4.11 (AA) · EN 301 549 9.1.4.11 · Rule `symbol-graphic-contrast`
 
 #### Table cells point to existing header cells
 

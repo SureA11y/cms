@@ -134,5 +134,7 @@
   "valid-lang": "ページの一部に付けた言語の設定が有効である",
   "video-caption": "動画に字幕がある",
   "video-poster-text-alternative-present": "動画のプレビュー画像に代替テキストがある",
-  "widget-keyboard-focusable": "操作部品にキーボードで届く"
+  "widget-keyboard-focusable": "操作部品にキーボードで届く",
+  "form-group-name-present": "選択肢のグループに名前がある",
+  "symbol-graphic-contrast": "星などの画像として使う記号が背景から見分けられる"
 }

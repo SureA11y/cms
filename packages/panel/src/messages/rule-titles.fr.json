@@ -134,5 +134,7 @@
   "valid-lang": "Les réglages de langue de parties de la page sont valides",
   "video-caption": "Les vidéos ont des sous-titres",
   "video-poster-text-alternative-present": "Les images d’aperçu des vidéos ont une alternative textuelle",
-  "widget-keyboard-focusable": "Les commandes sont accessibles au clavier"
+  "widget-keyboard-focusable": "Les commandes sont accessibles au clavier",
+  "form-group-name-present": "Les groupes de choix ont un nom",
+  "symbol-graphic-contrast": "Les symboles utilisés comme images, comme les étoiles, se détachent du fond"
 }
