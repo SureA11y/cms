@@ -2,6 +2,23 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-21: Core's next release, and what it changes here
+
+Core's main branch, which this repository builds with until core 1.18.0 is
+released, now holds two stress-test rounds of fixes, the decisions taken on
+them and four features. Checked against it on 2026-11-21 (core `6e2b905c`):
+lint, format, build and every package's tests pass, but for two things.
+
+- **The engine's size budget rises from 540 to 590 KB.** `engine.js` (core
+  with the CMS pack) went from 523.5 KB with core `254b644f` to 563.3 KB.
+  The growth is core's correctness fixes, which the CMS checks benefit
+  from; 590 KB is about 5% above the new size, as core sets its own budgets.
+- **The new rule `resize-text-content-loss` (WCAG 1.4.4) has a title for
+  editors** in every language. It judges only a page laid out 640 CSS
+  pixels wide or less, so in the panel's normal check it is not applicable.
+  **Not now:** checking it in a hidden 640-pixel frame, as reflow is checked
+  at 320; that costs another page load per check, to decide with the plan.
+
 ## 2026-11-19: The Dependabot alerts were in the test Studio only
 
 GitHub reported 13 alerts on main (6 high, 7 moderate). All come from

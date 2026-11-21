@@ -126,6 +126,7 @@
   "table-th-has-data-cells": "Table header cells describe some data",
   "target-size-minimum": "Things to click or tap are big enough, or far enough apart",
   "td-has-header": "Data tables have header cells",
+  "resize-text-content-loss": "Text stays readable when the page is zoomed to 200%",
   "text-spacing-content-loss": "Text stays readable with more spacing",
   "textbox-name-present": "Text fields have a name",
   "tooltip-name-present": "Tooltips have text",

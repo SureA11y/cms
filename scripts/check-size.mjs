@@ -14,7 +14,7 @@ const KB = 1024;
 const BUDGETS = [
   { match: /^panel\.js$/, max: 22 * KB, what: 'the panel' },
   { match: /^panel\.i18n\.[\w-]+\.js$/, max: 6 * KB, what: 'one language of the panel' },
-  { match: /^engine\.js$/, max: 540 * KB, what: 'the engine with the CMS pack' },
+  { match: /^engine\.js$/, max: 590 * KB, what: 'the engine with the CMS pack' },
   {
     match: /^review\.[\w-]+\.js$/,
     max: 60 * KB,
