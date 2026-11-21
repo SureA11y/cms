@@ -2,7 +2,7 @@
 
 <!-- Made by scripts/editor-docs.mjs from the build and the panel's messages. Do not edit by hand. -->
 
-Every rule the checker runs, 135 in all, by the name the plugin
+Every rule the checker runs, 136 in all, by the name the plugin
 shows. The checker puts each finding in one of four groups: **to fix**
 (it is sure), **likely problem** (the evidence points to one: confirm it),
 **needs a person** (only a person can tell: answer the question) and
@@ -12,7 +12,7 @@ The 12 rules editors meet most have their messages written for
 editors, listed with what to do. The others are rarer, and their messages
 are the engine's own.
 
-## In your content (111)
+## In your content (112)
 
 Fixed in the post or page, by whoever writes it.
 
@@ -527,6 +527,10 @@ WCAG 1.4.5 (AA) · EN 301 549 9.1.4.5 · Rule `image-of-text`
 #### Text spacing can be increased by the reader
 
 WCAG 1.4.12 (AA) · EN 301 549 9.1.4.12 · Rule `avoid-inline-spacing`
+
+#### Text stays readable when the page is zoomed to 200%
+
+WCAG 1.4.4 (AA) · EN 301 549 9.1.4.4 · Rule `resize-text-content-loss`
 
 #### The names of clickable image areas make sense
 
