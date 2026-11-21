@@ -356,6 +356,10 @@ WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `aria-prohibited-children`
 
 WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `aria-required-children`
 
+#### Groups of choices have a name
+
+WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `form-group-name-present`
+
 #### Headings say what the section is about
 
 WCAG 2.4.6 (AA) · EN 301 549 9.2.4.6 · Rule `heading-quality`
@@ -444,10 +448,6 @@ WCAG 3.3.8 (AA) · EN 301 549 9.3.3.8 · Rule `password-paste-enabled`
 
 WCAG 1.1.1 (A) · EN 301 549 9.1.1.1 · Rule `progressbar-name-present`
 
-#### Radio buttons and checkboxes that share a name should be in a named group
-
-WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `form-group-name-present`
-
 #### Scrolling areas can be scrolled with the keyboard
 
 WCAG 2.1.1 (A), 2.1.3 (AAA) · EN 301 549 9.2.1.1 · Rule `scrollable-region-focusable`
@@ -476,7 +476,7 @@ WCAG 1.4.2 (A) · EN 301 549 9.1.4.2 · Rule `no-autoplay-audio`
 
 WCAG 4.1.3 (AA) · EN 301 549 9.4.1.3 · Rule `live-region-announcements`
 
-#### Symbols used as a graphic should have a contrast of at least 3:1
+#### Symbols used as images, like stars, stand out from their background
 
 WCAG 1.4.11 (AA) · EN 301 549 9.1.4.11 · Rule `symbol-graphic-contrast`
 
