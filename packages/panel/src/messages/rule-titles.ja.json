@@ -126,6 +126,7 @@
   "table-th-has-data-cells": "表の見出しセルがデータを説明している",
   "target-size-minimum": "クリックやタップの対象が十分大きいか、十分離れている",
   "td-has-header": "データの表に見出しセルがある",
+  "resize-text-content-loss": "ページを200%に拡大しても文字が読める",
   "text-spacing-content-loss": "文字の間隔を広げても読める",
   "textbox-name-present": "テキスト入力欄に名前がある",
   "tooltip-name-present": "ツールチップにテキストがある",

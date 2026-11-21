@@ -126,6 +126,7 @@
   "table-th-has-data-cells": "Las celdas de encabezado de tabla describen algún dato",
   "target-size-minimum": "Lo que se pulsa es lo bastante grande o está lo bastante separado",
   "td-has-header": "Las tablas de datos tienen celdas de encabezado",
+  "resize-text-content-loss": "El texto sigue siendo legible con la página ampliada al 200 %",
   "text-spacing-content-loss": "El texto sigue siendo legible con más espaciado",
   "textbox-name-present": "Los campos de texto tienen nombre",
   "tooltip-name-present": "Las descripciones emergentes tienen texto",

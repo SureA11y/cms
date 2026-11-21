@@ -126,6 +126,7 @@
   "table-th-has-data-cells": "Les cellules d’en-tête de tableau décrivent des données",
   "target-size-minimum": "Ce qu’on clique ou touche est assez grand ou assez espacé",
   "td-has-header": "Les tableaux de données ont des cellules d’en-tête",
+  "resize-text-content-loss": "Le texte reste lisible quand la page est agrandie à 200 %",
   "text-spacing-content-loss": "Le texte reste lisible avec plus d’espacement",
   "textbox-name-present": "Les champs de texte ont un nom",
   "tooltip-name-present": "Les infobulles ont un texte",

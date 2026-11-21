@@ -126,6 +126,7 @@
   "table-th-has-data-cells": "Tabellenkopfzellen beschreiben Daten",
   "target-size-minimum": "Klick- und Tippziele sind groß genug oder weit genug auseinander",
   "td-has-header": "Datentabellen haben Kopfzellen",
+  "resize-text-content-loss": "Text bleibt lesbar, wenn die Seite auf 200 % vergrößert wird",
   "text-spacing-content-loss": "Text bleibt mit mehr Abstand lesbar",
   "textbox-name-present": "Textfelder haben einen Namen",
   "tooltip-name-present": "Tooltips haben Text",
