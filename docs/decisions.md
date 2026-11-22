@@ -27,6 +27,16 @@ so the repository builds with it from npm and the workarounds go.
 - **Also in 1.18.0, checked:** an occurrence can now be `pass`, which the
   panel already leaves out; packs whose range excludes 1.18 are skipped (the
   CMS and EN 301 549 packs include it).
+- **A gap, reported to core:** 1.18.0's `p-as-heading` no longer asks
+  about a bold line one step heavier than body text of 18px or more. That
+  is WordPress's default theme, Twenty Twenty-Five (paragraphs 21px at 300,
+  `<strong>` at 400), so a bold line used as a heading goes unasked there;
+  at body size, or with a bolder bold, it is still asked about. Reported as
+  SureA11y/core#428 with a minimal example and a suggested fix. The
+  maintainer chose to move to 1.18.0 now rather than wait: the 13 WordPress
+  end-to-end tests that use the test post's bold line fail on the local
+  Twenty Twenty-Five site until core fixes it, and pass again then. The
+  other 24, the 5 Contentful and the 3 Sanity end-to-end tests pass.
 
 ## 2026-11-21: Core's next release, and what it changes here
 
