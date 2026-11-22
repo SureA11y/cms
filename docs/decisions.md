@@ -2,10 +2,11 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
-## 2026-11-22: Editor wording for core's new rules
+## 2026-11-22: Editor wording for core's new rules, and "How to check" as a heading
 
 Stress test round 12 found that core's new rules and codes reached editors
-in core's words, which name markup and CSS (K12-3).
+in core's words, which name markup and CSS (K12-3), and that "How to check"
+looked like a heading but was a paragraph (K12-7).
 
 - **Plain wording, in all five languages**, for `form-group-name-present`
   (radio buttons and checkboxes), `symbol-graphic-contrast`,
@@ -27,6 +28,10 @@ in core's words, which name markup and CSS (K12-3).
   and the developer part, `panel.js` would have been 22.5 KB, over its
   22 KB budget; it is now 20.3 KB. It costs English pages one more small
   request. The budgets are unchanged. To confirm with the maintainer.
+- **"How to check" is a heading**, one level below its group's heading (h4
+  under the default h3), so the steps can be found by heading. Core run on
+  the panel in Chromium no longer asks whether it is a heading, and finds
+  nothing new.
 - **Not done:** `MARQUEE_STOPS_ONLY_ON_HOVER`. It is on core's round 11
   branch, not in core's main branch or in 1.18.0, so the panel can't word
   it yet. The reflow codes of the phone-width check (`WIDE_TABLE`,

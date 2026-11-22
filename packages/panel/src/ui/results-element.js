@@ -86,7 +86,7 @@ summary { cursor: pointer; color: var(--sa11y-accent); }
 .nav-label { flex-grow: 1; text-align: center; font-weight: 600; }
 
 section { display: flex; flex-direction: column; gap: var(--sa11y-space-2); }
-h2, h3, h4, h5 { margin: 0; font-size: 1em; }
+h2, h3, h4, h5, h6 { margin: 0; font-size: 1em; }
 .group-toggle { width: 100%; display: flex; align-items: center; gap: var(--sa11y-space-2); border: 0; border-bottom: 2px solid var(--sa11y-g, var(--sa11y-border)); background: transparent; padding: var(--sa11y-space-1) 0; min-height: var(--sa11y-button-height); text-align: start; font-weight: 600; }
 .group-name { flex-grow: 1; }
 .group-toggle .group-icon { display: inline-flex; }
@@ -755,12 +755,12 @@ export class ResultsElement extends HTMLElement {
     section.setAttribute('aria-labelledby', headingId);
     section.append(el(doc, 'p', 'help', t.groupHelp[group.id]));
     const ul = el(doc, 'ul');
-    for (const card of group.cards) ul.append(this._renderCard(doc, t, card));
+    for (const card of group.cards) ul.append(this._renderCard(doc, t, card, level));
     section.append(ul);
     return section;
   }
 
-  _renderCard(doc, t, card) {
+  _renderCard(doc, t, card, level) {
     const li = el(doc, 'li', 'card');
     li.dataset.group = card.group;
     li.dataset.key = card.key;
@@ -981,7 +981,7 @@ export class ResultsElement extends HTMLElement {
           }
           li.append(row);
           if (this._asking === card.key && !card.settled)
-            li.append(this._questionPanel(doc, t, card, id));
+            li.append(this._questionPanel(doc, t, card, id, level));
           return li;
         }
       } else {
@@ -990,7 +990,7 @@ export class ResultsElement extends HTMLElement {
     }
     li.append(actions);
     if (this._asking === card.key && !card.settled)
-      li.append(this._questionPanel(doc, t, card, id));
+      li.append(this._questionPanel(doc, t, card, id, level));
     return li;
   }
 
@@ -999,7 +999,7 @@ export class ResultsElement extends HTMLElement {
    * core's steps, what it looks like when it is fine and when it is a
    * problem, then Yes, No or Not sure with an optional note. Escape closes it.
    */
-  _questionPanel(doc, t, card, summaryId) {
+  _questionPanel(doc, t, card, summaryId, level) {
     const k = hash(card.key);
     const panel = el(doc, 'div', 'question');
     panel.id = `${summaryId}-question`;
@@ -1014,7 +1014,9 @@ export class ResultsElement extends HTMLElement {
       panel.append(el(doc, 'p', 'state-text', t.loadingSteps));
     } else if (q && q.steps && q.steps.length) {
       const headId = `${summaryId}-how`;
-      const head = el(doc, 'p', 'question-head', t.howToCheck);
+      // A heading one level below its group's, so the steps can be found
+      // by heading.
+      const head = el(doc, `h${Math.min(level + 1, 6)}`, 'question-head', t.howToCheck);
       head.id = headId;
       const list = el(doc, 'ol', 'steps');
       list.setAttribute('aria-labelledby', headId);

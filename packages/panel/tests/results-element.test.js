@@ -422,6 +422,11 @@ test('"Check it" shows what to do, the steps and what fine and a problem look li
     "It's a problem when: Nothing labels the columns."
   );
   assert.ok(buttonIn(card, 'Not sure'));
+  // "How to check" heads the steps, one level below its group's heading.
+  const head = card.querySelector('.question-head');
+  assert.equal(head.tagName, 'H4');
+  assert.equal(head.textContent, 'How to check');
+  assert.equal(card.querySelector('ol.steps').getAttribute('aria-labelledby'), head.id);
   // Escape closes it, and focus goes back to Check it.
   card
     .querySelector('.question')
