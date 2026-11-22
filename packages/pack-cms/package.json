@@ -18,10 +18,10 @@
     "docs:check": "surea11y-pack docs --check"
   },
   "peerDependencies": {
-    "@surea11y/core": "^1.17.0"
+    "@surea11y/core": "^1.18.0"
   },
   "devDependencies": {
-    "@surea11y/core": "^1.17.0",
+    "@surea11y/core": "^1.18.0",
     "eslint": "^10.8.0",
     "jsdom": "^29.1.1",
     "playwright": "^1.62.1"

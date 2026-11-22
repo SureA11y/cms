@@ -11,10 +11,10 @@
     "test": "node --test"
   },
   "peerDependencies": {
-    "@surea11y/core": "^1.17.0"
+    "@surea11y/core": "^1.18.0"
   },
   "devDependencies": {
-    "@surea11y/core": "^1.17.0",
+    "@surea11y/core": "^1.18.0",
     "jsdom": "^29.1.1"
   }
 }

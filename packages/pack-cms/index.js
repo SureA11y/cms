@@ -68,7 +68,7 @@ module.exports = definePack({
   namespace: 'cms',
   description:
     "Splits core's rules into what a content author can fix and what the theme decides, and adds checks authors need.",
-  core: '^1.17.0',
+  core: '^1.18.0',
 
   rules: [require('./rules/manual/cms-link-to-document')],
 

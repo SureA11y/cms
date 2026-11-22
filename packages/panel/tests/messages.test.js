@@ -2,19 +2,22 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import './locales.js';
 import { createRequire } from 'node:module';
-import fs from 'node:fs';
-import path from 'node:path';
 import { MESSAGES, messagesFor } from '../src/messages/index.js';
 import { UI } from '../src/messages/ui.js';
 
 const require = createRequire(import.meta.url);
-// core's English dictionary, read from the installed package.
-const coreDir = path.dirname(require.resolve('@surea11y/core/package.json'));
-const coreEn = JSON.parse(fs.readFileSync(path.join(coreDir, 'src/i18n/en.json'), 'utf8'));
+// The message keys core has. Its published package builds English into the
+// engine and ships the other languages as files (`@surea11y/core/i18n/<locale>`),
+// each with every key English has: their keys together are core's.
+const coreKeys = Object.fromEntries(
+  ['es', 'de', 'fr', 'ja'].flatMap((l) =>
+    Object.keys(require(`@surea11y/core/i18n/${l}`).messages).map((k) => [k, true])
+  )
+);
 const packEn = require('../../pack-cms/i18n/en.json');
 
 test('every message replaces a key that core or the pack has', () => {
-  const known = new Set([...Object.keys(coreEn), ...Object.keys(packEn)]);
+  const known = new Set([...Object.keys(coreKeys), ...Object.keys(packEn)]);
   for (const key of Object.keys(MESSAGES.en))
     assert.ok(known.has(key), `${key} is a key core or the pack has`);
 });

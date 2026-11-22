@@ -6,9 +6,9 @@
 // Before packaging, it checks what a release needs:
 // - the version is the same in the plugin header, SUREA11Y_VERSION and the
 //   readme's Stable tag;
-// - @surea11y/core is a released version from npm, not a local copy from
-//   `npm run setup:core` (pass --allow-unreleased-core to package anyway,
-//   for a test; the zip is then named so);
+// - @surea11y/core is a released version from npm, not a local copy linked
+//   into node_modules (pass --allow-unreleased-core to package anyway, for
+//   a test; the zip is then named so);
 // then builds, and checks the size budgets.
 //
 //   npm run package

@@ -55,14 +55,8 @@ You need [Node.js](https://nodejs.org/) 22 or later and
 
 ```sh
 npm install
-npm run setup:core
 npm run wp:start
 ```
-
-`setup:core` is needed until the next release of `@surea11y/core`: the
-plugin uses rules that are on core's main branch but not yet in 1.17.0. It
-clones core beside this folder (`../core`) and installs it from there; run
-it again after any `npm install`, which puts the released version back.
 
 The first start downloads WordPress and a database, so it takes a few
 minutes. Then open <http://localhost:8888/wp-admin> and log in as `admin`
@@ -70,9 +64,9 @@ with the password `password`.
 
 If something goes wrong:
 
-- **"The installed @surea11y/core (1.17.0) is older than the CMS pack
-  needs"**: run `npm run setup:core`, then start again. `npm install` puts
-  the released core back, so run it after every `npm install`.
+- **"The installed @surea11y/core (…) is older than the CMS pack needs"**:
+  run `npm install`, which installs the core version `package.json` names,
+  then start again.
 - **`spawn docker ENOENT`**: wp-env can't find Docker. Install
   [Docker Desktop](https://www.docker.com/products/docker-desktop/) and open
   it. If `docker --version` works in a terminal but not from your editor,
