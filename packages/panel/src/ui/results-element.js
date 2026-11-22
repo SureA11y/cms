@@ -28,6 +28,7 @@
 import { GROUP_ORDER, shortKey, FINDING_PARAM } from '../findings.js';
 import { toCards, countPlaces } from '../cards.js';
 import { uiStrings, fill } from '../messages/ui.js';
+import { MESSAGES } from '../messages/index.js';
 import { tokenCss } from './tokens.js';
 import { icon } from './icons.js';
 
@@ -104,6 +105,9 @@ ul, ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction:
 .summary { font-size: var(--sa11y-font-size-title); font-weight: 600; line-height: 1.4; overflow-wrap: anywhere; }
 .hint { margin-top: var(--sa11y-space-2); }
 .where { margin-top: var(--sa11y-space-2); font-style: italic; color: var(--sa11y-text-muted); }
+.dev-toggle { margin-top: var(--sa11y-space-1); padding: 0; }
+.dev { padding: var(--sa11y-space-2); border-radius: var(--sa11y-radius-small); background: var(--sa11y-surface-tag); overflow-wrap: anywhere; }
+.dev code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: var(--sa11y-font-size-small); }
 .actions { display: flex; flex-wrap: wrap; gap: var(--sa11y-space-1) var(--sa11y-space-2); margin-top: var(--sa11y-space-3); }
 .button.fix { display: inline-flex; align-items: center; gap: var(--sa11y-space-1); border-color: transparent; background: transparent; padding: 0 var(--sa11y-space-1); font-weight: 600; }
 .button.fix:hover { text-decoration: underline; }
@@ -190,6 +194,7 @@ export class ResultsElement extends HTMLElement {
     this._questions = new Map(); // card key -> { state, question }
     this._questionFor = null;
     this._howOpen = new Set();
+    this._devOpen = new Set(); // cards whose "For your developer" part is open
     this._moreOpen = new Set(); // cards whose "More" actions are shown
     this._current = null; // { cardKey, place }
     this._outline = null; // { headings, images }, from the host
@@ -807,6 +812,35 @@ export class ResultsElement extends HTMLElement {
           this.site === 'website' ? t.inWebsite : card.inContent ? t.inTheme : t.outsideContent
         )
       );
+    // Where the panel words a finding for editors, the markup and CSS that
+    // core's own message names are kept for a developer, closed at first.
+    const dev = devDetails(card, t);
+    if (dev) {
+      const devId = `${id}-dev`;
+      const devOpen = this._devOpen.has(card.key);
+      const toggle = el(doc, 'button', 'link dev-toggle', t.forDeveloper);
+      toggle.type = 'button';
+      toggle.dataset.focus = `card:${hash(card.key)}:dev`;
+      toggle.setAttribute('aria-expanded', String(devOpen));
+      if (devOpen) toggle.setAttribute('aria-controls', devId);
+      toggle.addEventListener('click', () => {
+        if (devOpen) this._devOpen.delete(card.key);
+        else this._devOpen.add(card.key);
+        this._render();
+        this._restoreFocus(`card:${hash(card.key)}:dev`);
+      });
+      li.append(toggle);
+      if (devOpen) {
+        const box = el(doc, 'div', 'dev');
+        box.id = devId;
+        for (const [label, value] of dev) {
+          const row = el(doc, 'p');
+          row.append(el(doc, 'strong', '', `${label}: `), el(doc, 'code', '', value));
+          box.append(row);
+        }
+        li.append(box);
+      }
+    }
     // A person's answer that leaves the card open: a confirmed problem, or
     // not sure.
     const open = card.confirmed || card.unsure;
@@ -1238,6 +1272,21 @@ function el(doc, tag, className, text) {
 }
 
 /** A short, stable id for a card key, safe in a selector. */
+/**
+ * What a developer needs about a card the panel words for editors: its rule,
+ * the element's markup and the CSS core names, as [label, value] rows; null
+ * for a card in core's own words, which already name them.
+ */
+function devDetails(card, t) {
+  const f = card.places[0];
+  if (!f || !f.messageKey || !MESSAGES.en[f.messageKey]) return null;
+  const rows = [[t.devRule, card.ruleId]];
+  if (f.html) rows.push([t.devMarkup, f.html.length > 300 ? `${f.html.slice(0, 300)}…` : f.html]);
+  const css = f.values && f.values.clipCss;
+  if (css) rows.push([t.devCss, css]);
+  return rows;
+}
+
 function hash(text) {
   let h = 5381;
   for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0;

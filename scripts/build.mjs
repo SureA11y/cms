@@ -1,7 +1,8 @@
 // Builds the WordPress plugin's assets into plugins/wordpress/build/ (and
 // the same engine and steps for the Sanity plugin, at the end):
 // - panel.js: @surea11y/panel for the browser (global SureA11yPanel), in
-//   English; panel.i18n.<locale>.js adds each other language;
+//   English but for the wording of findings; panel.i18n.en.js adds that,
+//   and panel.i18n.<locale>.js each other language;
 // - engine.js: core's browser bundle with the CMS pack built in, which runs
 //   where a Content Security Policy forbids eval and can't fall out of step;
 // - engine.i18n.<locale>.js: core's message side files;
@@ -58,6 +59,11 @@ try {
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 
+// The panel's English wording for findings (messages/en.json) is a file of
+// its own, panel.i18n.en.js, as each other language's is: loaded on every
+// page with the panel, before the person's language, so the panel itself
+// stays within its budget as editors' messages grow.
+const MESSAGES_EN = path.join(root, 'packages/panel/src/messages/en.json');
 await build({
   entryPoints: [path.join(root, 'packages/panel/src/index.js')],
   bundle: true,
@@ -67,6 +73,30 @@ await build({
   minify: true,
   legalComments: 'none',
   outfile: path.join(out, 'panel.js'),
+  logLevel: 'warning',
+  plugins: [
+    {
+      name: 'messages-en-apart',
+      setup(b) {
+        b.onLoad({ filter: /messages[\\/]en\.json$/ }, (args) =>
+          path.resolve(args.path) === MESSAGES_EN ? { contents: '{}', loader: 'json' } : undefined
+        );
+      }
+    }
+  ]
+});
+await build({
+  stdin: {
+    contents: `import messages from './packages/panel/src/messages/en.json';\nwindow.SureA11yPanel.addLocale('en', { messages });`,
+    resolveDir: root,
+    sourcefile: 'panel.i18n.en.js'
+  },
+  bundle: true,
+  format: 'iife',
+  target: 'es2020',
+  minify: true,
+  legalComments: 'none',
+  outfile: path.join(out, 'panel.i18n.en.js'),
   logLevel: 'warning'
 });
 

@@ -121,5 +121,9 @@
   "onPage": "Sur la page",
   "previewChecking": "Vérification de la page d’aperçu…",
   "previewError": "La page d’aperçu n’a pas pu être vérifiée.",
-  "checkedBoth": "Vérifié dans les champs et sur la page d’aperçu."
+  "checkedBoth": "Vérifié dans les champs et sur la page d’aperçu.",
+  "forDeveloper": "Pour la personne qui développe le site",
+  "devRule": "Règle",
+  "devMarkup": "Code HTML",
+  "devCss": "CSS"
 }

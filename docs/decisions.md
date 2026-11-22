@@ -2,6 +2,37 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-22: Editor wording for core's new rules
+
+Stress test round 12 found that core's new rules and codes reached editors
+in core's words, which name markup and CSS (K12-3).
+
+- **Plain wording, in all five languages**, for `form-group-name-present`
+  (radio buttons and checkboxes), `symbol-graphic-contrast`,
+  `resize-text-content-loss` (clipped and shortened text),
+  `listitem-parent-valid`'s `LIST_ROLE_OVERRIDDEN` and `page-title-patterns`'
+  `placeholderTitle`. Each says what the editor sees and what to do in the
+  editor, and says when the fix is the theme's. `p-as-heading`'s
+  `BOLD_SHORT_PARAGRAPH` already had wording. They live in the panel's
+  messages, by core's keys, as the other worded rules do: core refuses a
+  pack dictionary that redefines its keys, so `pack-cms` can't hold them.
+  Core's own texts are unchanged.
+- **"For your developer"**: a card the panel words for editors has a closed
+  part, opened by a button with `aria-expanded`, with the rule, the
+  element's markup and the CSS core names (`clipCss`). Cards in core's own
+  words have none, as their text already names them.
+- **The panel's English wording of findings is a file of its own**,
+  `panel.i18n.en.js` (2.4 KB), loaded on every page with the panel before
+  the person's language, as each other language's is. With the new wording
+  and the developer part, `panel.js` would have been 22.5 KB, over its
+  22 KB budget; it is now 20.3 KB. It costs English pages one more small
+  request. The budgets are unchanged. To confirm with the maintainer.
+- **Not done:** `MARQUEE_STOPS_ONLY_ON_HOVER`. It is on core's round 11
+  branch, not in core's main branch or in 1.18.0, so the panel can't word
+  it yet. The reflow codes of the phone-width check (`WIDE_TABLE`,
+  `WIDE_MEDIA` and the others) also keep core's words, which name CSS; to
+  word with the phone check's next change.
+
 ## 2026-11-22: Text cut off at 200% zoom is the theme's
 
 The rule `resize-text-content-loss` (WCAG 1.4.4) asks about text that a box

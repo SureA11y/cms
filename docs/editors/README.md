@@ -67,6 +67,11 @@ footer, the site's styles). Theme findings are usually for whoever builds or
 looks after the site, and are fixed once for every page, often in the Site
 Editor.
 
+A finding worded for editors has a closed part, **For your developer**: the
+rule's name, the element's code and, where it applies, the CSS involved. You
+don't need it to act; pass it on to whoever builds the site when the fix is
+theirs.
+
 ## Records of checks
 
 When you save a post by hand, and when you check its page, SureA11y records

@@ -36,5 +36,19 @@
   "cmsLinkToDocument_summary_unstated": "Este enlace abre un archivo {{format}}, pero el texto no lo dice.",
   "cmsLinkToDocument_hint_unstated": "Añade el tipo y el tamaño del archivo después del texto del enlace, como \"Informe anual (PDF, 2 MB)\". Comprueba también que el archivo sea accesible.",
   "contrastMinimum_fail_belowThreshold": "Este texto se lee mal: sus colores tienen un contraste de {{ratio}}:1, y necesita al menos {{threshold}}:1.",
-  "contrastMinimum_hint_fail": "Elige un color de texto más oscuro o un fondo más claro (o al revés) en los ajustes de color del bloque, hasta que el contraste llegue a {{threshold}}:1."
+  "contrastMinimum_hint_fail": "Elige un color de texto más oscuro o un fondo más claro (o al revés) en los ajustes de color del bloque, hasta que el contraste llegue a {{threshold}}:1.",
+  "formGroupNamePresent_summary_cantTell_radio": "Estas {{count}} opciones, de las que solo se puede elegir una, no están agrupadas bajo una pregunta.",
+  "formGroupNamePresent_summary_cantTell_checkbox": "Estas {{count}} casillas no están agrupadas bajo una pregunta.",
+  "formGroupNamePresent_hint_cantTell": "Si las opciones responden a una sola pregunta, agrúpalas bajo un título corto que la formule, como la etiqueta del campo en tu creador de formularios. Si la etiqueta de cada opción ya dice toda la pregunta, no hace falta cambiar nada.",
+  "symbolGraphicContrast_summary_cantTell": "Estos símbolos, “{{symbols}}”, apenas se distinguen del fondo: {{ratio}}:1, cuando los símbolos que muestran algo necesitan 3:1.",
+  "symbolGraphicContrast_hint_cantTell": "Si muestran algo, como una valoración o un estado, elige para ellos un color más marcado o di lo mismo con palabras a su lado. Si solo decoran, no hace falta cambiar nada.",
+  "resizeTextContentLoss_summary_clipped": "Con la página ampliada al 200 %, la caja que lo rodea corta parte del texto “{{text}}”.",
+  "resizeTextContentLoss_hint_clipped": "Si diste a este bloque una altura fija en el editor, quítala para que crezca con su texto. Si no, es el tema el que corta el texto: avisa a quien se ocupa del sitio.",
+  "resizeTextContentLoss_summary_truncated": "Con la página ampliada al 200 %, el texto “{{text}}” se acorta con “…”, así que parte de él no se ve.",
+  "resizeTextContentLoss_hint_truncated": "Comprueba que el texto completo se puede leer de otra forma, como con un enlace “Leer más”. Si no, avisa a quien se ocupa del sitio: es el tema el que lo acorta.",
+  "pageTitlePatterns_summary_cantTell_placeholder": "El título de la página, “{{titleText}}”, contiene “{{token}}”, que parece un marcador que nunca se rellenó.",
+  "listitemParentValid_summary_cantTell_listRoleOverridden": "Este elemento está en una lista que no se lee como lista.",
+  "listitemParentValid_hint_cantTell_listRoleOverridden": "Si hiciste esta lista en un bloque de HTML personalizado, usa en su lugar el bloque de lista del editor. Si forma parte del menú o del diseño del tema, avisa a quien se ocupa del sitio.",
+  "listitemParentValid_summary_fail_listRoleOverridden": "Este elemento está en una lista que no se lee como lista.",
+  "listitemParentValid_hint_fail_listRoleOverridden": "Si hiciste esta lista en un bloque de HTML personalizado, usa en su lugar el bloque de lista del editor. Si forma parte del menú o del diseño del tema, avisa a quien se ocupa del sitio."
 }

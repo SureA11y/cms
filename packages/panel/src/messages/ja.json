@@ -36,5 +36,19 @@
   "cmsLinkToDocument_summary_unstated": "このリンクは{{format}}ファイルを開きますが、テキストにはそう書かれていません。",
   "cmsLinkToDocument_hint_unstated": "「年次報告書（PDF、2 MB）」のように、リンクテキストの後にファイルの種類とサイズを加えてください。ファイル自体がアクセシブルかも確認してください。",
   "contrastMinimum_fail_belowThreshold": "このテキストは読みにくい色です。コントラストは {{ratio}}:1 で、少なくとも {{threshold}}:1 が必要です。",
-  "contrastMinimum_hint_fail": "ブロックの色の設定で、文字の色を濃くするか背景を明るくして（またはその逆）、コントラストを {{threshold}}:1 以上にしてください。"
+  "contrastMinimum_hint_fail": "ブロックの色の設定で、文字の色を濃くするか背景を明るくして（またはその逆）、コントラストを {{threshold}}:1 以上にしてください。",
+  "formGroupNamePresent_summary_cantTell_radio": "この{{count}}個の選択肢（1つだけ選べます）は、質問の下にまとめられていません。",
+  "formGroupNamePresent_summary_cantTell_checkbox": "この{{count}}個のチェックボックスは、質問の下にまとめられていません。",
+  "formGroupNamePresent_hint_cantTell": "選択肢が1つの質問に答えるものなら、その質問を短い見出しにしてまとめてください（フォーム作成ツールの項目ラベルなど）。各選択肢のラベルだけで質問全体がわかるなら、変更は不要です。",
+  "symbolGraphicContrast_summary_cantTell": "これらの記号「{{symbols}}」は背景との差が小さすぎます（{{ratio}}:1。何かを示す記号には3:1が必要です）。",
+  "symbolGraphicContrast_hint_cantTell": "評価や状態など何かを示しているなら、記号にもっとはっきりした色を選ぶか、同じ内容を横に言葉で書いてください。飾りだけなら、変更は不要です。",
+  "resizeTextContentLoss_summary_clipped": "ページを200%に拡大すると、「{{text}}」の一部が周りの枠で切れてしまいます。",
+  "resizeTextContentLoss_hint_clipped": "エディターでこのブロックに固定の高さを設定した場合は、それを外して文字に合わせて広がるようにしてください。設定していない場合はテーマが文字を切っています。サイトの担当者に伝えてください。",
+  "resizeTextContentLoss_summary_truncated": "ページを200%に拡大すると、「{{text}}」が「…」で省略され、一部が見えなくなります。",
+  "resizeTextContentLoss_hint_truncated": "「続きを読む」リンクなど、全文を別の方法で読めるか確認してください。読めない場合は、テーマが省略しているので、サイトの担当者に伝えてください。",
+  "pageTitlePatterns_summary_cantTell_placeholder": "ページのタイトル「{{titleText}}」に「{{token}}」が含まれています。入力されないまま残ったプレースホルダーのようです。",
+  "listitemParentValid_summary_cantTell_listRoleOverridden": "この項目は、リストとして読み上げられないリストの中にあります。",
+  "listitemParentValid_hint_cantTell_listRoleOverridden": "カスタムHTMLブロックでこのリストを作った場合は、代わりにエディターのリストブロックを使ってください。テーマのメニューやレイアウトの一部なら、サイトの担当者に伝えてください。",
+  "listitemParentValid_summary_fail_listRoleOverridden": "この項目は、リストとして読み上げられないリストの中にあります。",
+  "listitemParentValid_hint_fail_listRoleOverridden": "カスタムHTMLブロックでこのリストを作った場合は、代わりにエディターのリストブロックを使ってください。テーマのメニューやレイアウトの一部なら、サイトの担当者に伝えてください。"
 }

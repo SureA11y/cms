@@ -113,22 +113,29 @@ add_action( 'admin_footer', 'surea11y_print_config', 5 );
 add_action( 'wp_footer', 'surea11y_print_config', 5 );
 
 /**
- * Registers the panel's script, which both checkers use, and the file with
- * its words in the person's language when that is not English. Returns the
- * handle the checker's own script depends on.
+ * Registers the panel's script, which both checkers use, the file with its
+ * English wording of findings, and the file with its words in the person's
+ * language when that is not English. Returns the handle the checker's own
+ * script depends on.
  *
  * @return string
  */
 function surea11y_register_panel() {
 	$dir = plugin_dir_path( __FILE__ ) . 'build/';
 	wp_register_script( 'surea11y-panel', plugins_url( 'build/panel.js', __FILE__ ), array(), (string) filemtime( $dir . 'panel.js' ), true );
+	// The English wording of findings, which every language falls back to.
+	$handle = 'surea11y-panel';
+	if ( file_exists( $dir . 'panel.i18n.en.js' ) ) {
+		wp_register_script( 'surea11y-panel-en', plugins_url( 'build/panel.i18n.en.js', __FILE__ ), array( $handle ), (string) filemtime( $dir . 'panel.i18n.en.js' ), true );
+		$handle = 'surea11y-panel-en';
+	}
 	$locale = strtolower( substr( determine_locale(), 0, 2 ) );
 	$file   = 'panel.i18n.' . $locale . '.js';
 	if ( in_array( $locale, surea11y_engine_locales(), true ) && file_exists( $dir . $file ) ) {
-		wp_register_script( 'surea11y-panel-i18n', plugins_url( 'build/' . $file, __FILE__ ), array( 'surea11y-panel' ), (string) filemtime( $dir . $file ), true );
+		wp_register_script( 'surea11y-panel-i18n', plugins_url( 'build/' . $file, __FILE__ ), array( $handle ), (string) filemtime( $dir . $file ), true );
 		return 'surea11y-panel-i18n';
 	}
-	return 'surea11y-panel';
+	return $handle;
 }
 
 /**

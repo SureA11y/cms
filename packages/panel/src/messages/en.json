@@ -36,5 +36,19 @@
   "cmsLinkToDocument_summary_unstated": "This link opens a {{format}} file, but the text doesn't say so.",
   "cmsLinkToDocument_hint_unstated": "Add the file type and size after the link text, such as \"Annual report (PDF, 2 MB)\". Check the file itself is accessible too.",
   "contrastMinimum_fail_belowThreshold": "This text is hard to read: its colours have a contrast of {{ratio}}:1, and it needs at least {{threshold}}:1.",
-  "contrastMinimum_hint_fail": "Choose a darker text colour or a lighter background (or the other way round) in the block's colour settings, until the contrast reaches {{threshold}}:1."
+  "contrastMinimum_hint_fail": "Choose a darker text colour or a lighter background (or the other way round) in the block's colour settings, until the contrast reaches {{threshold}}:1.",
+  "formGroupNamePresent_summary_cantTell_radio": "These {{count}} choices, of which only one can be picked, are not grouped under a question.",
+  "formGroupNamePresent_summary_cantTell_checkbox": "These {{count}} checkboxes are not grouped under a question.",
+  "formGroupNamePresent_hint_cantTell": "If the choices answer one question, group them under a short heading that asks it, such as the field's label in your form builder. If each choice's own label says the whole question, nothing needs to change.",
+  "symbolGraphicContrast_summary_cantTell": "These symbols, “{{symbols}}”, are faint against their background: {{ratio}}:1, where symbols that show something need 3:1.",
+  "symbolGraphicContrast_hint_cantTell": "If they show something, such as a rating or a status, pick a stronger colour for them, or say the same in words beside them. If they only decorate, nothing needs to change.",
+  "resizeTextContentLoss_summary_clipped": "When the page is zoomed to 200%, part of the text “{{text}}” is cut off by the box around it.",
+  "resizeTextContentLoss_hint_clipped": "If you gave this block a fixed height in the editor, remove it so the block grows with its text. If you didn't, the theme cuts the text off: tell whoever looks after the site.",
+  "resizeTextContentLoss_summary_truncated": "When the page is zoomed to 200%, the text “{{text}}” is shortened with “…”, so part of it is hidden.",
+  "resizeTextContentLoss_hint_truncated": "Check that the full text can be read another way, such as through a “Read more” link. If it can't, tell whoever looks after the site: the theme shortens it.",
+  "pageTitlePatterns_summary_cantTell_placeholder": "The page's title, “{{titleText}}”, contains “{{token}}”, which looks like a placeholder that was never filled in.",
+  "listitemParentValid_summary_cantTell_listRoleOverridden": "This item is in a list that is not read out as a list.",
+  "listitemParentValid_hint_cantTell_listRoleOverridden": "If you made this list in a custom HTML block, use the editor's list block instead. If it is part of the theme's menu or layout, tell whoever looks after the site.",
+  "listitemParentValid_summary_fail_listRoleOverridden": "This item is in a list that is not read out as a list.",
+  "listitemParentValid_hint_fail_listRoleOverridden": "If you made this list in a custom HTML block, use the editor's list block instead. If it is part of the theme's menu or layout, tell whoever looks after the site."
 }

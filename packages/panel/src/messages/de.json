@@ -36,5 +36,19 @@
   "cmsLinkToDocument_summary_unstated": "Dieser Link öffnet eine {{format}}-Datei, aber der Text sagt es nicht.",
   "cmsLinkToDocument_hint_unstated": "Fügen Sie Dateityp und -größe nach dem Linktext hinzu, etwa „Jahresbericht (PDF, 2 MB)“. Prüfen Sie auch, ob die Datei selbst barrierefrei ist.",
   "contrastMinimum_fail_belowThreshold": "Dieser Text ist schwer zu lesen: Seine Farben haben einen Kontrast von {{ratio}}:1, nötig sind mindestens {{threshold}}:1.",
-  "contrastMinimum_hint_fail": "Wählen Sie in den Farbeinstellungen des Blocks eine dunklere Textfarbe oder einen helleren Hintergrund (oder umgekehrt), bis der Kontrast {{threshold}}:1 erreicht."
+  "contrastMinimum_hint_fail": "Wählen Sie in den Farbeinstellungen des Blocks eine dunklere Textfarbe oder einen helleren Hintergrund (oder umgekehrt), bis der Kontrast {{threshold}}:1 erreicht.",
+  "formGroupNamePresent_summary_cantTell_radio": "Diese {{count}} Optionen, von denen nur eine wählbar ist, sind nicht unter einer Frage gruppiert.",
+  "formGroupNamePresent_summary_cantTell_checkbox": "Diese {{count}} Kontrollkästchen sind nicht unter einer Frage gruppiert.",
+  "formGroupNamePresent_hint_cantTell": "Wenn die Optionen eine Frage beantworten, gruppieren Sie sie unter einer kurzen Überschrift, die diese Frage stellt, etwa der Feldbeschriftung in Ihrem Formular-Builder. Wenn schon die Beschriftung jeder Option die ganze Frage nennt, ist nichts zu ändern.",
+  "symbolGraphicContrast_summary_cantTell": "Diese Symbole, „{{symbols}}“, heben sich kaum vom Hintergrund ab: {{ratio}}:1, wo Symbole, die etwas zeigen, 3:1 brauchen.",
+  "symbolGraphicContrast_hint_cantTell": "Wenn sie etwas zeigen, etwa eine Bewertung oder einen Status, wählen Sie eine kräftigere Farbe für sie oder sagen Sie dasselbe in Worten daneben. Wenn sie nur schmücken, ist nichts zu ändern.",
+  "resizeTextContentLoss_summary_clipped": "Wenn die Seite auf 200 % vergrößert wird, schneidet der Kasten um den Text „{{text}}“ einen Teil davon ab.",
+  "resizeTextContentLoss_hint_clipped": "Wenn Sie diesem Block im Editor eine feste Höhe gegeben haben, entfernen Sie sie, damit er mit seinem Text wächst. Wenn nicht, schneidet das Theme den Text ab: Sagen Sie es der Person, die sich um die Website kümmert.",
+  "resizeTextContentLoss_summary_truncated": "Wenn die Seite auf 200 % vergrößert wird, wird der Text „{{text}}“ mit „…“ gekürzt, sodass ein Teil davon nicht zu sehen ist.",
+  "resizeTextContentLoss_hint_truncated": "Prüfen Sie, ob der ganze Text auf anderem Weg lesbar ist, etwa über einen Link „Weiterlesen“. Wenn nicht, sagen Sie es der Person, die sich um die Website kümmert: Das Theme kürzt ihn.",
+  "pageTitlePatterns_summary_cantTell_placeholder": "Der Seitentitel „{{titleText}}“ enthält „{{token}}“, offenbar einen Platzhalter, der nie ausgefüllt wurde.",
+  "listitemParentValid_summary_cantTell_listRoleOverridden": "Dieser Eintrag steht in einer Liste, die nicht als Liste vorgelesen wird.",
+  "listitemParentValid_hint_cantTell_listRoleOverridden": "Wenn Sie diese Liste in einem Block für eigenes HTML angelegt haben, verwenden Sie stattdessen den Listen-Block des Editors. Wenn sie zum Menü oder Layout des Themes gehört, sagen Sie es der Person, die sich um die Website kümmert.",
+  "listitemParentValid_summary_fail_listRoleOverridden": "Dieser Eintrag steht in einer Liste, die nicht als Liste vorgelesen wird.",
+  "listitemParentValid_hint_fail_listRoleOverridden": "Wenn Sie diese Liste in einem Block für eigenes HTML angelegt haben, verwenden Sie stattdessen den Listen-Block des Editors. Wenn sie zum Menü oder Layout des Themes gehört, sagen Sie es der Person, die sich um die Website kümmert."
 }

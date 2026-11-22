@@ -36,5 +36,19 @@
   "cmsLinkToDocument_summary_unstated": "Ce lien ouvre un fichier {{format}}, mais le texte ne le dit pas.",
   "cmsLinkToDocument_hint_unstated": "Ajoutez le type et la taille du fichier après le texte du lien, comme « Rapport annuel (PDF, 2 Mo) ». Vérifiez aussi que le fichier lui-même est accessible.",
   "contrastMinimum_fail_belowThreshold": "Ce texte est difficile à lire : ses couleurs ont un contraste de {{ratio}}:1, et il lui faut au moins {{threshold}}:1.",
-  "contrastMinimum_hint_fail": "Choisissez une couleur de texte plus foncée ou un fond plus clair (ou l'inverse) dans les réglages de couleur du bloc, jusqu'à ce que le contraste atteigne {{threshold}}:1."
+  "contrastMinimum_hint_fail": "Choisissez une couleur de texte plus foncée ou un fond plus clair (ou l'inverse) dans les réglages de couleur du bloc, jusqu'à ce que le contraste atteigne {{threshold}}:1.",
+  "formGroupNamePresent_summary_cantTell_radio": "Ces {{count}} options, dont une seule peut être choisie, ne sont pas regroupées sous une question.",
+  "formGroupNamePresent_summary_cantTell_checkbox": "Ces {{count}} cases à cocher ne sont pas regroupées sous une question.",
+  "formGroupNamePresent_hint_cantTell": "Si les options répondent à une même question, regroupez-les sous un titre court qui la pose, comme l'intitulé du champ dans votre outil de formulaires. Si l'intitulé de chaque option dit déjà toute la question, rien n'est à changer.",
+  "symbolGraphicContrast_summary_cantTell": "Ces symboles, « {{symbols}} », se distinguent mal de leur fond : {{ratio}}:1, alors que les symboles qui montrent quelque chose demandent 3:1.",
+  "symbolGraphicContrast_hint_cantTell": "S'ils montrent quelque chose, comme une note ou un état, choisissez pour eux une couleur plus marquée, ou dites la même chose en mots à côté. S'ils ne font que décorer, rien n'est à changer.",
+  "resizeTextContentLoss_summary_clipped": "Quand la page est agrandie à 200 %, le cadre autour du texte « {{text}} » en coupe une partie.",
+  "resizeTextContentLoss_hint_clipped": "Si vous avez donné à ce bloc une hauteur fixe dans l'éditeur, retirez-la pour qu'il grandisse avec son texte. Sinon, c'est le thème qui coupe le texte : prévenez la personne qui s'occupe du site.",
+  "resizeTextContentLoss_summary_truncated": "Quand la page est agrandie à 200 %, le texte « {{text}} » est raccourci par « … », et une partie n'est pas visible.",
+  "resizeTextContentLoss_hint_truncated": "Vérifiez que le texte complet peut se lire autrement, par exemple avec un lien « Lire la suite ». Sinon, prévenez la personne qui s'occupe du site : c'est le thème qui le raccourcit.",
+  "pageTitlePatterns_summary_cantTell_placeholder": "Le titre de la page, « {{titleText}} », contient « {{token}} », qui semble être un espace réservé jamais rempli.",
+  "listitemParentValid_summary_cantTell_listRoleOverridden": "Cet élément est dans une liste qui n'est pas lue comme une liste.",
+  "listitemParentValid_hint_cantTell_listRoleOverridden": "Si vous avez fait cette liste dans un bloc HTML personnalisé, utilisez plutôt le bloc Liste de l'éditeur. Si elle fait partie du menu ou de la mise en page du thème, prévenez la personne qui s'occupe du site.",
+  "listitemParentValid_summary_fail_listRoleOverridden": "Cet élément est dans une liste qui n'est pas lue comme une liste.",
+  "listitemParentValid_hint_fail_listRoleOverridden": "Si vous avez fait cette liste dans un bloc HTML personnalisé, utilisez plutôt le bloc Liste de l'éditeur. Si elle fait partie du menu ou de la mise en page du thème, prévenez la personne qui s'occupe du site."
 }

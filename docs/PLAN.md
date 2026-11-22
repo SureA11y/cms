@@ -133,6 +133,11 @@ Panel:
       language), in English and Spanish first.
 - [x] The same in German, French and Japanese, and plain wording for
       contrast in all five.
+- [x] Plain wording for core 1.18's new rules and codes, in all five
+      languages: groups of choices, symbols as images, text cut off at 200%
+      zoom, a list's lost role and a placeholder left in the page title. A
+      card worded for editors keeps the rule, the markup and the CSS in a
+      closed "For your developer" part.
 - [ ] German, French and Japanese reviewed by native speakers: written
       without one, using core's own terms where they overlap.
 - [x] Results list with "show me where" and "next issue".

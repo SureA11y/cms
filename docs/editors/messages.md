@@ -8,7 +8,7 @@ shows. The checker puts each finding in one of four groups: **to fix**
 **needs a person** (only a person can tell: answer the question) and
 **probably fine**. See [the guide](README.md) for how to work through them.
 
-The 12 rules editors meet most have their messages written for
+The 17 rules editors meet most have their messages written for
 editors, listed with what to do. The others are rarer, and their messages
 are the engine's own.
 
@@ -49,6 +49,19 @@ What to do:
 
 - If the table holds data, turn on its header row (or header column), so each cell is read with its label. A table used only to place things side by side needs no headers.
 - Make the first row (or column) of the table its header, so every cell is read with its label.
+
+#### Groups of choices have a name
+
+WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `form-group-name-present`
+
+What you may see:
+
+- These … choices, of which only one can be picked, are not grouped under a question.
+- These … checkboxes are not grouped under a question.
+
+What to do:
+
+- If the choices answer one question, group them under a short heading that asks it, such as the field's label in your form builder. If each choice's own label says the whole question, nothing needs to change.
 
 #### Heading levels don't skip a level
 
@@ -147,6 +160,30 @@ What you may see:
 What to do:
 
 - Add the file type and size after the link text, such as "Annual report (PDF, 2 MB)". Check the file itself is accessible too.
+
+#### List items are inside a list
+
+WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `listitem-parent-valid`
+
+What you may see:
+
+- This item is in a list that is not read out as a list.
+
+What to do:
+
+- If you made this list in a custom HTML block, use the editor's list block instead. If it is part of the theme's menu or layout, tell whoever looks after the site.
+
+#### Symbols used as images, like stars, stand out from their background
+
+WCAG 1.4.11 (AA) · EN 301 549 9.1.4.11 · Rule `symbol-graphic-contrast`
+
+What you may see:
+
+- These symbols, “…”, are faint against their background: …:1, where symbols that show something need 3:1.
+
+What to do:
+
+- If they show something, such as a rating or a status, pick a stronger colour for them, or say the same in words beside them. If they only decorate, nothing needs to change.
 
 #### Text has enough contrast with its background
 
@@ -356,10 +393,6 @@ WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `aria-prohibited-children`
 
 WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `aria-required-children`
 
-#### Groups of choices have a name
-
-WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `form-group-name-present`
-
 #### Headings say what the section is about
 
 WCAG 2.4.6 (AA) · EN 301 549 9.2.4.6 · Rule `heading-quality`
@@ -399,10 +432,6 @@ WCAG 3.1.2 (AA) · EN 301 549 9.3.1.2 · Rule `valid-lang`
 #### Links in text stand out by more than their colour
 
 WCAG 1.4.1 (A) · EN 301 549 9.1.4.1 · Rule `link-in-text-block`
-
-#### List items are inside a list
-
-WCAG 1.3.1 (A) · EN 301 549 9.1.3.1 · Rule `listitem-parent-valid`
 
 #### Lists contain only list items
 
@@ -475,10 +504,6 @@ WCAG 1.4.2 (A) · EN 301 549 9.1.4.2 · Rule `no-autoplay-audio`
 #### Status messages are announced
 
 WCAG 4.1.3 (AA) · EN 301 549 9.4.1.3 · Rule `live-region-announcements`
-
-#### Symbols used as images, like stars, stand out from their background
-
-WCAG 1.4.11 (AA) · EN 301 549 9.1.4.11 · Rule `symbol-graphic-contrast`
 
 #### Table cells point to existing header cells
 
@@ -588,102 +613,120 @@ them; the post editor doesn't. When the page checker finds one of them on
 something inside your content, such as a block whose height was set in the
 editor, it shows it under "Your content".
 
-### All content is inside a page region
+### Met most often
 
-A good practice, not a WCAG requirement · Rule `region`
-
-### Keyboard focus isn't hidden behind other content
-
-WCAG 2.4.11 (AA) · EN 301 549 9.2.4.11 · Rule `focus-not-obscured-minimum`
-
-### Keyboard focus stays visible
-
-WCAG 1.4.11 (AA), 2.4.7 (AA), 2.4.13 (AAA) · EN 301 549 9.1.4.11, 9.2.4.7 · Rule `css-focus-indicator-suppressed`
-
-### Page regions of the same kind have different names
-
-A good practice, not a WCAG requirement · Rule `landmark-unique`
-
-### Sidebars aren't inside another page region
-
-A good practice, not a WCAG requirement · Rule `landmark-complementary-is-top-level`
-
-### Text stays readable when the page is zoomed to 200%
+#### Text stays readable when the page is zoomed to 200%
 
 WCAG 1.4.4 (AA) · EN 301 549 9.1.4.4 · Rule `resize-text-content-loss`
 
-### Text stays readable with more spacing
+What you may see:
 
-WCAG 1.4.12 (AA) · EN 301 549 9.1.4.12 · Rule `text-spacing-content-loss`
+- When the page is zoomed to 200%, part of the text “…” is cut off by the box around it.
+- When the page is zoomed to 200%, the text “…” is shortened with “…”, so part of it is hidden.
 
-### The "skip to content" link goes somewhere
+What to do:
 
-A good practice, not a WCAG requirement · Rule `skip-link`
+- If you gave this block a fixed height in the editor, remove it so the block grows with its text. If you didn't, the theme cuts the text off: tell whoever looks after the site.
+- Check that the full text can be read another way, such as through a “Read more” link. If it can't, tell whoever looks after the site: the theme shortens it.
 
-### The header, navigation, search and footer are marked as page regions
-
-A good practice, not a WCAG requirement · Rule `page-zones-landmark`
-
-### The main content isn't inside another page region
-
-A good practice, not a WCAG requirement · Rule `landmark-main-is-top-level`
-
-### The page has a title
-
-WCAG 2.4.2 (A) · EN 301 549 9.2.4.2 · Rule `page-title-present`
-
-### The page has only one main content area
-
-A good practice, not a WCAG requirement · Rule `landmark-no-duplicate-main`
-
-### The page has only one site footer
-
-A good practice, not a WCAG requirement · Rule `landmark-no-duplicate-contentinfo`
-
-### The page has only one site header
-
-A good practice, not a WCAG requirement · Rule `landmark-no-duplicate-banner`
-
-### The page marks its main content
-
-A good practice, not a WCAG requirement · Rule `landmark-one-main`
-
-### The page says what language it's in
-
-WCAG 3.1.1 (A) · EN 301 549 9.3.1.1 · Rule `html-lang-attr-present`
-
-### The page title says what the page is
+#### The page title says what the page is
 
 WCAG 2.4.2 (A) · EN 301 549 9.2.4.2 · Rule `page-title-patterns`
 
-### The page works both upright and sideways
+What you may see:
+
+- The page's title, “…”, contains “…”, which looks like a placeholder that was never filled in.
+
+### Less common
+
+#### All content is inside a page region
+
+A good practice, not a WCAG requirement · Rule `region`
+
+#### Keyboard focus isn't hidden behind other content
+
+WCAG 2.4.11 (AA) · EN 301 549 9.2.4.11 · Rule `focus-not-obscured-minimum`
+
+#### Keyboard focus stays visible
+
+WCAG 1.4.11 (AA), 2.4.7 (AA), 2.4.13 (AAA) · EN 301 549 9.1.4.11, 9.2.4.7 · Rule `css-focus-indicator-suppressed`
+
+#### Page regions of the same kind have different names
+
+A good practice, not a WCAG requirement · Rule `landmark-unique`
+
+#### Sidebars aren't inside another page region
+
+A good practice, not a WCAG requirement · Rule `landmark-complementary-is-top-level`
+
+#### Text stays readable with more spacing
+
+WCAG 1.4.12 (AA) · EN 301 549 9.1.4.12 · Rule `text-spacing-content-loss`
+
+#### The "skip to content" link goes somewhere
+
+A good practice, not a WCAG requirement · Rule `skip-link`
+
+#### The header, navigation, search and footer are marked as page regions
+
+A good practice, not a WCAG requirement · Rule `page-zones-landmark`
+
+#### The main content isn't inside another page region
+
+A good practice, not a WCAG requirement · Rule `landmark-main-is-top-level`
+
+#### The page has a title
+
+WCAG 2.4.2 (A) · EN 301 549 9.2.4.2 · Rule `page-title-present`
+
+#### The page has only one main content area
+
+A good practice, not a WCAG requirement · Rule `landmark-no-duplicate-main`
+
+#### The page has only one site footer
+
+A good practice, not a WCAG requirement · Rule `landmark-no-duplicate-contentinfo`
+
+#### The page has only one site header
+
+A good practice, not a WCAG requirement · Rule `landmark-no-duplicate-banner`
+
+#### The page marks its main content
+
+A good practice, not a WCAG requirement · Rule `landmark-one-main`
+
+#### The page says what language it's in
+
+WCAG 3.1.1 (A) · EN 301 549 9.3.1.1 · Rule `html-lang-attr-present`
+
+#### The page works both upright and sideways
 
 WCAG 1.3.4 (AA) · EN 301 549 9.1.3.4 · Rule `css-orientation-lock`
 
-### The site footer isn't inside another page region
+#### The site footer isn't inside another page region
 
 A good practice, not a WCAG requirement · Rule `landmark-contentinfo-is-top-level`
 
-### The site header isn't inside another page region
+#### The site header isn't inside another page region
 
 A good practice, not a WCAG requirement · Rule `landmark-banner-is-top-level`
 
-### Things that can get keyboard focus aren't invisible
+#### Things that can get keyboard focus aren't invisible
 
 WCAG 2.4.7 (AA) · EN 301 549 9.2.4.7 · Rule `css-hidden-focus`
 
-### Things to click or tap are big enough, or far enough apart
+#### Things to click or tap are big enough, or far enough apart
 
 WCAG 2.5.8 (AA) · EN 301 549 9.2.5.8 · Rule `target-size-minimum`
 
-### Visitors can skip past repeated parts of the page
+#### Visitors can skip past repeated parts of the page
 
 WCAG 2.4.1 (A) · EN 301 549 9.2.4.1 · Rule `bypass-blocks-present`
 
-### Visitors can zoom in
+#### Visitors can zoom in
 
 WCAG 1.4.4 (AA) · EN 301 549 9.1.4.4 · Rule `meta-viewport-zoom-enabled`
 
-### Visitors can zoom in to five times the size
+#### Visitors can zoom in to five times the size
 
 A good practice, not a WCAG requirement · Rule `meta-viewport-large`

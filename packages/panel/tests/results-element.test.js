@@ -542,3 +542,40 @@ test('a host that cannot show a place gets no Show buttons and no arrows', () =>
   assert.ok($$(el, 'li.card').length > 0, 'the cards stay');
   el.remove();
 });
+
+test('a finding worded for editors keeps its markup and CSS for a developer, closed at first', () => {
+  const worded = {
+    key: 'r1',
+    ruleId: 'resize-text-content-loss',
+    reasonCode: 'TEXT_CLIPPED_AT_640',
+    group: 'likely',
+    summary: 'When the page is zoomed to 200%, part of the text is cut off.',
+    hint: 'Remove the fixed height.',
+    messageKey: 'resizeTextContentLoss_summary_clipped',
+    html: '<div class="card">Opening times</div>',
+    values: { clipCss: 'height: 40px; overflow: hidden' },
+    itemId: 'b1'
+  };
+  const plain = { ...worded, key: 'r2', summary: 'Core words.', messageKey: 'coreOnly_summary' };
+  const el = make([worded, plain]);
+  const toggles = $$(el, 'button.dev-toggle');
+  assert.equal(toggles.length, 1, "only the card the panel words; core's own words name them");
+  const toggle = toggles[0];
+  assert.equal(toggle.textContent, 'For your developer');
+  assert.equal(toggle.getAttribute('aria-expanded'), 'false');
+  assert.equal($(el, '.dev'), null);
+  toggle.click();
+  const open = $(el, 'button.dev-toggle');
+  assert.equal(open.getAttribute('aria-expanded'), 'true');
+  const box = el.shadowRoot.getElementById(open.getAttribute('aria-controls'));
+  assert.ok(box, 'the button controls the part it opens');
+  const text = box.textContent;
+  assert.match(text, /Rule: resize-text-content-loss/);
+  assert.match(text, /Markup: <div class="card">Opening times<\/div>/);
+  assert.match(text, /CSS: height: 40px; overflow: hidden/);
+  assert.equal(box.querySelector('div div'), null, 'markup is shown as text');
+  assert.equal(el.shadowRoot.activeElement, open, 'focus stays on the button');
+  open.click();
+  assert.equal($(el, '.dev'), null);
+  el.remove();
+});

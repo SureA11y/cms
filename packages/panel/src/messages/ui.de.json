@@ -121,5 +121,9 @@
   "onPage": "Auf der Seite",
   "previewChecking": "Die Vorschauseite wird geprüft …",
   "previewError": "Die Vorschauseite konnte nicht geprüft werden.",
-  "checkedBoth": "In den Feldern und auf der Vorschauseite geprüft."
+  "checkedBoth": "In den Feldern und auf der Vorschauseite geprüft.",
+  "forDeveloper": "Für die Entwicklung",
+  "devRule": "Regel",
+  "devMarkup": "HTML-Code",
+  "devCss": "CSS"
 }

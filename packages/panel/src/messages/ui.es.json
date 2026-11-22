@@ -121,5 +121,9 @@
   "onPage": "En la página",
   "previewChecking": "Comprobando la página de vista previa…",
   "previewError": "No se pudo comprobar la página de vista previa.",
-  "checkedBoth": "Comprobado en los campos y en la página de vista previa."
+  "checkedBoth": "Comprobado en los campos y en la página de vista previa.",
+  "forDeveloper": "Para quien desarrolla el sitio",
+  "devRule": "Regla",
+  "devMarkup": "Código HTML",
+  "devCss": "CSS"
 }

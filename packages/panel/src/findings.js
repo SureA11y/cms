@@ -97,6 +97,8 @@ export function toFindings(result, doc) {
         summary: occ.summary || '',
         hint: occ.hint || '',
         lean: occ.lean || null,
+        // The key of core's message, which the panel may word for editors.
+        messageKey: (occ.i18n && occ.i18n.summaryKey) || null,
         howToCheck: occ.howToCheck || null,
         // What finds the steps for checking it by hand: its rule's message
         // prefix and reason code, and the values its steps can name.

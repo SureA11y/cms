@@ -140,7 +140,13 @@ export const UI = {
     phoneChecking: 'Checking at phone width…',
     phoneDone: 'Checked at phone width (320 pixels): {{n}} found.',
     phoneError: "The check at phone width didn't finish.",
-    marker: '{{group}}: {{summary}}'
+    marker: '{{group}}: {{summary}}',
+    // Under a finding the panel words for editors: what core's own message
+    // names, for whoever builds the site.
+    forDeveloper: 'For your developer',
+    devRule: 'Rule',
+    devMarkup: 'Markup',
+    devCss: 'CSS'
   }
 };
 

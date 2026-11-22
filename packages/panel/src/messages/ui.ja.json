@@ -121,5 +121,9 @@
   "onPage": "ページ上",
   "previewChecking": "プレビューページを確認しています…",
   "previewError": "プレビューページを確認できませんでした。",
-  "checkedBoth": "フィールドとプレビューページで確認しました。"
+  "checkedBoth": "フィールドとプレビューページで確認しました。",
+  "forDeveloper": "開発者向け",
+  "devRule": "ルール",
+  "devMarkup": "HTML",
+  "devCss": "CSS"
 }
