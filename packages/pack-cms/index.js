@@ -23,9 +23,13 @@ const { definePack, wcagTags } = require('@surea11y/core/pack');
 const { name, version } = require('./package.json');
 
 // Rules that judge the theme's style sheets or layout rather than what an
-// author writes: an author can't fix what they find from the editor.
+// author writes: an author can't fix what they find from the editor. On a
+// whole page (`cms-page`), the host still tells content from theme by where
+// each finding is: one on an element inside the author's content, such as
+// a block whose fixed height was set in the editor, is the author's.
 const THEME_RULES = [
   'text-spacing-content-loss',
+  'resize-text-content-loss',
   'css-focus-indicator-suppressed',
   'css-hidden-focus',
   'css-orientation-lock',

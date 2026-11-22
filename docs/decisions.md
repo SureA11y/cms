@@ -2,6 +2,32 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-22: Text cut off at 200% zoom is the theme's
+
+The rule `resize-text-content-loss` (WCAG 1.4.4) asks about text that a box
+cuts off at 640 CSS pixels wide, as a 1280-pixel window shows a page at 200%
+zoom. Its findings name the CSS that cuts the text off, such as
+`height: 40px; overflow: hidden`, which is usually the theme's: an author
+can't change it from the editor. Stress test round 12 (K12-1) found it
+listed under "In your content", while its sibling `text-spacing-content-loss`
+was a theme rule.
+
+- **It is a theme rule now**, like `text-spacing-content-loss`: in
+  `THEME_RULES` in `packages/pack-cms`. The post editor doesn't run it (it
+  could not apply there anyway, as the editor is not the page), and the
+  editors' list puts it under "In the theme or template".
+- **The exception: a box inside the author's content.** The rule reports the
+  box that cuts the text off. When that box is inside the content, such as
+  a block whose fixed height was set in the editor, the page checker shows
+  the finding under "Your content". That is how the page checker already
+  tells content from theme for every rule: by where the element is, not by
+  the rule. A test now holds it for this rule.
+- **Not done:** telling a box styled by the theme from one styled in the
+  editor. A theme's CSS on a block inside the content (a `.card` class the
+  theme styles) still shows under "Your content". Telling them apart would
+  need to know where each CSS declaration comes from; to decide with the
+  plan if editors meet it.
+
 ## 2026-11-21: Core's next release, and what it changes here
 
 Core's main branch, which this repository builds with until core 1.18.0 is
@@ -21,8 +47,8 @@ lint, format, build and every package's tests pass, but for two things.
   or in a narrow window: its findings then appear, and those on elements
   inside the author's content are tagged "Your content". Corrected on
   2026-11-22: this entry first said the rule was not applicable in the
-  panel's normal check. Whether its findings belong to the theme or to the
-  content is open (stress test round 12, K12-1).
+  panel's normal check. Where its findings belong was decided on
+  2026-11-22 (above).
   **Not now:** checking it in a hidden 640-pixel frame, as reflow is checked
   at 320; that costs another page load per check, to decide with the plan.
 

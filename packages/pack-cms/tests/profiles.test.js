@@ -38,6 +38,7 @@ test('the content profile: WCAG 2.2 A and AA about content, best practice, the p
   }
   for (const id of [
     'text-spacing-content-loss',
+    'resize-text-content-loss',
     'css-focus-indicator-suppressed',
     'region',
     'page-title-present'
@@ -54,7 +55,12 @@ test('the content profile: WCAG 2.2 A and AA about content, best practice, the p
 
 test('the theme profile runs the theme rules and none about content', () => {
   const ids = ran(scan('cms-theme'));
-  for (const id of ['text-spacing-content-loss', 'region', 'page-title-present']) {
+  for (const id of [
+    'text-spacing-content-loss',
+    'resize-text-content-loss',
+    'region',
+    'page-title-present'
+  ]) {
     assert.ok(ids.includes(id), `${id} runs`);
   }
   for (const id of ['img-alt-present', 'p-as-heading', 'link-name-quality']) {
@@ -97,7 +103,8 @@ test('the page profile runs both the content and the theme rules', () => {
     'heading-order',
     'region',
     'page-title-present',
-    'text-spacing-content-loss'
+    'text-spacing-content-loss',
+    'resize-text-content-loss'
   ]) {
     assert.ok(ids.includes(id), `${id} runs`);
   }

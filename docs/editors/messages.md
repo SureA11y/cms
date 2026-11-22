@@ -12,7 +12,7 @@ The 12 rules editors meet most have their messages written for
 editors, listed with what to do. The others are rarer, and their messages
 are the engine's own.
 
-## In your content (114)
+## In your content (113)
 
 Fixed in the post or page, by whoever writes it.
 
@@ -536,10 +536,6 @@ WCAG 1.4.5 (AA) · EN 301 549 9.1.4.5 · Rule `image-of-text`
 
 WCAG 1.4.12 (AA) · EN 301 549 9.1.4.12 · Rule `avoid-inline-spacing`
 
-#### Text stays readable when the page is zoomed to 200%
-
-WCAG 1.4.4 (AA) · EN 301 549 9.1.4.4 · Rule `resize-text-content-loss`
-
 #### The names of clickable image areas make sense
 
 WCAG 1.1.1 (A) · EN 301 549 9.1.1.1 · Rule `area-alt-quality`
@@ -584,11 +580,13 @@ WCAG 1.1.1 (A) · EN 301 549 9.1.1.1 · Rule `video-poster-text-alternative-pres
 
 WCAG 1.2.2 (A) · EN 301 549 9.1.2.2 · Rule `video-caption`
 
-## In the theme or template (24)
+## In the theme or template (25)
 
 Fixed in the theme, its templates or the site's settings, usually by whoever
 builds or looks after the site. The page checker and the Site Editor show
-them; the post editor doesn't.
+them; the post editor doesn't. When the page checker finds one of them on
+something inside your content, such as a block whose height was set in the
+editor, it shows it under "Your content".
 
 ### All content is inside a page region
 
@@ -609,6 +607,10 @@ A good practice, not a WCAG requirement · Rule `landmark-unique`
 ### Sidebars aren't inside another page region
 
 A good practice, not a WCAG requirement · Rule `landmark-complementary-is-top-level`
+
+### Text stays readable when the page is zoomed to 200%
+
+WCAG 1.4.4 (AA) · EN 301 549 9.1.4.4 · Rule `resize-text-content-loss`
 
 ### Text stays readable with more spacing
 

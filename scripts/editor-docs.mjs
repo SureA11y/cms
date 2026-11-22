@@ -110,7 +110,9 @@ const doc = [
   '',
   "Fixed in the theme, its templates or the site's settings, usually by whoever",
   'builds or looks after the site. The page checker and the Site Editor show',
-  "them; the post editor doesn't.",
+  "them; the post editor doesn't. When the page checker finds one of them on",
+  'something inside your content, such as a block whose height was set in the',
+  'editor, it shows it under "Your content".',
   '',
   ...grouped(theme)
 ]

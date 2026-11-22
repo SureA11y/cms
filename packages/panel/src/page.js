@@ -64,7 +64,9 @@ export function loadScripts(doc, urls, done = null, failure = 'A script did not 
  * Returns { findings, outline, result, scanMs }: `outline` is the page's
  * headings and images (readOutline). Each finding's `itemId` is its
  * selector, so a host can find the element again; `outside` is true for
- * findings outside the author's content.
+ * findings outside the author's content. Where the element is decides, not
+ * the rule: a theme rule's finding on an element inside the content (a box
+ * whose fixed height was set in the editor) is the author's.
  */
 export function scanPage(
   doc,

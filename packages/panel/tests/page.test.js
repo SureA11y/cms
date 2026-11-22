@@ -71,6 +71,37 @@ test('findings in the content and in the theme are told apart', () => {
   assert.equal(seen[0].options.profile, 'cms-page');
 });
 
+test("a theme rule's finding is the author's when its box is in the content", () => {
+  // resize-text-content-loss is a theme rule (pack-cms), and it reports the
+  // box that cuts the text off: a box the author made in the editor stays
+  // in "Your content", one in the theme goes to the theme.
+  win.a11ycore = {
+    runa11yCoreInPage() {
+      const occ = (selector, summary) => ({
+        selector,
+        summary,
+        html: `<x ${selector}>`,
+        data: { details: { reasonCode: 'TEXT_CLIPPED_AT_640' } }
+      });
+      return {
+        checksResults: [
+          {
+            ruleId: 'resize-text-content-loss',
+            outcome: 'cantTell',
+            occurrences: [occ('#bold', 'Box in the post.'), occ('#menu', 'Box in the theme.')]
+          }
+        ]
+      };
+    }
+  };
+  const { findings } = scanPage(document, { contentSelector: '.entry-content' });
+  const by = Object.fromEntries(findings.map((f) => [f.summary, f]));
+  assert.equal(by['Box in the post.'].outside, false);
+  assert.equal(by['Box in the post.'].itemLabel, 'Your content');
+  assert.equal(by['Box in the theme.'].outside, true);
+  assert.equal(by['Box in the theme.'].itemLabel, 'Theme or template');
+});
+
 test("without a content area, everything is the theme's", () => {
   fakeEngine([]);
   const { findings } = scanPage(document, { contentSelector: '.nope' });
