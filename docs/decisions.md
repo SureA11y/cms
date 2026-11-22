@@ -15,7 +15,14 @@ lint, format, build and every package's tests pass, but for two things.
   from; 590 KB is about 5% above the new size, as core sets its own budgets.
 - **The new rule `resize-text-content-loss` (WCAG 1.4.4) has a title for
   editors** in every language. It judges only a page laid out 640 CSS
-  pixels wide or less, so in the panel's normal check it is not applicable.
+  pixels wide or less. In the editor's check it is not applicable, since
+  the editor's sandbox is not the page. The page checker (`scanPage`) runs
+  it whenever the window is 640 CSS pixels wide or less, such as on a phone
+  or in a narrow window: its findings then appear, and those on elements
+  inside the author's content are tagged "Your content". Corrected on
+  2026-11-22: this entry first said the rule was not applicable in the
+  panel's normal check. Whether its findings belong to the theme or to the
+  content is open (stress test round 12, K12-1).
   **Not now:** checking it in a hidden 640-pixel frame, as reflow is checked
   at 320; that costs another page load per check, to decide with the plan.
 
