@@ -354,9 +354,9 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
       - [x] **The EN 301 549 pack moved with core**: 1.5.0, made for core
         1.18. The clauses in the exports are the same as with 1.1.0.
       - [ ] **Core#428** (bold lines on Twenty Twenty-Five, WordPress's
-        default theme): take the core release that fixes it before the
-        first WordPress.org release, and see the 13 end-to-end tests that
-        use the bold line pass again.
+        default theme): the plugins wait for core 1.18.1 with its fix
+        (maintainer's decision, 2026-11-22). Take it, and see the 13
+        end-to-end tests that use the bold line pass again.
 - [x] Security review (2026-11-15, see `docs/decisions.md`): sandbox limited
       to the engine's own files, records out of reach of WordPress's screens
       and API, capped preferences, uninstall, privacy export, erasure and

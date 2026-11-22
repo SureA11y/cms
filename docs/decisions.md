@@ -2,6 +2,17 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-22: The plugins wait for core 1.18.1
+
+The maintainer will publish core 1.18.1 with the fix for SureA11y/core#428
+(bold lines used as headings on Twenty Twenty-Five) before publishing the
+plugins, so the first releases on WordPress.org, npm and Contentful don't
+miss that question on WordPress's default theme. Core 1.18.0 would have
+been enough to publish; this is a choice about the first impression, not a
+build requirement. When 1.18.1 is on npm: raise the root's exact core
+version, build, run the tests (the 13 WordPress end-to-end tests that use
+the bold line should pass again), and package.
+
 ## 2026-11-22: Built with the published core 1.18.0
 
 Core 1.18.0 was released on 2026-11-22 with every rule the CMS pack uses,
