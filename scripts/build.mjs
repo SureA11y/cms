@@ -43,10 +43,8 @@ try {
         `The installed @surea11y/core (${coreVersion}) is older than the CMS pack needs:`,
         `  ${error.message}`,
         '',
-        'Install core from its main branch, then build again:',
-        '  npm run setup:core',
-        '',
-        '(`npm install` puts the released version back; run setup:core again after it.)',
+        'Install the core version package.json names, then build again:',
+        '  npm install',
         ''
       ].join('\n')
     );

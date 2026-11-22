@@ -13,21 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # The packages use core's rules that are on core's main branch and not
-      # released yet: test against that branch until they are.
-      - uses: actions/checkout@v4
-        with:
-          repository: SureA11y/core
-          ref: main
-          path: core-src
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
-      - name: Use core's main branch
-        run: |
-          rm -rf node_modules/@surea11y/core packages/*/node_modules/@surea11y/core
-          ln -s "$GITHUB_WORKSPACE/core-src" node_modules/@surea11y/core
       - run: npm run lint
       - run: npm run format:check
       - run: npm test

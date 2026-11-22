@@ -2,6 +2,42 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-22: Built with the published core 1.18.0
+
+Core 1.18.0 was released on 2026-11-22 with every rule the CMS pack uses,
+so the repository builds with it from npm and the workarounds go.
+
+- **Core from npm.** `@surea11y/core` is an exact development dependency at
+  the root (1.18.0), so the build and `npm run package` always use the
+  published version; the panel and the pack ask for `^1.18.0`, and the
+  pack's own `core` range is `^1.18.0` (it uses rules 1.17 lacks).
+  `setup:core`, its script and CI's checkout of core's main branch are
+  gone; `npm run package` still refuses a core linked from a local copy.
+- **The EN 301 549 pack moves to 1.5.0**, made for core 1.18. Its public
+  table is unchanged and the clauses in the exports are the same as with
+  1.1.0 (compared rule by rule).
+- **The engine's budget rises from 590 to 625 KB.** The release is 594.2 KB
+  with the pack: the fixes core made after the main-branch build measured
+  on 2026-11-21 (563.3 KB). 625 KB is about 5% above, the rule the last
+  raise used.
+- **Core's English messages** are now built into the engine, not shipped
+  as `src/i18n/en.json`; the panel's test that every message replaces a key
+  core has reads the keys from core's other languages, which have every key
+  English has.
+- **Also in 1.18.0, checked:** an occurrence can now be `pass`, which the
+  panel already leaves out; packs whose range excludes 1.18 are skipped (the
+  CMS and EN 301 549 packs include it).
+- **A gap, reported to core:** 1.18.0's `p-as-heading` no longer asks
+  about a bold line one step heavier than body text of 18px or more. That
+  is WordPress's default theme, Twenty Twenty-Five (paragraphs 21px at 300,
+  `<strong>` at 400), so a bold line used as a heading goes unasked there;
+  at body size, or with a bolder bold, it is still asked about. Reported as
+  SureA11y/core#428 with a minimal example and a suggested fix. The
+  maintainer chose to move to 1.18.0 now rather than wait: the 13 WordPress
+  end-to-end tests that use the test post's bold line fail on the local
+  Twenty Twenty-Five site until core fixes it, and pass again then. The
+  other 24, the 5 Contentful and the 3 Sanity end-to-end tests pass.
+
 ## 2026-11-21: Core's next release, and what it changes here
 
 Core's main branch, which this repository builds with until core 1.18.0 is

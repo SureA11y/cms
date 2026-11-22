@@ -14,7 +14,6 @@
     "test:e2e": "node --test --test-concurrency=1 \"tests/e2e/*.test.mjs\"",
     "test:e2e:local": "node --env-file=tests/e2e/wp-env.env --test --test-concurrency=1 \"tests/e2e/*.test.mjs\"",
     "e2e:browser": "playwright-core install chromium",
-    "setup:core": "node scripts/setup-core.mjs",
     "lint": "eslint .",
     "format": "prettier --write \"packages/*/src/**/*.js\" \"packages/*/tests/**/*.js\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\" eslint.config.mjs",
     "format:check": "prettier --check \"packages/*/src/**/*.js\" \"packages/*/tests/**/*.js\" \"scripts/**/*.mjs\" \"tests/**/*.mjs\" eslint.config.mjs",
@@ -28,7 +27,8 @@
   "devDependencies": {
     "@contentful/live-preview": "4.10.27",
     "@eslint/js": "^10.0.1",
-    "@surea11y/pack-en301549": "1.1.0",
+    "@surea11y/core": "1.18.0",
+    "@surea11y/pack-en301549": "1.5.0",
     "@wordpress/env": "12.0.0",
     "esbuild": "^0.25.0",
     "eslint": "^10.15.0",

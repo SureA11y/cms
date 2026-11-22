@@ -74,7 +74,6 @@ sees only the posts they can edit. The lists of posts and pages have an
 
 From the repository root: `npm install`, `node scripts/build.mjs`, then link
 or copy `plugins/wordpress` into a site's `wp-content/plugins/surea11y` and
-activate it. Until core releases the rules the pack uses, link
-`node_modules/@surea11y/core` to a checkout of core's main branch.
+activate it.
 
 End-to-end tests run against such a site: see `tests/e2e/`.

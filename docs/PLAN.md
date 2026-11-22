@@ -2,7 +2,7 @@
 
 How SureA11y for CMS gets from research to a first release, and beyond.
 Written from the [research report](research/2026-10-04-cms-checkers.md) and
-the [decisions](decisions.md) made so far. Last updated 2026-11-15, against `@surea11y/core` 1.17.0, with the Phase 0
+the [decisions](decisions.md) made so far. Last updated 2026-11-22, against `@surea11y/core` 1.18.0, with the Phase 0
 results.
 
 ## Goal
@@ -339,23 +339,24 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
 
 - [ ] Security review and a full pass of the quality gates.
 - [ ] Confirm the `surea11y` slug; submit for review.
-- [ ] A release step: with core at a published version (not `setup:core`),
-      run the tests, raise the version (`Version:` and `SUREA11Y_VERSION` in
+- [ ] A release step: with core at a published version, run the tests,
+      raise the version (`Version:` and `SUREA11Y_VERSION` in
       `surea11y.php`, `Stable tag:` in `readme.txt`), and run
       `npm run package`: it checks the three versions agree and core is a
       release, builds, checks the size budgets, and writes
       `dist/surea11y-<version>.zip` (the `surea11y/` folder with `build/`,
-      without the developer README) for the WordPress.org repository. Each core release that sites need goes out this way; see
-      the decision "Core ships inside each plugin release".
-      - **Core must be released first.** The plugin needs rules that are on
-        core's main branch but not in 1.17.0 (the CMS pack uses
-        `link-name-quality-link-only` and others; the build stops with a
-        message naming the missing rule). The first plugin release waits
-        for a core release that has them.
-      - **The EN 301 549 pack moves with core.** `@surea11y/pack-en301549`
-        is pinned at 1.1.0, which needs `@surea11y/core ~1.17.0`. Raising
-        core to 1.18 or later needs a version of the pack that accepts it,
-        updated in the same change, or npm won't install the two together.
+      without the developer README) for the WordPress.org repository. Each
+      core release that sites need goes out this way; see the decision
+      "Core ships inside each plugin release".
+      - [x] **Core released (1.18.0, 2026-11-22)** with the rules the CMS
+        pack uses. The repository builds with it from npm; `setup:core` and
+        CI's checkout of core's main branch are gone.
+      - [x] **The EN 301 549 pack moved with core**: 1.5.0, made for core
+        1.18. The clauses in the exports are the same as with 1.1.0.
+      - [ ] **Core#428** (bold lines on Twenty Twenty-Five, WordPress's
+        default theme): take the core release that fixes it before the
+        first WordPress.org release, and see the 13 end-to-end tests that
+        use the bold line pass again.
 - [x] Security review (2026-11-15, see `docs/decisions.md`): sandbox limited
       to the engine's own files, records out of reach of WordPress's screens
       and API, capped preferences, uninstall, privacy export, erasure and
