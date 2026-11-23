@@ -2,7 +2,7 @@
 
 How SureA11y for CMS gets from research to a first release, and beyond.
 Written from the [research report](research/2026-10-04-cms-checkers.md) and
-the [decisions](decisions.md) made so far. Last updated 2026-11-22, against `@surea11y/core` 1.18.0, with the Phase 0
+the [decisions](decisions.md) made so far. Last updated 2026-11-23, against `@surea11y/core` 1.18.1, with the Phase 0
 results.
 
 ## Goal
@@ -353,10 +353,10 @@ answered" on a page, and export the evidence. **Met on 2026-11-15** (above).
         CI's checkout of core's main branch are gone.
       - [x] **The EN 301 549 pack moved with core**: 1.5.0, made for core
         1.18. The clauses in the exports are the same as with 1.1.0.
-      - [ ] **Core#428** (bold lines on Twenty Twenty-Five, WordPress's
-        default theme): the plugins wait for core 1.18.1 with its fix
-        (maintainer's decision, 2026-11-22). Take it, and see the 13
-        end-to-end tests that use the bold line pass again.
+      - [x] **Core#428** (bold lines on Twenty Twenty-Five, WordPress's
+        default theme): fixed in core 1.18.1 (2026-11-23), which the plugins
+        now build with; the 13 end-to-end tests that use the bold line pass
+        again.
 - [x] Security review (2026-11-15, see `docs/decisions.md`): sandbox limited
       to the engine's own files, records out of reach of WordPress's screens
       and API, capped preferences, uninstall, privacy export, erasure and

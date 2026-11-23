@@ -2,6 +2,16 @@
 
 A running log, newest first. Each entry says what was decided and why.
 
+## 2026-11-23: Built with core 1.18.1
+
+Core 1.18.1, released on 2026-11-23, fixes SureA11y/core#428: `p-as-heading`
+asks again about a bold line one step heavier than body text of 18px or
+more, as WordPress's default theme sets it. The root's exact core version
+moves to 1.18.1; the lockfile changes only core. The panel and the pack
+keep `^1.18.0`: the API is the same, and the plugins carry the root's exact
+version. The engine is 594.3 KB of 625 KB. With it, the plugins are ready
+to publish once the WordPress.org prerequisites are done.
+
 ## 2026-11-22: The plugins wait for core 1.18.1
 
 The maintainer will publish core 1.18.1 with the fix for SureA11y/core#428
